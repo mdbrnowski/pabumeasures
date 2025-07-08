@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "Measures on participatory budgeting elections"
 readme = "README.md"
 authors = [
-    { name = "Michał Dobranowski", email = "mdbrnowski@gmail.com" }
+    { name = "Michał Dobranowski", email = "mdbrnowski@gmail.com" },
+    { name = "Jakub Wiśniewski", email = "wisniewskij514@gmail.com" }
 ]
 requires-python = ">=3.10"
 dependencies = []
