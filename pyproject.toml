@@ -8,7 +8,9 @@ authors = [
     { name = "Jakub Wiśniewski", email = "wisniewskij514@gmail.com" }
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "pabutools>=1.2.2",
+]
 
 [tool.scikit-build]
 minimum-version = "build-system.requires"
