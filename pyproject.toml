@@ -5,7 +5,7 @@ description = "Measures on participatory budgeting elections"
 readme = "README.md"
 authors = [
     { name = "Michał Dobranowski", email = "mdbrnowski@gmail.com" },
-    { name = "Jakub Wiśniewski", email = "wisniewskij514@gmail.com" }
+    { name = "Jakub Wiśniewski", email = "wisniewskij514@gmail.com" },
 ]
 requires-python = ">=3.10"
 dependencies = [
@@ -28,3 +28,6 @@ dev = [
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
