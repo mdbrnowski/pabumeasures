@@ -6,7 +6,6 @@ from pabumeasures.main import (
     greedy_over_cost,
     greedy_over_cost_measure,
     greedy_over_cost_measures,
-    hello,
     mes_apr,
     mes_apr_measure,
     mes_apr_measures,
@@ -26,7 +25,6 @@ __all__ = [
     "greedy_over_cost",
     "greedy_over_cost_measure",
     "greedy_over_cost_measures",
-    "hello",  # todo: remove
     "mes_apr",
     "mes_apr_measure",
     "mes_apr_measures",

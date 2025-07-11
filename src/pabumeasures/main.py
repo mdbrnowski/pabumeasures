@@ -1,10 +1,10 @@
 from enum import Enum, auto
 
-from pabutools.election.instance import Instance
+from pabutools.election.instance import Instance, Project
 from pabutools.election.profile import Profile
 from pabutools.rules import BudgetAllocation
 
-from pabumeasures._core import hello_from_bin
+from pabumeasures import _core
 
 
 class Measure(Enum):
@@ -14,12 +14,8 @@ class Measure(Enum):
     ADD_SINGLETON = auto()
 
 
-def hello() -> str:
-    return hello_from_bin()
-
-
 def greedy(instance: Instance, profile: Profile) -> BudgetAllocation:
-    raise NotImplementedError()
+    return BudgetAllocation(Project(str(i), 1) for i in _core.greedy())
 
 
 def greedy_measure(instance: Instance, profile: Profile, measure: Measure):

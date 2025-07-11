@@ -2,11 +2,7 @@ import pytest
 from pabutools.election.instance import Instance
 from pabutools.election.profile import ApprovalProfile
 
-from pabumeasures import Measure, hello, mes_apr_measures
-
-
-def test_hello():
-    assert hello() == "Hello from pabumeasures!"
+from pabumeasures import Measure, mes_apr_measures
 
 
 def test_mes_apr_measures_raises():

@@ -1,13 +1,17 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
-std::string hello_from_bin() { return "Hello from pabumeasures!"; }
-
+using namespace pybind11::literals;
 namespace py = pybind11;
 
-PYBIND11_MODULE(_core, m) {
-  m.doc() = "pybind11 hello module";
+std::vector<int> greedy() {
+  return std::vector<int>({1, 2, 3, 4, 5});
+}
 
-  m.def("hello_from_bin", &hello_from_bin, R"pbdoc(
-      A function that returns a Hello string.
+PYBIND11_MODULE(_core, m) {
+  m.doc() = "core module with all internal functions";
+
+  m.def("greedy", &greedy, R"pbdoc(
+      GreedyAV implementation.
   )pbdoc");
 }
