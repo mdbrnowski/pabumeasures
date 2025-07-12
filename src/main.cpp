@@ -12,7 +12,7 @@ vector<int> greedy(int num_projects, int num_voters, int total_budget, const vec
     vector<int> winners, projects(num_projects);
     iota(projects.begin(), projects.end(), 0);
     sort(projects.begin(), projects.end(),
-         [&approvers](int a, int b) { return approvers[a].size() < approvers[b].size(); });
+         [&approvers](int a, int b) { return approvers[a].size() > approvers[b].size(); });
     // todo: add tie-breaking
     for (const auto project : projects) {
         if (cost[project] < total_budget) {
