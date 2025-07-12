@@ -7,7 +7,8 @@ using namespace std;
 using namespace pybind11::literals;
 namespace py = pybind11;
 
-vector<int> greedy(int num_projects, int num_voters, int total_budget, const vector<int> &cost, const vector<vector<int>> &approvers) {
+vector<int> greedy(int num_projects, int num_voters, int total_budget, const vector<int> &cost,
+                   const vector<vector<int>> &approvers) {
     vector<int> winners, projects(num_projects);
     iota(projects.begin(), projects.end(), 0);
     sort(projects.begin(), projects.end(),

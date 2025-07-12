@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-from pabutools.election.ballot import FrozenBallot, Ballot
+from pabutools.election.ballot import Ballot, FrozenBallot
 from pabutools.election.instance import Instance, Project
 from pabutools.election.profile import Profile
 from pabutools.rules import BudgetAllocation
