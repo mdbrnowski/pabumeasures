@@ -18,12 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cpp-linter/cpp-linter-action@main
+      - uses: cpp-linter/cpp-linter-action@v2
         id: linter
-        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          style: file
-          files-changed-only: false
-          thread-comments: false
+          style: 'file'
+          tidy-checks: '-*' # disables clang-tidy checks
+
+      - if: steps.linter.outputs.clang-format-checks-failed > 0
+        run: exit 1
