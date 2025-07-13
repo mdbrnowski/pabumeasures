@@ -1,3 +1,6 @@
 def greedy(
     num_projects: int, num_voters: int, total_budget: int, cost: list[int], approvers: list[list[int]]
 ) -> list[int]: ...
+def greedy_over_cost(
+    num_projects: int, num_voters: int, total_budget: int, cost: list[int], approvers: list[list[int]]
+) -> list[int]: ...

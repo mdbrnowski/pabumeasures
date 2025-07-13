@@ -53,7 +53,9 @@ def greedy_measures(instance: Instance, profile: Profile, measures: list[Measure
 
 
 def greedy_over_cost(instance: Instance, profile: Profile) -> BudgetAllocation:
-    raise NotImplementedError()
+    projects, ballots, total_budget, cost, approvers = _translate_input_format(instance, profile)
+    result = _core.greedy_over_cost(len(projects), len(ballots), total_budget, cost, approvers)
+    return BudgetAllocation(projects[i] for i in result)
 
 
 def greedy_over_cost_measure(instance: Instance, profile: Profile, measure: Measure):

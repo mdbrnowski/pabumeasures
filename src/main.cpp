@@ -25,9 +25,31 @@ vector<int> greedy(int num_projects, int num_voters, int total_budget, const vec
     return winners;
 }
 
+vector<int> greedy_over_cost(int num_projects, int num_voters, int total_budget, const vector<int> &cost,
+                             const vector<vector<int>> &approvers) {
+    vector<int> winners, projects(num_projects);
+    iota(projects.begin(), projects.end(), 0);
+    sort(projects.begin(), projects.end(), [&approvers, &cost](int a, int b) {
+        return approvers[a].size() / static_cast<double>(cost[a]) > approvers[b].size() / static_cast<double>(cost[b]);
+    });
+    // todo: add tie-breaking
+    for (const auto project : projects) {
+        if (cost[project] <= total_budget) {
+            winners.push_back(project);
+            total_budget -= cost[project];
+        }
+        if (total_budget <= 0)
+            break;
+    }
+    return winners;
+}
+
 PYBIND11_MODULE(_core, m) {
     m.doc() = "core module with all internal functions";
 
     m.def("greedy", &greedy, "GreedyAV implementation.", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
           "approvers"_a);
+
+    m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost implementation/", "num_projects"_a, "num_voters"_a,
+          "total_budget"_a, "cost"_a, "approvers"_a);
 }
