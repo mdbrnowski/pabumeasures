@@ -34,14 +34,14 @@ optional<int> optimist_add_for_greedy(int num_projects, int num_voters, int tota
     sort(projects.begin(), projects.end(),
          [&approvers](int a, int b) { return approvers[a].size() > approvers[b].size(); });
     // todo: add tie-breaking
-    for (size_t i = 0; i < projects.size(); i++) {
+    for (int i = 0; i < num_projects; i++) {
         auto project = projects[i];
         if (cost[project] <= total_budget) {
             if (project == p)
                 return 0;
             if (total_budget - cost[project] < cost[p]) {
                 int difference = approvers[project].size() - approvers[p].size(); // todo: add tie-breaking
-                if (difference + approvers[p].size() > num_voters)
+                if (difference + static_cast<int>(approvers[p].size()) > num_voters)
                     return nullopt;
                 else
                     return difference;
@@ -88,7 +88,7 @@ optional<int> optimist_add_for_greedy_over_cost(int num_projects, int num_voters
         return approvers[a].size() / static_cast<double>(cost[a]) > approvers[b].size() / static_cast<double>(cost[b]);
     });
     // todo: add tie-breaking
-    for (size_t i = 0; i < projects.size(); i++) {
+    for (int i = 0; i < num_projects; i++) {
         auto project = projects[i];
         if (cost[project] <= total_budget) {
             if (project == p)
@@ -97,7 +97,7 @@ optional<int> optimist_add_for_greedy_over_cost(int num_projects, int num_voters
                 int difference = ceil(approvers[project].size() / static_cast<double>(cost[project]) *
                                       static_cast<double>(cost[p])) -
                                  approvers[p].size(); // todo: add tie-breaking
-                if (difference + approvers[p].size() > num_voters)
+                if (difference + static_cast<int>(approvers[p].size()) > num_voters)
                     return nullopt;
                 else
                     return difference;
