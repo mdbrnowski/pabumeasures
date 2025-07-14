@@ -44,11 +44,7 @@ def greedy(instance: Instance, profile: Profile) -> BudgetAllocation:
     return BudgetAllocation(projects[i] for i in result)
 
 
-def greedy_measure(instance: Instance, profile: Profile, measure: Measure):
-    raise NotImplementedError()
-
-
-def greedy_measures(instance: Instance, profile: Profile, measures: list[Measure]):
+def greedy_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
     raise NotImplementedError()
 
 
@@ -58,11 +54,7 @@ def greedy_over_cost(instance: Instance, profile: Profile) -> BudgetAllocation:
     return BudgetAllocation(projects[i] for i in result)
 
 
-def greedy_over_cost_measure(instance: Instance, profile: Profile, measure: Measure):
-    raise NotImplementedError()
-
-
-def greedy_over_cost_measures(instance: Instance, profile: Profile, measures: list[Measure]):
+def greedy_over_cost_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
     raise NotImplementedError()
 
 
@@ -70,11 +62,7 @@ def mes_apr(instance: Instance, profile: Profile) -> BudgetAllocation:
     raise NotImplementedError()
 
 
-def mes_apr_measure(instance: Instance, profile: Profile, measure: Measure):
-    raise NotImplementedError()
-
-
-def mes_apr_measures(instance: Instance, profile: Profile, measures: list[Measure]):
+def mes_apr_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
     raise NotImplementedError()
 
 
@@ -82,11 +70,7 @@ def mes_cost(instance: Instance, profile: Profile) -> BudgetAllocation:
     raise NotImplementedError()
 
 
-def mes_cost_measure(instance: Instance, profile: Profile, measure: Measure):
-    raise NotImplementedError()
-
-
-def mes_cost_measures(instance: Instance, profile: Profile, measures: list[Measure]):
+def mes_cost_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
     raise NotImplementedError()
 
 
@@ -94,9 +78,5 @@ def phragmen(instance: Instance, profile: Profile) -> BudgetAllocation:
     raise NotImplementedError()
 
 
-def phragmen_measure(instance: Instance, profile: Profile, measure: Measure):
-    raise NotImplementedError()
-
-
-def phragmen_measures(instance: Instance, profile: Profile, measures: list[Measure]):
+def phragmen_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
     raise NotImplementedError()
