@@ -45,7 +45,17 @@ def greedy(instance: Instance, profile: Profile) -> BudgetAllocation:
 
 
 def greedy_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
-    raise NotImplementedError()
+    projects, ballots, total_budget, cost, approvers = _translate_input_format(instance, profile)
+    p = projects.index(project)
+    match measure:
+        case Measure.COST_REDUCTION:
+            raise NotImplementedError()
+        case Measure.ADD_APPROVAL_OPTIMIST:
+            return _core.optimist_add_for_greedy(len(projects), len(ballots), total_budget, cost, approvers, p)
+        case Measure.ADD_APPROVAL_PESSIMIST:
+            return _core.pessimist_add_for_greedy(len(projects), len(ballots), total_budget, cost, approvers, p)
+        case Measure.ADD_SINGLETON:
+            raise NotImplementedError()
 
 
 def greedy_over_cost(instance: Instance, profile: Profile) -> BudgetAllocation:
