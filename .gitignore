@@ -15,4 +15,8 @@ uv.lock
 # Editors
 .idea/
 .vscode/
+
+# Cmake
+CMakeCache.txt
+CMakeFiles/
 .clangd
