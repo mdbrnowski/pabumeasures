@@ -1,5 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include "cpp_src/Project.h"
+#include "cpp_src/ProjectComparator.h"
 
 #include <numeric>
 
@@ -137,4 +139,42 @@ PYBIND11_MODULE(_core, m) {
     m.def("pessimist_add_for_greedy_over_cost", &pessimist_add_for_greedy_over_cost,
           "pessimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
           "approvers"_a, "p"_a);
+
+    // temporary (mozliwe ze bullshit) z chata: 
+
+    py::enum_<ProjectComparator::Comparator>(m, "Comparator")
+        .value("COST", ProjectComparator::Comparator::COST)
+        .value("VOTES", ProjectComparator::Comparator::VOTES)
+        .value("LEXICOGRAPHIC", ProjectComparator::Comparator::LEXICOGRAPHIC)
+        .export_values();
+
+    py::enum_<ProjectComparator::Ordering>(m, "Ordering")
+        .value("ASCENDING", ProjectComparator::Ordering::ASCENDING)
+        .value("DESCENDING", ProjectComparator::Ordering::DESCENDING)
+        .export_values();
+
+    py::class_<Project>(m, "Project")
+        // Expose constructors - note template constructors are resolved automatically
+        .def(py::init<int, std::string, std::vector<int>>())
+        .def(py::init<int, std::string>())
+        .def(py::init<int>());
+
+    py::class_<ProjectComparator>(m, "ProjectComparator")
+        // Constructors
+        .def(py::init<std::vector<std::pair<ProjectComparator::Comparator, ProjectComparator::Ordering>>>(),
+             py::arg("criteria"))
+        .def(py::init<ProjectComparator::Comparator, ProjectComparator::Ordering>(),
+             py::arg("comparator"), py::arg("ordering"))
+        // Operator () as a call operator in Python, e.g. cmp(a, b)
+        .def("__call__", &ProjectComparator::operator())
+        // Static default instances
+        .def_property_readonly_static("ByCostAsc", [](py::object) {
+            return ProjectComparator::ByCostAsc;
+        })
+        .def_property_readonly_static("ByVotesDesc", [](py::object) {
+            return ProjectComparator::ByVotesDesc;
+        })
+        .def_property_readonly_static("ByCostAscThenVotesDesc", [](py::object) {
+            return ProjectComparator::ByCostAscThenVotesDesc;
+        });
 }

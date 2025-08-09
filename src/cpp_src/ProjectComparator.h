@@ -1,0 +1,27 @@
+#pragma once
+#include "Project.h"
+#include <compare>
+#include <utility>
+#include <vector>
+
+class ProjectComparator {
+  public:
+    enum class Comparator { COST, VOTES, LEXICOGRAPHIC };
+    enum class Ordering { ASCENDING, DESCENDING };
+
+    explicit ProjectComparator(std::vector<std::pair<Comparator, Ordering>> criteria);
+    ProjectComparator(Comparator comparator, Ordering ordering);
+
+    bool operator()(const Project &a, const Project &b) const;
+
+    // Static predefined comparators:
+    static const ProjectComparator ByCostAsc;
+    static const ProjectComparator ByVotesDesc;
+    static const ProjectComparator ByCostAscThenVotesDesc;
+
+  private:
+    std::vector<std::pair<Comparator, Ordering>> criteria_;
+
+    static std::strong_ordering applyOrder(std::strong_ordering cmp, Ordering order);
+    static std::strong_ordering compare(const Project &a, const Project &b, Comparator cmpType, Ordering order);
+};
