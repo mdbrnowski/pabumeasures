@@ -140,7 +140,6 @@ PYBIND11_MODULE(_core, m) {
           "pessimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
           "approvers"_a, "p"_a);
 
-    // temporary (mozliwe ze bullshit) z chata: 
 
     py::enum_<ProjectComparator::Comparator>(m, "Comparator")
         .value("COST", ProjectComparator::Comparator::COST)
@@ -154,20 +153,17 @@ PYBIND11_MODULE(_core, m) {
         .export_values();
 
     py::class_<Project>(m, "Project")
-        // Expose constructors - note template constructors are resolved automatically
         .def(py::init<int, std::string, std::vector<int>>())
         .def(py::init<int, std::string>())
         .def(py::init<int>());
 
     py::class_<ProjectComparator>(m, "ProjectComparator")
-        // Constructors
         .def(py::init<std::vector<std::pair<ProjectComparator::Comparator, ProjectComparator::Ordering>>>(),
              py::arg("criteria"))
         .def(py::init<ProjectComparator::Comparator, ProjectComparator::Ordering>(),
              py::arg("comparator"), py::arg("ordering"))
-        // Operator () as a call operator in Python, e.g. cmp(a, b)
         .def("__call__", &ProjectComparator::operator())
-        // Static default instances
+        // static default comparators
         .def_property_readonly_static("ByCostAsc", [](py::object) {
             return ProjectComparator::ByCostAsc;
         })
