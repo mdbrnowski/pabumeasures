@@ -1,5 +1,6 @@
 #include "cpp_src/Project.h"
 #include "cpp_src/ProjectComparator.h"
+#include <pybind11/native_enum.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -140,16 +141,18 @@ PYBIND11_MODULE(_core, m) {
           "pessimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
           "approvers"_a, "p"_a);
 
-    py::enum_<ProjectComparator::Comparator>(m, "Comparator")
+    py::native_enum<ProjectComparator::Comparator>(m, "Comparator", "enum.Enum")
         .value("COST", ProjectComparator::Comparator::COST)
         .value("VOTES", ProjectComparator::Comparator::VOTES)
         .value("LEXICOGRAPHIC", ProjectComparator::Comparator::LEXICOGRAPHIC)
-        .export_values();
+        .export_values()
+        .finalize();
 
-    py::enum_<ProjectComparator::Ordering>(m, "Ordering")
+    py::native_enum<ProjectComparator::Ordering>(m, "Ordering", "enum.Enum")
         .value("ASCENDING", ProjectComparator::Ordering::ASCENDING)
         .value("DESCENDING", ProjectComparator::Ordering::DESCENDING)
-        .export_values();
+        .export_values()
+        .finalize();
 
     py::class_<Project>(m, "Project")
         .def(py::init<int, std::string, std::vector<int>>())
