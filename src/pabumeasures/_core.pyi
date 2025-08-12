@@ -1,3 +1,40 @@
+import enum
+from typing import overload
+
+# ========== project enums ==========
+
+class Comparator(enum.Enum):
+    COST: Comparator
+    VOTES: Comparator
+    LEXICOGRAPHIC: Comparator
+
+class Ordering(enum.Enum):
+    ASCENDING: Ordering
+    DESCENDING: Ordering
+
+# ========== project classes ==========
+
+class Project:
+    def __init__(self, cost: int, name: str = ..., approvers: list[int] = ...) -> None: ...
+    @property
+    def cost(self) -> int: ...
+    @property
+    def name(self) -> str: ...
+    @property
+    def approvers(self) -> list[int]: ...
+
+class ProjectComparator:
+    ByCostAsc: ProjectComparator
+    ByVotesDesc: ProjectComparator
+    ByCostAscThenVotesDesc: ProjectComparator
+
+    @overload
+    def __init__(self, criteria: list[tuple[Comparator, Ordering]]) -> None: ...
+    @overload
+    def __init__(self, comparator: Comparator, ordering: Ordering) -> None: ...
+    def __init__(self, *args, **kwargs) -> None: ...
+    def __call__(self, lhs: Project, rhs: Project) -> bool: ...
+
 # ========== rules ==========
 
 def greedy(
