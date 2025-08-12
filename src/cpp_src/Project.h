@@ -16,6 +16,10 @@ class Project {
 
     Project(int cost) : cost_(cost) {}
 
+    int cost() const { return cost_; }
+    const std::string &name() const { return name_; }
+    const std::vector<int> &approvers() const { return approvers_; }
+
     friend class ProjectComparator;
 
   private:
