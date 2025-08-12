@@ -164,9 +164,8 @@ PYBIND11_MODULE(_core, m) {
 
     py::class_<ProjectComparator>(m, "ProjectComparator")
         .def(py::init<std::vector<std::pair<ProjectComparator::Comparator, ProjectComparator::Ordering>>>(),
-             py::arg("criteria"))
-        .def(py::init<ProjectComparator::Comparator, ProjectComparator::Ordering>(), py::arg("comparator"),
-             py::arg("ordering"))
+             "criteria"_a)
+        .def(py::init<ProjectComparator::Comparator, ProjectComparator::Ordering>(), "comparator"_a, "ordering"_a)
         .def("__call__", &ProjectComparator::operator())
         // static default comparators
         .def_property_readonly_static("ByCostAsc", [](py::object) { return ProjectComparator::ByCostAsc; })
