@@ -1,7 +1,8 @@
 import random
 
 import pytest
-from utils import get_random_approval_profile, get_random_instance
+from pabutools.election.instance import get_random_instance
+from pabutools.election.profile import get_random_approval_profile
 
 import pabumeasures
 
@@ -11,10 +12,10 @@ NUMBER_OF_TIMES = 20
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 def test_greedy_measure(seed):
     random.seed(seed)
-    instance, projects = get_random_instance(3, 1, 10)
-    profile = get_random_approval_profile(instance, projects, 10)
+    instance = get_random_instance(3, 1, 10)
+    profile = get_random_approval_profile(instance, 10)
     allocation = pabumeasures.greedy(instance, profile)
-    project = random.choice(projects)
+    project = random.choice(sorted(instance))
     result = pabumeasures.greedy_measure(instance, profile, project, pabumeasures.Measure.ADD_APPROVAL_OPTIMIST)
     # todo: needs more extensive assertions
     if project in allocation:
@@ -29,10 +30,10 @@ def test_greedy_measure(seed):
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 def test_greedy_over_cost_measure(seed):
     random.seed(seed)
-    instance, projects = get_random_instance(3, 1, 10)
-    profile = get_random_approval_profile(instance, projects, 10)
+    instance = get_random_instance(3, 1, 10)
+    profile = get_random_approval_profile(instance, 10)
     allocation = pabumeasures.greedy_over_cost(instance, profile)
-    project = random.choice(projects)
+    project = random.choice(sorted(instance))
     result = pabumeasures.greedy_over_cost_measure(
         instance, profile, project, pabumeasures.Measure.ADD_APPROVAL_OPTIMIST
     )
