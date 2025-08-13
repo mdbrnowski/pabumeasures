@@ -145,13 +145,11 @@ PYBIND11_MODULE(_core, m) {
         .value("COST", ProjectComparator::Comparator::COST)
         .value("VOTES", ProjectComparator::Comparator::VOTES)
         .value("LEXICOGRAPHIC", ProjectComparator::Comparator::LEXICOGRAPHIC)
-        .export_values()
         .finalize();
 
     py::native_enum<ProjectComparator::Ordering>(m, "Ordering", "enum.Enum")
         .value("ASCENDING", ProjectComparator::Ordering::ASCENDING)
         .value("DESCENDING", ProjectComparator::Ordering::DESCENDING)
-        .export_values()
         .finalize();
 
     py::class_<Project>(m, "Project")

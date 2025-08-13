@@ -3,7 +3,7 @@ import string
 
 import pytest
 
-from pabumeasures._core import ASCENDING, COST, DESCENDING, LEXICOGRAPHIC, VOTES, Project, ProjectComparator
+from pabumeasures._core import Comparator, Ordering, Project, ProjectComparator
 
 
 def random_project(min_cost, max_cost, name_length=5, max_approvers=3):
@@ -17,22 +17,33 @@ projects = [random_project(1, 3) for _ in range(200)]
 
 test_cases = [
     (lambda p: p.cost, False, ProjectComparator.ByCostAsc, "ByCostAsc"),
-    (lambda p: p.cost, False, ProjectComparator(COST, ASCENDING), "ByCostAsc_explicit"),
-    (lambda p: p.cost, True, ProjectComparator(COST, DESCENDING), "ByCostDesc"),
+    (lambda p: p.cost, False, ProjectComparator(Comparator.COST, Ordering.ASCENDING), "ByCostAsc_explicit"),
+    (lambda p: p.cost, True, ProjectComparator(Comparator.COST, Ordering.DESCENDING), "ByCostDesc"),
     (lambda p: len(p.approvers), True, ProjectComparator.ByVotesDesc, "ByVotesDesc"),
-    (lambda p: len(p.approvers), True, ProjectComparator(VOTES, DESCENDING), "ByVotesDesc_explicit"),
-    (lambda p: len(p.approvers), False, ProjectComparator(VOTES, ASCENDING), "ByVotesAsc"),
+    (
+        lambda p: len(p.approvers),
+        True,
+        ProjectComparator(Comparator.VOTES, Ordering.DESCENDING),
+        "ByVotesDesc_explicit",
+    ),
+    (lambda p: len(p.approvers), False, ProjectComparator(Comparator.VOTES, Ordering.ASCENDING), "ByVotesAsc"),
     (lambda p: (p.cost, -len(p.approvers)), False, ProjectComparator.ByCostAscThenVotesDesc, "ByCostAscThenVotesDesc"),
     (
         lambda p: (p.cost, -len(p.approvers)),
         False,
-        ProjectComparator([(COST, ASCENDING), (VOTES, DESCENDING)]),
+        ProjectComparator([(Comparator.COST, Ordering.ASCENDING), (Comparator.VOTES, Ordering.DESCENDING)]),
         "ByCostAscThenVotesDesc_explicit",
     ),
     (
         lambda p: (p.cost, -len(p.approvers), p.name),
         False,
-        ProjectComparator([(COST, ASCENDING), (VOTES, DESCENDING), (LEXICOGRAPHIC, ASCENDING)]),
+        ProjectComparator(
+            [
+                (Comparator.COST, Ordering.ASCENDING),
+                (Comparator.VOTES, Ordering.DESCENDING),
+                (Comparator.LEXICOGRAPHIC, Ordering.ASCENDING),
+            ]
+        ),
         "ByCostVotesLex",
     ),
 ]
