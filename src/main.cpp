@@ -1,3 +1,6 @@
+#include "cpp_src/Project.h"
+#include "cpp_src/ProjectComparator.h"
+#include <pybind11/native_enum.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -14,7 +17,7 @@ vector<int> greedy(int num_projects, int num_voters, int total_budget, const vec
     sort(projects.begin(), projects.end(),
          [&approvers](int a, int b) { return approvers[a].size() > approvers[b].size(); });
     // todo: add tie-breaking
-    for (const auto project : projects) {
+    for (const auto &project : projects) {
         if (cost[project] <= total_budget) {
             winners.push_back(project);
             total_budget -= cost[project];
@@ -137,4 +140,34 @@ PYBIND11_MODULE(_core, m) {
     m.def("pessimist_add_for_greedy_over_cost", &pessimist_add_for_greedy_over_cost,
           "pessimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
           "approvers"_a, "p"_a);
+
+    py::native_enum<ProjectComparator::Comparator>(m, "Comparator", "enum.Enum")
+        .value("COST", ProjectComparator::Comparator::COST)
+        .value("VOTES", ProjectComparator::Comparator::VOTES)
+        .value("LEXICOGRAPHIC", ProjectComparator::Comparator::LEXICOGRAPHIC)
+        .finalize();
+
+    py::native_enum<ProjectComparator::Ordering>(m, "Ordering", "enum.Enum")
+        .value("ASCENDING", ProjectComparator::Ordering::ASCENDING)
+        .value("DESCENDING", ProjectComparator::Ordering::DESCENDING)
+        .finalize();
+
+    py::class_<Project>(m, "Project")
+        .def(py::init<int, std::string, std::vector<int>>())
+        .def(py::init<int, std::string>())
+        .def(py::init<int>())
+        .def_property_readonly("cost", &Project::cost)
+        .def_property_readonly("name", &Project::name)
+        .def_property_readonly("approvers", &Project::approvers);
+
+    py::class_<ProjectComparator>(m, "ProjectComparator")
+        .def(py::init<std::vector<std::pair<ProjectComparator::Comparator, ProjectComparator::Ordering>>>(),
+             "criteria"_a)
+        .def(py::init<ProjectComparator::Comparator, ProjectComparator::Ordering>(), "comparator"_a, "ordering"_a)
+        .def("__call__", &ProjectComparator::operator())
+        // static default comparators
+        .def_property_readonly_static("ByCostAsc", [](py::object) { return ProjectComparator::ByCostAsc; })
+        .def_property_readonly_static("ByVotesDesc", [](py::object) { return ProjectComparator::ByVotesDesc; })
+        .def_property_readonly_static("ByCostAscThenVotesDesc",
+                                      [](py::object) { return ProjectComparator::ByCostAscThenVotesDesc; });
 }
