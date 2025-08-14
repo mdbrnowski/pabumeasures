@@ -13,6 +13,7 @@ def random_project(min_cost, max_cost, name_length=5, max_approvers=3):
     return Project(cost, name, approvers)
 
 
+random.seed(42)
 projects = [random_project(1, 3) for _ in range(200)]
 
 test_cases = [
