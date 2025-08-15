@@ -40,13 +40,13 @@ def _translate_input_format(
 
 def _translate_input_format_tmp(
     instance: Instance, profile: Profile
-) -> tuple[int, dict[Project, _core.ProjectEmbedding]]:
+) -> tuple[int, list[Project], list[_core.ProjectEmbedding]]:
     if not isinstance(instance, Instance):
         raise TypeError("Instance must be of type Instance")
     if not isinstance(profile, Profile):
         raise TypeError("Profile must be of type Profile")
 
-    projects: list[Project] = [project for project in instance]
+    projects: list[Project] = sorted(instance)
     _project_to_id = {project: i for i, project in enumerate(projects)}
     frozen_ballots: list[FrozenBallot] = [ballot.frozen() for ballot in profile]
     _ballot_to_id = {ballot: i for i, ballot in enumerate(frozen_ballots)}
@@ -58,18 +58,17 @@ def _translate_input_format_tmp(
         ballot_id = _ballot_to_id[ballot.frozen()]
         for project in ballot:
             approvers[_project_to_id[project]].append(ballot_id)
-    embedding_to_project: dict[Project, _core.ProjectEmbedding] = {
-        _core.ProjectEmbedding(int(project.cost), project.name, approvers[_project_to_id[project]]): project
-        for project in projects  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
+    project_embeddings: list[_core.ProjectEmbedding] = {
+        _core.ProjectEmbedding(int(project.cost), i, project.name, approvers[_project_to_id[project]])
+        for i, project in enumerate(projects)  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
     }
-    return total_budget, embedding_to_project
+    return total_budget, projects, project_embeddings
 
 
 def greedy(instance: Instance, profile: Profile) -> BudgetAllocation:
-    total_budget, embedding_to_project = _translate_input_format_tmp(instance, profile)
-    project_embeddings: list[_core.ProjectEmbedding] = list(embedding_to_project.keys())
+    total_budget, projects, project_embeddings = _translate_input_format_tmp(instance, profile)
     result = _core.greedy(total_budget, project_embeddings)
-    return BudgetAllocation(embedding_to_project[project_embedding] for project_embedding in result)
+    return BudgetAllocation(projects[project_embeding.id] for project_embeding in result)
 
 
 def greedy_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
