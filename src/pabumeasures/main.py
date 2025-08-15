@@ -59,7 +59,7 @@ def _translate_input_format_tmp(
         for project in ballot:
             approvers[_project_to_id[project]].append(ballot_id)
     embedding_to_project: dict[Project, _core.ProjectEmbedding] = {
-        _core.ProjectEmbedding(project.cost, project.name, approvers[_project_to_id[project]]): project
+        _core.ProjectEmbedding(int(project.cost), project.name, approvers[_project_to_id[project]]): project
         for project in projects  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
     }
     return total_budget, embedding_to_project
