@@ -19,6 +19,8 @@ test_cases = [
     (lambda p: p.cost, False, ProjectComparator.ByCostAsc, "ByCostAsc"),
     (lambda p: p.cost, False, ProjectComparator(Comparator.COST, Ordering.ASCENDING), "ByCostAsc_explicit"),
     (lambda p: p.cost, True, ProjectComparator(Comparator.COST, Ordering.DESCENDING), "ByCostDesc"),
+    (lambda p: p.id, False, ProjectComparator(Comparator.ID, Ordering.ASCENDING), "ByIdAsc"),
+    (lambda p: p.id, True, ProjectComparator(Comparator.ID, Ordering.DESCENDING), "ByIdDesc"),
     (lambda p: len(p.approvers), True, ProjectComparator.ByVotesDesc, "ByVotesDesc"),
     (
         lambda p: len(p.approvers),
@@ -45,6 +47,23 @@ test_cases = [
             ]
         ),
         "ByCostVotesLex",
+    ),
+    (
+        lambda p: (p.cost, p.id),
+        False,
+        ProjectComparator.ByCostAscThenIdAsc,
+        "ByCostId",
+    ),
+    (
+        lambda p: (p.cost, p.id),
+        False,
+        ProjectComparator(
+            [
+                (Comparator.COST, Ordering.ASCENDING),
+                (Comparator.ID, Ordering.ASCENDING),
+            ]
+        ),
+        "ByCostId_explicit",
     ),
 ]
 

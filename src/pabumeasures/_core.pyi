@@ -5,6 +5,7 @@ from typing import overload
 
 class Comparator(enum.Enum):
     COST: Comparator
+    ID: Comparator
     VOTES: Comparator
     LEXICOGRAPHIC: Comparator
 
@@ -27,6 +28,7 @@ class ProjectEmbedding:
 
 class ProjectComparator:
     ByCostAsc: ProjectComparator
+    ByCostAscThenIdAsc: ProjectComparator
     ByVotesDesc: ProjectComparator
     ByCostAscThenVotesDesc: ProjectComparator
 
