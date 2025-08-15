@@ -23,13 +23,13 @@ def _translate_input_format(
     if not isinstance(profile, Profile):
         raise TypeError("Profile must be of type Profile")
 
-    projects: list[Project] = [project for project in instance]
+    projects: list[Project] = sorted(instance)
     _project_to_id = {project: i for i, project in enumerate(projects)}
     ballots: list[Ballot] = [ballot for ballot in profile]
     frozen_ballots: list[FrozenBallot] = [ballot.frozen() for ballot in profile]
     _ballot_to_id = {ballot: i for i, ballot in enumerate(frozen_ballots)}
     total_budget = int(instance.budget_limit)  # todo: remove int() if budget_limit can be float/mpq
-    cost: list[int] = [int(project.cost) for project in instance]  # todo: remove int() if cost can be float/mpq
+    cost: list[int] = [int(project.cost) for project in projects]  # todo: remove int() if cost can be float/mpq
     approvers: list[list[int]] = [[] for _ in range(len(projects))]
     for ballot in profile:
         ballot_id = _ballot_to_id[ballot.frozen()]
