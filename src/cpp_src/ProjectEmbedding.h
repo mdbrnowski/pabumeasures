@@ -6,15 +6,15 @@
 
 class ProjectComparator;
 
-class Project {
+class ProjectEmbedding {
   public:
     template <typename StringT, typename VectorT>
-    Project(int cost, StringT &&name, VectorT &&approvers)
+    ProjectEmbedding(int cost, StringT &&name, VectorT &&approvers)
         : cost_(cost), name_(std::forward<StringT>(name)), approvers_(std::forward<VectorT>(approvers)) {}
 
-    template <typename StringT> Project(int cost, StringT &&name) : cost_(cost), name_(std::forward<StringT>(name)) {}
+    template <typename StringT> ProjectEmbedding(int cost, StringT &&name) : cost_(cost), name_(std::forward<StringT>(name)) {}
 
-    Project(int cost) : cost_(cost) {}
+    ProjectEmbedding(int cost) : cost_(cost) {}
 
     int cost() const { return cost_; }
     const std::string &name() const { return name_; }

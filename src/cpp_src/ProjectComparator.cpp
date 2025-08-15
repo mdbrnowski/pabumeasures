@@ -6,7 +6,7 @@ ProjectComparator::ProjectComparator(std::vector<std::pair<Comparator, Ordering>
 ProjectComparator::ProjectComparator(Comparator comparator, Ordering ordering)
     : criteria_{std::make_pair(comparator, ordering)} {}
 
-bool ProjectComparator::operator()(const Project &a, const Project &b) const {
+bool ProjectComparator::operator()(const ProjectEmbedding &a, const ProjectEmbedding &b) const {
     for (const auto &[cmpType, order] : criteria_) {
         auto cmp = compare(a, b, cmpType, order);
         if (cmp != std::strong_ordering::equal) {
@@ -26,7 +26,7 @@ std::strong_ordering ProjectComparator::applyOrder(std::strong_ordering cmp, Ord
     return std::strong_ordering::equal;
 }
 
-std::strong_ordering ProjectComparator::compare(const Project &a, const Project &b, Comparator cmpType,
+std::strong_ordering ProjectComparator::compare(const ProjectEmbedding &a, const ProjectEmbedding &b, Comparator cmpType,
                                                 Ordering order) {
     switch (cmpType) {
     case Comparator::COST:

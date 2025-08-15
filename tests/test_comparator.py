@@ -3,14 +3,14 @@ import string
 
 import pytest
 
-from pabumeasures._core import Comparator, Ordering, Project, ProjectComparator
+from pabumeasures._core import Comparator, Ordering, ProjectEmbedding, ProjectComparator
 
 
 def random_project(min_cost, max_cost, name_length=5, max_approvers=3):
     cost = random.randint(min_cost, max_cost)
     name = "".join(random.choices(string.ascii_letters, k=name_length))
     approvers = random.sample(range(max_approvers), random.randint(0, max_approvers))
-    return Project(cost, name, approvers)
+    return ProjectEmbedding(cost, name, approvers)
 
 
 projects = [random_project(1, 3) for _ in range(200)]

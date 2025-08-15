@@ -1,5 +1,5 @@
 #pragma once
-#include "Project.h"
+#include "ProjectEmbedding.h"
 #include <compare>
 #include <utility>
 #include <vector>
@@ -12,7 +12,7 @@ class ProjectComparator {
     explicit ProjectComparator(std::vector<std::pair<Comparator, Ordering>> criteria);
     ProjectComparator(Comparator comparator, Ordering ordering);
 
-    bool operator()(const Project &a, const Project &b) const;
+    bool operator()(const ProjectEmbedding &a, const ProjectEmbedding &b) const;
 
     // Static predefined comparators:
     static const ProjectComparator ByCostAsc;
@@ -23,5 +23,5 @@ class ProjectComparator {
     std::vector<std::pair<Comparator, Ordering>> criteria_;
 
     static std::strong_ordering applyOrder(std::strong_ordering cmp, Ordering order);
-    static std::strong_ordering compare(const Project &a, const Project &b, Comparator cmpType, Ordering order);
+    static std::strong_ordering compare(const ProjectEmbedding &a, const ProjectEmbedding &b, Comparator cmpType, Ordering order);
 };

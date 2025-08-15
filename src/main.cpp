@@ -1,4 +1,4 @@
-#include "cpp_src/Project.h"
+#include "cpp_src/ProjectEmbedding.h"
 #include "cpp_src/ProjectComparator.h"
 #include <pybind11/native_enum.h>
 #include <pybind11/pybind11.h>
@@ -152,13 +152,13 @@ PYBIND11_MODULE(_core, m) {
         .value("DESCENDING", ProjectComparator::Ordering::DESCENDING)
         .finalize();
 
-    py::class_<Project>(m, "Project")
+    py::class_<ProjectEmbedding>(m, "ProjectEmbedding")
         .def(py::init<int, std::string, std::vector<int>>())
         .def(py::init<int, std::string>())
         .def(py::init<int>())
-        .def_property_readonly("cost", &Project::cost)
-        .def_property_readonly("name", &Project::name)
-        .def_property_readonly("approvers", &Project::approvers);
+        .def_property_readonly("cost", &ProjectEmbedding::cost)
+        .def_property_readonly("name", &ProjectEmbedding::name)
+        .def_property_readonly("approvers", &ProjectEmbedding::approvers);
 
     py::class_<ProjectComparator>(m, "ProjectComparator")
         .def(py::init<std::vector<std::pair<ProjectComparator::Comparator, ProjectComparator::Ordering>>>(),
