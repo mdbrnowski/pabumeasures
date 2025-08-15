@@ -24,5 +24,6 @@ class ProjectComparator {
     std::vector<std::pair<Comparator, Ordering>> criteria_;
 
     static std::strong_ordering applyOrder(std::strong_ordering cmp, Ordering order);
-    static std::strong_ordering compare(const ProjectEmbedding &a, const ProjectEmbedding &b, Comparator cmpType, Ordering order);
+    static std::strong_ordering compare(const ProjectEmbedding &a, const ProjectEmbedding &b, Comparator cmpType,
+                                        Ordering order);
 };

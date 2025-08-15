@@ -12,7 +12,8 @@ class ProjectEmbedding {
     ProjectEmbedding(int cost, int id, StringT &&name, VectorT &&approvers)
         : cost_(cost), id_(id), name_(std::forward<StringT>(name)), approvers_(std::forward<VectorT>(approvers)) {}
 
-    template <typename StringT> ProjectEmbedding(int cost, int id, StringT &&name) : cost_(cost), id_(id), name_(std::forward<StringT>(name)) {}
+    template <typename StringT>
+    ProjectEmbedding(int cost, int id, StringT &&name) : cost_(cost), id_(id), name_(std::forward<StringT>(name)) {}
 
     ProjectEmbedding(int cost, int id) : cost_(cost), id_(id) {}
 

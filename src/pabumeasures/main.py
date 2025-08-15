@@ -60,7 +60,9 @@ def _translate_input_format_tmp(
             approvers[_project_to_id[project]].append(ballot_id)
     project_embeddings: list[_core.ProjectEmbedding] = {
         _core.ProjectEmbedding(int(project.cost), i, project.name, approvers[_project_to_id[project]])
-        for i, project in enumerate(projects)  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
+        for i, project in enumerate(
+            projects
+        )  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
     }
     return total_budget, projects, project_embeddings
 
