@@ -152,6 +152,9 @@ PYBIND11_MODULE(_core, m) {
         .def_property_readonly_static("ByCostAscThenVotesDesc",
                                       [](py::object) { return ProjectComparator::ByCostAscThenVotesDesc; });
 
+    m.def("greedy", &greedy, "GreedyAV implementation.", "total_budget"_a, "projects"_a,
+          "tie_breaking"_a = ProjectComparator::ByCostAsc);
+
     m.def("optimist_add_for_greedy", &optimist_add_for_greedy, "optimist-add measure for GreedyAV", "num_projects"_a,
           "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
 
