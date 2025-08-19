@@ -3,7 +3,7 @@ import string
 
 import pytest
 
-from pabumeasures._core import Comparator, Ordering, ProjectEmbedding, ProjectComparator
+from pabumeasures._core import Comparator, Ordering, ProjectComparator, ProjectEmbedding
 
 
 def random_project(id: int, min_cost: int, max_cost: int, name_length: int = 5, max_approvers: int = 3):
