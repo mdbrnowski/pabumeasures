@@ -42,7 +42,7 @@ class ProjectComparator:
 # ========== rules ==========
 
 def greedy(
-    total_budget: int, projects: list[ProjectEmbedding], tie_breaking: ProjectComparator
+    total_budget: int, projects: list[ProjectEmbedding], tie_breaking: ProjectComparator = ...
 ) -> list[ProjectEmbedding]: ...
 def greedy_over_cost(
     num_projects: int, num_voters: int, total_budget: int, cost: list[int], approvers: list[list[int]]
