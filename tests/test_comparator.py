@@ -13,30 +13,27 @@ def random_project(min_cost: int, max_cost: int, name_length: int = 5, max_appro
     return ProjectEmbedding(cost, name, approvers)
 
 
-projects = [random_project(i, 1, 3) for i in range(200)]
+projects = [random_project(1, 3) for _ in range(200)]
 
 test_cases = [
-    (lambda p: p.cost, False, ProjectComparator.ByCostAsc, "ByCostAsc"),
-    (lambda p: p.cost, False, ProjectComparator(Comparator.COST, Ordering.ASCENDING), "ByCostAsc_explicit"),
-    (lambda p: p.cost, True, ProjectComparator(Comparator.COST, Ordering.DESCENDING), "ByCostDesc"),
-    (lambda p: len(p.approvers), True, ProjectComparator.ByVotesDesc, "ByVotesDesc"),
+    (lambda p: (p.cost, p.name), ProjectComparator.ByCostAsc, "ByCostAsc"),
+    (lambda p: (p.cost, p.name), ProjectComparator(Comparator.COST, Ordering.ASCENDING), "ByCostAsc_explicit"),
+    (lambda p: (-p.cost, p.name), ProjectComparator(Comparator.COST, Ordering.DESCENDING), "ByCostDesc"),
+    (lambda p: (-len(p.approvers), p.name), ProjectComparator.ByVotesDesc, "ByVotesDesc"),
     (
-        lambda p: len(p.approvers),
-        True,
+        lambda p: (-len(p.approvers), p.name),
         ProjectComparator(Comparator.VOTES, Ordering.DESCENDING),
         "ByVotesDesc_explicit",
     ),
-    (lambda p: len(p.approvers), False, ProjectComparator(Comparator.VOTES, Ordering.ASCENDING), "ByVotesAsc"),
-    (lambda p: (p.cost, -len(p.approvers)), False, ProjectComparator.ByCostAscThenVotesDesc, "ByCostAscThenVotesDesc"),
+    (lambda p: (len(p.approvers), p.name), ProjectComparator(Comparator.VOTES, Ordering.ASCENDING), "ByVotesAsc"),
+    (lambda p: (p.cost, -len(p.approvers), p.name), ProjectComparator.ByCostAscThenVotesDesc, "ByCostAscThenVotesDesc"),
     (
-        lambda p: (p.cost, -len(p.approvers)),
-        False,
+        lambda p: (p.cost, -len(p.approvers), p.name),
         ProjectComparator([(Comparator.COST, Ordering.ASCENDING), (Comparator.VOTES, Ordering.DESCENDING)]),
         "ByCostAscThenVotesDesc_explicit",
     ),
     (
         lambda p: (p.cost, -len(p.approvers), p.name),
-        False,
         ProjectComparator(
             [
                 (Comparator.COST, Ordering.ASCENDING),
@@ -49,10 +46,10 @@ test_cases = [
 ]
 
 
-@pytest.mark.parametrize("key_func,reverse,comparator,name", test_cases)
-def test_project_comparator_basic(key_func, reverse, comparator, name):
+@pytest.mark.parametrize("key_func,comparator,name", test_cases)
+def test_project_comparator_basic(key_func, comparator, name):
     sorted_projects = list(projects)
-    sorted_projects.sort(key=key_func, reverse=reverse)
+    sorted_projects.sort(key=key_func)
 
     for i in range(len(sorted_projects)):
         for j in range(i + 1, len(sorted_projects)):
