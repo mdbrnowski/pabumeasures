@@ -38,10 +38,38 @@ def _translate_input_format(
     return projects, ballots, total_budget, cost, approvers
 
 
+def _translate_input_format_tmp(
+    instance: Instance, profile: Profile
+) -> tuple[int, list[Project], dict[str, Project], list[_core.ProjectEmbedding]]:
+    if not isinstance(instance, Instance):
+        raise TypeError("Instance must be of type Instance")
+    if not isinstance(profile, Profile):
+        raise TypeError("Profile must be of type Profile")
+
+    projects: list[Project] = sorted(instance)
+    frozen_ballots: list[FrozenBallot] = [ballot.frozen() for ballot in profile]
+    _ballot_to_id = {ballot: i for i, ballot in enumerate(frozen_ballots)}
+    total_budget = int(
+        instance.budget_limit
+    )  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
+    approvers: dict[str, list[int]] = {project.name: [] for project in projects}
+    for ballot in profile:
+        ballot_id = _ballot_to_id[ballot.frozen()]
+        for project in ballot:
+            approvers[project.name].append(ballot_id)
+    project_embeddings: list[_core.ProjectEmbedding] = [
+        _core.ProjectEmbedding(int(project.cost), project.name, approvers[project.name])
+        for project in projects
+        # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
+    ]
+    name_to_project: dict[str, Project] = {project.name: project for project in projects}
+    return total_budget, projects, name_to_project, project_embeddings
+
+
 def greedy(instance: Instance, profile: Profile) -> BudgetAllocation:
-    projects, ballots, total_budget, cost, approvers = _translate_input_format(instance, profile)
-    result = _core.greedy(len(projects), len(ballots), total_budget, cost, approvers)
-    return BudgetAllocation(projects[i] for i in result)
+    total_budget, projects, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
+    result = _core.greedy(total_budget, project_embeddings)
+    return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def greedy_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
@@ -59,9 +87,9 @@ def greedy_measure(instance: Instance, profile: Profile, project: Project, measu
 
 
 def greedy_over_cost(instance: Instance, profile: Profile) -> BudgetAllocation:
-    projects, ballots, total_budget, cost, approvers = _translate_input_format(instance, profile)
-    result = _core.greedy_over_cost(len(projects), len(ballots), total_budget, cost, approvers)
-    return BudgetAllocation(projects[i] for i in result)
+    total_budget, projects, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
+    result = _core.greedy_over_cost(total_budget, project_embeddings)
+    return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def greedy_over_cost_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:

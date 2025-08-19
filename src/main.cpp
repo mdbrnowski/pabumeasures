@@ -1,5 +1,5 @@
-#include "cpp_src/Project.h"
 #include "cpp_src/ProjectComparator.h"
+#include "cpp_src/ProjectEmbedding.h"
 #include <pybind11/native_enum.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -10,17 +10,19 @@ using namespace std;
 using namespace pybind11::literals;
 namespace py = pybind11;
 
-vector<int> greedy(int num_projects, int num_voters, int total_budget, const vector<int> &cost,
-                   const vector<vector<int>> &approvers) {
-    vector<int> winners, projects(num_projects);
-    iota(projects.begin(), projects.end(), 0);
-    sort(projects.begin(), projects.end(),
-         [&approvers](int a, int b) { return approvers[a].size() > approvers[b].size(); });
-    // todo: add tie-breaking
+vector<ProjectEmbedding> greedy(int total_budget, vector<ProjectEmbedding> projects,
+                                const ProjectComparator &tie_breaking = ProjectComparator::ByCostAsc) {
+    vector<ProjectEmbedding> winners;
+    sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+        if (a.approvers().size() == b.approvers().size()) {
+            return tie_breaking(a, b);
+        }
+        return a.approvers().size() > b.approvers().size();
+    });
     for (const auto &project : projects) {
-        if (cost[project] <= total_budget) {
+        if (project.cost() <= total_budget) {
             winners.push_back(project);
-            total_budget -= cost[project];
+            total_budget -= project.cost();
         }
         if (total_budget <= 0)
             break;
@@ -62,18 +64,22 @@ optional<int> pessimist_add_for_greedy(int num_projects, int num_voters, int tot
     return optimist_add_for_greedy(num_projects, num_voters, total_budget, cost, approvers, p);
 }
 
-vector<int> greedy_over_cost(int num_projects, int num_voters, int total_budget, const vector<int> &cost,
-                             const vector<vector<int>> &approvers) {
-    vector<int> winners, projects(num_projects);
-    iota(projects.begin(), projects.end(), 0);
-    sort(projects.begin(), projects.end(), [&approvers, &cost](int a, int b) {
-        return approvers[a].size() / static_cast<double>(cost[a]) > approvers[b].size() / static_cast<double>(cost[b]);
+vector<ProjectEmbedding> greedy_over_cost(int total_budget, vector<ProjectEmbedding> projects,
+                                          const ProjectComparator &tie_breaking = ProjectComparator::ByCostAsc) {
+    vector<ProjectEmbedding> winners;
+
+    sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+        long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
+                  cross_term_b_approvals_a_cost = static_cast<long long>(b.approvers().size()) * a.cost();
+        if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
+            return tie_breaking(a, b);
+        }
+        return cross_term_a_approvals_b_cost > cross_term_b_approvals_a_cost;
     });
-    // todo: add tie-breaking
     for (const auto project : projects) {
-        if (cost[project] <= total_budget) {
+        if (project.cost() <= total_budget) {
             winners.push_back(project);
-            total_budget -= cost[project];
+            total_budget -= project.cost();
         }
         if (total_budget <= 0)
             break;
@@ -121,26 +127,6 @@ optional<int> pessimist_add_for_greedy_over_cost(int num_projects, int num_voter
 PYBIND11_MODULE(_core, m) {
     m.doc() = "core module with all internal functions";
 
-    m.def("greedy", &greedy, "GreedyAV implementation.", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
-          "approvers"_a);
-
-    m.def("optimist_add_for_greedy", &optimist_add_for_greedy, "optimist-add measure for GreedyAV", "num_projects"_a,
-          "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
-
-    m.def("pessimist_add_for_greedy", &pessimist_add_for_greedy, "pessimist-add measure for GreedyAV", "num_projects"_a,
-          "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
-
-    m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost implementation", "num_projects"_a, "num_voters"_a,
-          "total_budget"_a, "cost"_a, "approvers"_a);
-
-    m.def("optimist_add_for_greedy_over_cost", &optimist_add_for_greedy_over_cost,
-          "optimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
-          "approvers"_a, "p"_a);
-
-    m.def("pessimist_add_for_greedy_over_cost", &pessimist_add_for_greedy_over_cost,
-          "pessimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
-          "approvers"_a, "p"_a);
-
     py::native_enum<ProjectComparator::Comparator>(m, "Comparator", "enum.Enum")
         .value("COST", ProjectComparator::Comparator::COST)
         .value("VOTES", ProjectComparator::Comparator::VOTES)
@@ -152,13 +138,12 @@ PYBIND11_MODULE(_core, m) {
         .value("DESCENDING", ProjectComparator::Ordering::DESCENDING)
         .finalize();
 
-    py::class_<Project>(m, "Project")
-        .def(py::init<int, std::string, std::vector<int>>())
-        .def(py::init<int, std::string>())
-        .def(py::init<int>())
-        .def_property_readonly("cost", &Project::cost)
-        .def_property_readonly("name", &Project::name)
-        .def_property_readonly("approvers", &Project::approvers);
+    py::class_<ProjectEmbedding>(m, "ProjectEmbedding")
+        .def(py::init<int, std::string, std::vector<int>>(), "cost"_a, "name"_a, "approvers"_a)
+        .def(py::init<int, std::string>(), "cost"_a, "name"_a)
+        .def_property_readonly("cost", &ProjectEmbedding::cost)
+        .def_property_readonly("name", &ProjectEmbedding::name)
+        .def_property_readonly("approvers", &ProjectEmbedding::approvers);
 
     py::class_<ProjectComparator>(m, "ProjectComparator")
         .def(py::init<std::vector<std::pair<ProjectComparator::Comparator, ProjectComparator::Ordering>>>(),
@@ -170,4 +155,24 @@ PYBIND11_MODULE(_core, m) {
         .def_property_readonly_static("ByVotesDesc", [](py::object) { return ProjectComparator::ByVotesDesc; })
         .def_property_readonly_static("ByCostAscThenVotesDesc",
                                       [](py::object) { return ProjectComparator::ByCostAscThenVotesDesc; });
+
+    m.def("greedy", &greedy, "GreedyAV implementation.", "total_budget"_a, "projects"_a,
+          "tie_breaking"_a = ProjectComparator::ByCostAsc);
+
+    m.def("optimist_add_for_greedy", &optimist_add_for_greedy, "optimist-add measure for GreedyAV", "num_projects"_a,
+          "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
+
+    m.def("pessimist_add_for_greedy", &pessimist_add_for_greedy, "pessimist-add measure for GreedyAV", "num_projects"_a,
+          "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
+
+    m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost implementation", "total_budget"_a, "projects"_a,
+          "tie_breaking"_a = ProjectComparator::ByCostAsc);
+
+    m.def("optimist_add_for_greedy_over_cost", &optimist_add_for_greedy_over_cost,
+          "optimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
+          "approvers"_a, "p"_a);
+
+    m.def("pessimist_add_for_greedy_over_cost", &pessimist_add_for_greedy_over_cost,
+          "pessimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
+          "approvers"_a, "p"_a);
 }
