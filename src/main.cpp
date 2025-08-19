@@ -137,7 +137,6 @@ PYBIND11_MODULE(_core, m) {
     py::class_<ProjectEmbedding>(m, "ProjectEmbedding")
         .def(py::init<int, std::string, std::vector<int>>(), "cost"_a, "name"_a, "approvers"_a)
         .def(py::init<int, std::string>(), "cost"_a, "name"_a)
-        .def(py::init<int>(), "cost"_a)
         .def_property_readonly("cost", &ProjectEmbedding::cost)
         .def_property_readonly("name", &ProjectEmbedding::name)
         .def_property_readonly("approvers", &ProjectEmbedding::approvers);
