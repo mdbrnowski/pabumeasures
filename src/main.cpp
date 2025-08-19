@@ -64,18 +64,22 @@ optional<int> pessimist_add_for_greedy(int num_projects, int num_voters, int tot
     return optimist_add_for_greedy(num_projects, num_voters, total_budget, cost, approvers, p);
 }
 
-vector<int> greedy_over_cost(int num_projects, int num_voters, int total_budget, const vector<int> &cost,
-                             const vector<vector<int>> &approvers) {
-    vector<int> winners, projects(num_projects);
-    iota(projects.begin(), projects.end(), 0);
-    sort(projects.begin(), projects.end(), [&approvers, &cost](int a, int b) {
-        return approvers[a].size() / static_cast<double>(cost[a]) > approvers[b].size() / static_cast<double>(cost[b]);
+vector<ProjectEmbedding> greedy_over_cost(int total_budget, vector<ProjectEmbedding> projects,
+                                          const ProjectComparator &tie_breaking = ProjectComparator::ByCostAsc) {
+    vector<ProjectEmbedding> winners;
+
+    sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+        double a_approvals_over_cost = a.approvers().size() / static_cast<double>(a.cost()),
+               b_approvals_over_cost = b.approvers().size() / static_cast<double>(b.cost());
+        if (a_approvals_over_cost == b_approvals_over_cost) {
+            return tie_breaking(a, b);
+        }
+        return a_approvals_over_cost > b_approvals_over_cost;
     });
-    // todo: add tie-breaking
     for (const auto project : projects) {
-        if (cost[project] <= total_budget) {
+        if (project.cost() <= total_budget) {
             winners.push_back(project);
-            total_budget -= cost[project];
+            total_budget -= project.cost();
         }
         if (total_budget <= 0)
             break;
@@ -161,8 +165,8 @@ PYBIND11_MODULE(_core, m) {
     m.def("pessimist_add_for_greedy", &pessimist_add_for_greedy, "pessimist-add measure for GreedyAV", "num_projects"_a,
           "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
 
-    m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost implementation", "num_projects"_a, "num_voters"_a,
-          "total_budget"_a, "cost"_a, "approvers"_a);
+    m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost implementation", "total_budget"_a, "projects"_a,
+          "tie_breaking"_a = ProjectComparator::ByCostAsc);
 
     m.def("optimist_add_for_greedy_over_cost", &optimist_add_for_greedy_over_cost,
           "optimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,

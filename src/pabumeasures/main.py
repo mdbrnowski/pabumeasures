@@ -87,9 +87,9 @@ def greedy_measure(instance: Instance, profile: Profile, project: Project, measu
 
 
 def greedy_over_cost(instance: Instance, profile: Profile) -> BudgetAllocation:
-    projects, ballots, total_budget, cost, approvers = _translate_input_format(instance, profile)
-    result = _core.greedy_over_cost(len(projects), len(ballots), total_budget, cost, approvers)
-    return BudgetAllocation(projects[i] for i in result)
+    total_budget, projects, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
+    result = _core.greedy_over_cost(total_budget, project_embeddings)
+    return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def greedy_over_cost_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
