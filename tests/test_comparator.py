@@ -6,11 +6,11 @@ import pytest
 from pabumeasures._core import Comparator, Ordering, ProjectComparator, ProjectEmbedding
 
 
-def random_project(id: int, min_cost: int, max_cost: int, name_length: int = 5, max_approvers: int = 3):
+def random_project(min_cost: int, max_cost: int, name_length: int = 5, max_approvers: int = 3):
     cost = random.randint(min_cost, max_cost)
     name = "".join(random.choices(string.ascii_letters, k=name_length))
     approvers = random.sample(range(max_approvers), random.randint(0, max_approvers))
-    return ProjectEmbedding(cost, id, name, approvers)
+    return ProjectEmbedding(cost, name, approvers)
 
 
 projects = [random_project(i, 1, 3) for i in range(200)]
@@ -19,8 +19,6 @@ test_cases = [
     (lambda p: p.cost, False, ProjectComparator.ByCostAsc, "ByCostAsc"),
     (lambda p: p.cost, False, ProjectComparator(Comparator.COST, Ordering.ASCENDING), "ByCostAsc_explicit"),
     (lambda p: p.cost, True, ProjectComparator(Comparator.COST, Ordering.DESCENDING), "ByCostDesc"),
-    (lambda p: p.id, False, ProjectComparator(Comparator.ID, Ordering.ASCENDING), "ByIdAsc"),
-    (lambda p: p.id, True, ProjectComparator(Comparator.ID, Ordering.DESCENDING), "ByIdDesc"),
     (lambda p: len(p.approvers), True, ProjectComparator.ByVotesDesc, "ByVotesDesc"),
     (
         lambda p: len(p.approvers),
@@ -47,23 +45,6 @@ test_cases = [
             ]
         ),
         "ByCostVotesLex",
-    ),
-    (
-        lambda p: (p.cost, p.id),
-        False,
-        ProjectComparator.ByCostAscThenIdAsc,
-        "ByCostId",
-    ),
-    (
-        lambda p: (p.cost, p.id),
-        False,
-        ProjectComparator(
-            [
-                (Comparator.COST, Ordering.ASCENDING),
-                (Comparator.ID, Ordering.ASCENDING),
-            ]
-        ),
-        "ByCostId_explicit",
     ),
 ]
 

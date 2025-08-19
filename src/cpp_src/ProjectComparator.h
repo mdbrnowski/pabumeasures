@@ -6,7 +6,7 @@
 
 class ProjectComparator {
   public:
-    enum class Comparator { COST, ID, VOTES, LEXICOGRAPHIC };
+    enum class Comparator { COST, VOTES, LEXICOGRAPHIC };
     enum class Ordering { ASCENDING, DESCENDING };
 
     explicit ProjectComparator(std::vector<std::pair<Comparator, Ordering>> criteria);
@@ -16,7 +16,6 @@ class ProjectComparator {
 
     // Static predefined comparators:
     static const ProjectComparator ByCostAsc;
-    static const ProjectComparator ByCostAscThenIdAsc;
     static const ProjectComparator ByVotesDesc;
     static const ProjectComparator ByCostAscThenVotesDesc;
 

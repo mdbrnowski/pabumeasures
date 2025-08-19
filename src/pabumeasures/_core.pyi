@@ -5,7 +5,6 @@ from typing import overload
 
 class Comparator(enum.Enum):
     COST: Comparator
-    ID: Comparator
     VOTES: Comparator
     LEXICOGRAPHIC: Comparator
 
@@ -16,11 +15,9 @@ class Ordering(enum.Enum):
 # ========== project classes ==========
 
 class ProjectEmbedding:
-    def __init__(self, cost: int, id: int = ..., name: str = ..., approvers: list[int] = ...) -> None: ...
+    def __init__(self, cost: int, name: str = ..., approvers: list[int] = ...) -> None: ...
     @property
     def cost(self) -> int: ...
-    @property
-    def id(self) -> int: ...
     @property
     def name(self) -> str: ...
     @property
@@ -28,7 +25,6 @@ class ProjectEmbedding:
 
 class ProjectComparator:
     ByCostAsc: ProjectComparator
-    ByCostAscThenIdAsc: ProjectComparator
     ByVotesDesc: ProjectComparator
     ByCostAscThenVotesDesc: ProjectComparator
 

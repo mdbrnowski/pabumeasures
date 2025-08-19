@@ -13,7 +13,9 @@ bool ProjectComparator::operator()(const ProjectEmbedding &a, const ProjectEmbed
             return cmp == std::strong_ordering::less;
         }
     }
-    return false; // all equal
+    // all equal - apply lexicographic ordering
+    return compare(a, b, Comparator::LEXICOGRAPHIC, Ordering::ASCENDING) == std::strong_ordering::less;
+    // todo: add information about tie-breaking ensuring total ordering to documentation
 }
 
 std::strong_ordering ProjectComparator::applyOrder(std::strong_ordering cmp, Ordering order) {
@@ -31,8 +33,6 @@ std::strong_ordering ProjectComparator::compare(const ProjectEmbedding &a, const
     switch (cmpType) {
     case Comparator::COST:
         return applyOrder(a.cost_ <=> b.cost_, order);
-    case Comparator::ID:
-        return applyOrder(a.id_ <=> b.id_, order);
     case Comparator::VOTES:
         return applyOrder(a.approvers_.size() <=> b.approvers_.size(), order);
     case Comparator::LEXICOGRAPHIC:
@@ -44,10 +44,6 @@ std::strong_ordering ProjectComparator::compare(const ProjectEmbedding &a, const
 // Static predefined comparator definitions:
 const ProjectComparator ProjectComparator::ByCostAsc{ProjectComparator::Comparator::COST,
                                                      ProjectComparator::Ordering::ASCENDING};
-const ProjectComparator ProjectComparator::ByCostAscThenIdAsc{
-    std::vector<std::pair<ProjectComparator::Comparator, ProjectComparator::Ordering>>{
-        {ProjectComparator::Comparator::COST, ProjectComparator::Ordering::ASCENDING},
-        {ProjectComparator::Comparator::ID, ProjectComparator::Ordering::ASCENDING}}};
 const ProjectComparator ProjectComparator::ByVotesDesc{ProjectComparator::Comparator::VOTES,
                                                        ProjectComparator::Ordering::DESCENDING};
 const ProjectComparator ProjectComparator::ByCostAscThenVotesDesc{

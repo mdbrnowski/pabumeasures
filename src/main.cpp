@@ -11,7 +11,7 @@ using namespace pybind11::literals;
 namespace py = pybind11;
 
 vector<ProjectEmbedding> greedy(int total_budget, vector<ProjectEmbedding> projects,
-                                const ProjectComparator &tie_breaking = ProjectComparator::ByCostAscThenIdAsc) {
+                                const ProjectComparator &tie_breaking = ProjectComparator::ByCostAsc) {
     vector<ProjectEmbedding> winners;
     sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
@@ -125,7 +125,6 @@ PYBIND11_MODULE(_core, m) {
 
     py::native_enum<ProjectComparator::Comparator>(m, "Comparator", "enum.Enum")
         .value("COST", ProjectComparator::Comparator::COST)
-        .value("ID", ProjectComparator::Comparator::ID)
         .value("VOTES", ProjectComparator::Comparator::VOTES)
         .value("LEXICOGRAPHIC", ProjectComparator::Comparator::LEXICOGRAPHIC)
         .finalize();
@@ -136,12 +135,10 @@ PYBIND11_MODULE(_core, m) {
         .finalize();
 
     py::class_<ProjectEmbedding>(m, "ProjectEmbedding")
-        .def(py::init<int, int, std::string, std::vector<int>>(), "cost"_a, "id"_a, "name"_a, "approvers"_a)
-        .def(py::init<int, int, std::string>(), "cost"_a, "id"_a, "name"_a)
-        .def(py::init<int, int>(), "cost"_a, "id"_a)
+        .def(py::init<int, std::string, std::vector<int>>(), "cost"_a, "name"_a, "approvers"_a)
+        .def(py::init<int, std::string>(), "cost"_a, "name"_a)
         .def(py::init<int>(), "cost"_a)
         .def_property_readonly("cost", &ProjectEmbedding::cost)
-        .def_property_readonly("id", &ProjectEmbedding::id)
         .def_property_readonly("name", &ProjectEmbedding::name)
         .def_property_readonly("approvers", &ProjectEmbedding::approvers);
 
@@ -152,14 +149,9 @@ PYBIND11_MODULE(_core, m) {
         .def("__call__", &ProjectComparator::operator())
         // static default comparators
         .def_property_readonly_static("ByCostAsc", [](py::object) { return ProjectComparator::ByCostAsc; })
-        .def_property_readonly_static("ByCostAscThenIdAsc",
-                                      [](py::object) { return ProjectComparator::ByCostAscThenIdAsc; })
         .def_property_readonly_static("ByVotesDesc", [](py::object) { return ProjectComparator::ByVotesDesc; })
         .def_property_readonly_static("ByCostAscThenVotesDesc",
                                       [](py::object) { return ProjectComparator::ByCostAscThenVotesDesc; });
-
-    m.def("greedy", &greedy, "GreedyAV implementation.", "total_budget"_a, "projects"_a,
-          "tie_breaking"_a = ProjectComparator::ByCostAscThenIdAsc);
 
     m.def("optimist_add_for_greedy", &optimist_add_for_greedy, "optimist-add measure for GreedyAV", "num_projects"_a,
           "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
