@@ -69,12 +69,12 @@ vector<ProjectEmbedding> greedy_over_cost(int total_budget, vector<ProjectEmbedd
     vector<ProjectEmbedding> winners;
 
     sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
-        double a_approvals_over_cost = a.approvers().size() / static_cast<double>(a.cost()),
-               b_approvals_over_cost = b.approvers().size() / static_cast<double>(b.cost());
-        if (a_approvals_over_cost == b_approvals_over_cost) {
+        double cross_term_a_approvals_b_cost = a.approvers().size() * b.cost(),
+               cross_term_b_approvals_a_cost = b.approvers().size() * a.cost();
+        if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
             return tie_breaking(a, b);
         }
-        return a_approvals_over_cost > b_approvals_over_cost;
+        return cross_term_a_approvals_b_cost > cross_term_b_approvals_a_cost;
     });
     for (const auto project : projects) {
         if (project.cost() <= total_budget) {
