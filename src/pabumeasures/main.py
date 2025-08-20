@@ -49,6 +49,8 @@ def _translate_input_format_tmp(
         raise ValueError("Project names must be unique in the instance")
     if any(project.cost <= 0 for project in instance):
         raise ValueError("Project costs must be positive")
+    if any(project.cost > 1_000_000_000 for project in instance):
+        raise ValueError("Project costs must not exceed 1 billion")
     if instance.budget_limit > 1_000_000_000:
         raise ValueError("Budget limit must not exceed 1 billion")
 

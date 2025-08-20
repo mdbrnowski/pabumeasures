@@ -39,3 +39,33 @@ def test_error_on_negative_cost():
 
     with pytest.raises(ValueError, match=r"costs .+ positive"):
         pabumeasures.greedy(instance, profile)
+
+
+def test_error_on_huge_cost():
+    p1 = Project("p1", int(2e9))
+    p2 = Project("p2", 1)
+    instance = Instance([p1, p2], 10)
+    profile = ApprovalProfile(
+        [
+            ApprovalBallot([p1]),
+            ApprovalBallot([p2]),
+        ]
+    )
+
+    with pytest.raises(ValueError, match=r"costs .+ exceed"):
+        pabumeasures.greedy(instance, profile)
+
+
+def test_error_on_huge_budget():
+    p1 = Project("p1", 2)
+    p2 = Project("p2", 1)
+    instance = Instance([p1, p2], int(2e9))
+    profile = ApprovalProfile(
+        [
+            ApprovalBallot([p1]),
+            ApprovalBallot([p2]),
+        ]
+    )
+
+    with pytest.raises(ValueError, match=r"[Bb]udget limit .+ exceed"):
+        pabumeasures.greedy(instance, profile)
