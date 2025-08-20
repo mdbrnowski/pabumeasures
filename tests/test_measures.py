@@ -5,7 +5,7 @@ from utils import get_random_approval_profile, get_random_instance
 
 import pabumeasures
 
-NUMBER_OF_TIMES = 20
+NUMBER_OF_TIMES = 100
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
