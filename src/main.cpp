@@ -10,6 +10,15 @@ using namespace std;
 using namespace pybind11::literals;
 namespace py = pybind11;
 
+int get_number_of_voters(const vector<ProjectEmbedding> &projects) {
+    int n_voters = 0;
+    for (const auto &project : projects) {
+        if (!project.approvers().empty())
+            n_voters = max(n_voters, *ranges::max_element(project.approvers()) + 1);
+    }
+    return n_voters;
+}
+
 vector<ProjectEmbedding> greedy(int total_budget, vector<ProjectEmbedding> projects,
                                 const ProjectComparator &tie_breaking) {
     vector<ProjectEmbedding> winners;
@@ -124,6 +133,39 @@ optional<int> pessimist_add_for_greedy_over_cost(int num_projects, int num_voter
     return optimist_add_for_greedy(num_projects, num_voters, total_budget, cost, approvers, p);
 }
 
+vector<ProjectEmbedding> phragmen(int total_budget, vector<ProjectEmbedding> projects,
+                                  const ProjectComparator &tie_breaking = ProjectComparator::ByCostAsc) {
+    vector<ProjectEmbedding> winners;
+    int n_voters = get_number_of_voters(projects);
+    vector<long double> load(n_voters, 0);
+    while (!projects.empty()) {
+        long double min_max_load = numeric_limits<long double>::max();
+        auto winner = projects[0];
+        for (const auto project : projects) {
+            long double max_load = project.cost();
+            for (const auto &approver : project.approvers())
+                max_load += load[approver];
+            max_load /= project.approvers().size();
+
+            if ((max_load == min_max_load && tie_breaking(project, winner)) || max_load < min_max_load) {
+                min_max_load = max_load;
+                winner = project;
+            }
+        }
+        if (winner.cost() > total_budget)
+            break;
+
+        for (const auto &approver : winner.approvers()) {
+            load[approver] = min_max_load;
+        }
+
+        winners.push_back(winner);
+        total_budget -= winner.cost();
+        projects.erase(remove(projects.begin(), projects.end(), winner), projects.end());
+    }
+    return winners;
+}
+
 PYBIND11_MODULE(_core, m) {
     m.doc() = "core module with all internal functions";
 
@@ -161,7 +203,7 @@ PYBIND11_MODULE(_core, m) {
         .def_property_readonly_static("ByCostDescThenVotesDesc",
                                       [](py::object) { return ProjectComparator::ByCostDescThenVotesDesc; });
 
-    m.def("greedy", &greedy, "GreedyAV implementation.", "total_budget"_a, "projects"_a, "tie_breaking"_a);
+    m.def("greedy", &greedy, "GreedyAV", "total_budget"_a, "projects"_a, "tie_breaking"_a);
 
     m.def("optimist_add_for_greedy", &optimist_add_for_greedy, "optimist-add measure for GreedyAV", "num_projects"_a,
           "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
@@ -169,8 +211,7 @@ PYBIND11_MODULE(_core, m) {
     m.def("pessimist_add_for_greedy", &pessimist_add_for_greedy, "pessimist-add measure for GreedyAV", "num_projects"_a,
           "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
 
-    m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost implementation", "total_budget"_a, "projects"_a,
-          "tie_breaking"_a);
+    m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost", "total_budget"_a, "projects"_a, "tie_breaking"_a);
 
     m.def("optimist_add_for_greedy_over_cost", &optimist_add_for_greedy_over_cost,
           "optimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
@@ -179,4 +220,6 @@ PYBIND11_MODULE(_core, m) {
     m.def("pessimist_add_for_greedy_over_cost", &pessimist_add_for_greedy_over_cost,
           "pessimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
           "approvers"_a, "p"_a);
+
+    m.def("phragmen", &phragmen, "Sequential Phragmén", "total_budget"_a, "projects"_a, "tie_breaking"_a);
 }

@@ -15,6 +15,7 @@ class ProjectEmbedding {
     template <typename StringT>
     ProjectEmbedding(int cost, StringT &&name) : cost_(cost), name_(std::forward<StringT>(name)) {}
 
+    bool operator==(const ProjectEmbedding &other) const { return name_ == other.name_; }
     int cost() const { return cost_; }
     const std::string &name() const { return name_; }
     const std::vector<int> &approvers() const { return approvers_; }

@@ -134,8 +134,12 @@ def mes_cost_measure(instance: Instance, profile: Profile, project: Project, mea
     raise NotImplementedError()
 
 
-def phragmen(instance: Instance, profile: Profile) -> BudgetAllocation:
-    raise NotImplementedError()
+def phragmen(
+    instance: Instance, profile: Profile, tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc
+) -> BudgetAllocation:
+    total_budget, name_to_project, project_embeddings = _translate_input_format(instance, profile)
+    result = _core.phragmen(total_budget, project_embeddings, tie_breaking)
+    return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def phragmen_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
