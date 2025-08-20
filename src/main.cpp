@@ -212,6 +212,39 @@ vector<ProjectEmbedding> phragmen(int total_budget, vector<ProjectEmbedding> pro
     return winners;
 }
 
+vector<ProjectEmbedding> phragmen(int total_budget, vector<ProjectEmbedding> projects,
+                                  const ProjectComparator &tie_breaking = ProjectComparator::ByCostAsc) {
+    vector<ProjectEmbedding> winners;
+    int n_voters = get_number_of_voters(projects);
+    vector<long double> load(n_voters, 0);
+    while (!projects.empty()) {
+        long double min_max_load = numeric_limits<long double>::max();
+        auto winner = projects[0];
+        for (const auto project : projects) {
+            long double max_load = project.cost();
+            for (const auto &approver : project.approvers())
+                max_load += load[approver];
+            max_load /= project.approvers().size();
+
+            if ((max_load == min_max_load && tie_breaking(project, winner)) || max_load < min_max_load) {
+                min_max_load = max_load;
+                winner = project;
+            }
+        }
+        if (winner.cost() > total_budget)
+            break;
+
+        for (const auto &approver : winner.approvers()) {
+            load[approver] = min_max_load;
+        }
+
+        winners.push_back(winner);
+        total_budget -= winner.cost();
+        projects.erase(remove(projects.begin(), projects.end(), winner), projects.end());
+    }
+    return winners;
+}
+
 PYBIND11_MODULE(_core, m) {
     m.doc() = "core module with all internal functions";
 
@@ -263,7 +296,12 @@ PYBIND11_MODULE(_core, m) {
           "optimist-add measure for GreedyAV/Cost", "total_budget"_a, "projects"_a, "p"_a, "tie_breaking"_a);
 
     m.def("pessimist_add_for_greedy_over_cost", &pessimist_add_for_greedy_over_cost,
+<<<<<<< HEAD
           "pessimist-add measure for GreedyAV/Cost", "total_budget"_a, "projects"_a, "p"_a, "tie_breaking"_a);
+=======
+          "pessimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
+          "approvers"_a, "p"_a);
+>>>>>>> 74a096c (Implement the Phragmén rule)
 
     m.def("phragmen", &phragmen, "Sequential Phragmén", "total_budget"_a, "projects"_a, "tie_breaking"_a);
 }
