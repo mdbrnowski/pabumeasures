@@ -41,8 +41,8 @@ def test_error_on_negative_cost():
         pabumeasures.greedy(instance, profile)
 
 
-def test_error_on_huge_cost():
-    p1 = Project("p1", int(2e9))
+def test_error_on_cost_larger_than_budget():
+    p1 = Project("p1", 11)
     p2 = Project("p2", 1)
     instance = Instance([p1, p2], 10)
     profile = ApprovalProfile(
