@@ -17,7 +17,7 @@ def get_random_instance(num_projects: int, min_cost: int, max_cost: int) -> tupl
         for p in range(round(num_projects))
     ]
     inst.update(projects)
-    inst.budget_limit = random.randint(ceil(min(p.cost for p in inst)), ceil(sum(p.cost for p in inst)))
+    inst.budget_limit = random.randint(ceil(max(p.cost for p in inst)), ceil(sum(p.cost for p in inst)))
     return inst, projects
 
 
