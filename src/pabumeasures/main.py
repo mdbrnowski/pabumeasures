@@ -2,7 +2,7 @@ from enum import Enum, auto
 
 from pabutools.election.ballot import Ballot, FrozenBallot
 from pabutools.election.instance import Instance, Project
-from pabutools.election.profile import Profile
+from pabutools.election.profile import ApprovalProfile, Profile
 from pabutools.rules import BudgetAllocation
 
 from pabumeasures import _core
@@ -20,8 +20,8 @@ def _translate_input_format(
 ) -> tuple[list[Project], list[Ballot], int, list[int], list[list[int]]]:
     if not isinstance(instance, Instance):
         raise TypeError("Instance must be of type Instance")
-    if not isinstance(profile, Profile):
-        raise TypeError("Profile must be of type Profile")
+    if not isinstance(profile, ApprovalProfile):
+        raise TypeError("Profile must be of type ApprovalProfile")
 
     projects: list[Project] = sorted(instance)
     _project_to_id = {project: i for i, project in enumerate(projects)}
@@ -43,8 +43,8 @@ def _translate_input_format_tmp(
 ) -> tuple[int, dict[str, Project], list[_core.ProjectEmbedding]]:
     if not isinstance(instance, Instance):
         raise TypeError("Instance must be of type Instance")
-    if not isinstance(profile, Profile):
-        raise TypeError("Profile must be of type Profile")
+    if not isinstance(profile, ApprovalProfile):
+        raise TypeError("Profile must be of type ApprovalProfile")
     if len([project.name for project in instance]) != len({project.name for project in instance}):
         raise ValueError("Project names must be unique in the instance")
     if any(project.cost <= 0 for project in instance):

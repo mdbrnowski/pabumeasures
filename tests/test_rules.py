@@ -10,7 +10,7 @@ from utils import get_random_approval_profile, get_random_instance
 import pabumeasures
 
 test_files = glob.glob("./data/*.pb")
-NUMBER_OF_TIMES = 0  # todo: set this to 500 when tie-breaking is implemented
+NUMBER_OF_TIMES = 100
 
 
 @pytest.mark.parametrize("file", test_files)
