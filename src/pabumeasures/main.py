@@ -15,7 +15,7 @@ class Measure(Enum):
     ADD_SINGLETON = auto()
 
 
-def _translate_input_format(
+def _translate_input_format_temp(
     instance: Instance, profile: Profile
 ) -> tuple[list[Project], list[Ballot], int, list[int], list[list[int]]]:
     if not isinstance(instance, Instance):
@@ -38,7 +38,7 @@ def _translate_input_format(
     return projects, ballots, total_budget, cost, approvers
 
 
-def _translate_input_format_tmp(
+def _translate_input_format(
     instance: Instance, profile: Profile
 ) -> tuple[int, dict[str, Project], list[_core.ProjectEmbedding]]:
     if not isinstance(instance, Instance):
@@ -71,13 +71,13 @@ def _translate_input_format_tmp(
 
 
 def greedy(instance: Instance, profile: Profile) -> BudgetAllocation:
-    total_budget, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
+    total_budget, name_to_project, project_embeddings = _translate_input_format(instance, profile)
     result = _core.greedy(total_budget, project_embeddings)
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def greedy_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
-    projects, ballots, total_budget, cost, approvers = _translate_input_format(instance, profile)
+    projects, ballots, total_budget, cost, approvers = _translate_input_format_temp(instance, profile)
     p = projects.index(project)
     match measure:
         case Measure.COST_REDUCTION:
@@ -91,13 +91,13 @@ def greedy_measure(instance: Instance, profile: Profile, project: Project, measu
 
 
 def greedy_over_cost(instance: Instance, profile: Profile) -> BudgetAllocation:
-    total_budget, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
+    total_budget, name_to_project, project_embeddings = _translate_input_format(instance, profile)
     result = _core.greedy_over_cost(total_budget, project_embeddings)
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def greedy_over_cost_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
-    projects, ballots, total_budget, cost, approvers = _translate_input_format(instance, profile)
+    projects, ballots, total_budget, cost, approvers = _translate_input_format_temp(instance, profile)
     p = projects.index(project)
     match measure:
         case Measure.COST_REDUCTION:
