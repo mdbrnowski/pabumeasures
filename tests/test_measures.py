@@ -22,8 +22,7 @@ def test_greedy_measure(seed):
     elif project.cost > instance.budget_limit:
         assert result is None
     else:
-        # todo: it should be at least 1, but we need to allow 0 for now (lack of tie-breaking)
-        assert result is not None and result >= 0
+        assert result is None or result >= 1
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))

@@ -51,7 +51,7 @@ def greedy_over_cost(
 # ========== optimist-add ==========
 
 def optimist_add_for_greedy(
-    num_projects: int, num_voters: int, total_budget: int, cost: list[int], approvers: list[list[int]], p: int
+    total_budget: int, projects: list[ProjectEmbedding], p: int, tie_breaking: ProjectComparator
 ) -> int | None: ...
 def optimist_add_for_greedy_over_cost(
     num_projects: int, num_voters: int, total_budget: int, cost: list[int], approvers: list[list[int]], p: int
@@ -60,7 +60,7 @@ def optimist_add_for_greedy_over_cost(
 # ========== pessimist-add ==========
 
 def pessimist_add_for_greedy(
-    num_projects: int, num_voters: int, total_budget: int, cost: list[int], approvers: list[list[int]], p: int
+    total_budget: int, projects: list[ProjectEmbedding], p: int, tie_breaking: ProjectComparator
 ) -> int | None: ...
 def pessimist_add_for_greedy_over_cost(
     num_projects: int, num_voters: int, total_budget: int, cost: list[int], approvers: list[list[int]], p: int
