@@ -55,16 +55,14 @@ def _translate_input_format_tmp(
         raise ValueError("Budget limit must not exceed 1 billion")
 
     projects: list[Project] = sorted(instance)
-    frozen_ballots: list[FrozenBallot] = [ballot.frozen() for ballot in profile]
-    _ballot_to_id = {ballot: i for i, ballot in enumerate(frozen_ballots)}
+    frozen_ballots: list[tuple[int, FrozenBallot]] = [(i, ballot.frozen()) for i, ballot in enumerate(profile)]
     total_budget = int(
         instance.budget_limit
     )  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
     approvers: dict[str, list[int]] = {project.name: [] for project in projects}
-    for ballot in profile:
-        ballot_id = _ballot_to_id[ballot.frozen()]
-        for project in ballot:
-            approvers[project.name].append(ballot_id)
+    for i, frozen_ballot in frozen_ballots:
+        for project in frozen_ballot:
+            approvers[project.name].append(i)
     project_embeddings: list[_core.ProjectEmbedding] = [
         _core.ProjectEmbedding(int(project.cost), project.name, approvers[project.name]) for project in projects
     ]  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
