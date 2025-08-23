@@ -152,10 +152,15 @@ PYBIND11_MODULE(_core, m) {
         .def("__call__", &ProjectComparator::operator())
         // static default comparators
         .def_property_readonly_static("ByCostAsc", [](py::object) { return ProjectComparator::ByCostAsc; })
+        .def_property_readonly_static("ByCostDesc", [](py::object) { return ProjectComparator::ByCostDesc; })
         .def_property_readonly_static("ByNameAsc", [](py::object) { return ProjectComparator::ByNameAsc; })
+        .def_property_readonly_static("ByNameDesc", [](py::object) { return ProjectComparator::ByNameDesc; })
+        .def_property_readonly_static("ByVotesAsc", [](py::object) { return ProjectComparator::ByVotesAsc; })
         .def_property_readonly_static("ByVotesDesc", [](py::object) { return ProjectComparator::ByVotesDesc; })
         .def_property_readonly_static("ByCostAscThenVotesDesc",
-                                      [](py::object) { return ProjectComparator::ByCostAscThenVotesDesc; });
+                                      [](py::object) { return ProjectComparator::ByCostAscThenVotesDesc; })
+        .def_property_readonly_static("ByCostDescThenVotesDesc",
+                                      [](py::object) { return ProjectComparator::ByCostDescThenVotesDesc; });
 
     m.def("greedy", &greedy, "GreedyAV implementation.", "total_budget"_a, "projects"_a, "tie_breaking"_a);
 

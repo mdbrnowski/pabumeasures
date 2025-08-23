@@ -19,22 +19,44 @@ projects = [random_project(1, 3) for _ in range(200)]
 test_cases = [
     (lambda p: (p.cost, p.name), ProjectComparator.ByCostAsc, "ByCostAsc"),
     (lambda p: (p.cost, p.name), ProjectComparator(Comparator.COST, Ordering.ASCENDING), "ByCostAsc_explicit"),
+    (lambda p: (-p.cost, p.name), ProjectComparator.ByCostDesc, "ByCostDesc"),
+    (lambda p: (-p.cost, p.name), ProjectComparator(Comparator.COST, Ordering.DESCENDING), "ByCostDesc_explicit"),
     (lambda p: (p.name), ProjectComparator.ByNameAsc, "ByNameAsc"),
     (lambda p: (p.name), ProjectComparator([]), "ByNameAsc_implicit"),
     (lambda p: (p.name), ProjectComparator(Comparator.LEXICOGRAPHIC, Ordering.ASCENDING), "ByNameAsc_explicit"),
-    (lambda p: (-p.cost, p.name), ProjectComparator(Comparator.COST, Ordering.DESCENDING), "ByCostDesc"),
+    (lambda p: "".join(chr(255 - ord(c)) for c in p.name), ProjectComparator.ByNameDesc, "ByNameDesc"),
+    (
+        lambda p: "".join(chr(255 - ord(c)) for c in p.name),
+        ProjectComparator(Comparator.LEXICOGRAPHIC, Ordering.DESCENDING),
+        "ByNameDesc_explicit",
+    ),
+    (lambda p: (len(p.approvers), p.name), ProjectComparator.ByVotesAsc, "ByVotesAsc"),
+    (
+        lambda p: (len(p.approvers), p.name),
+        ProjectComparator(Comparator.VOTES, Ordering.ASCENDING),
+        "ByVotesAsc_explicit",
+    ),
     (lambda p: (-len(p.approvers), p.name), ProjectComparator.ByVotesDesc, "ByVotesDesc"),
     (
         lambda p: (-len(p.approvers), p.name),
         ProjectComparator(Comparator.VOTES, Ordering.DESCENDING),
         "ByVotesDesc_explicit",
     ),
-    (lambda p: (len(p.approvers), p.name), ProjectComparator(Comparator.VOTES, Ordering.ASCENDING), "ByVotesAsc"),
     (lambda p: (p.cost, -len(p.approvers), p.name), ProjectComparator.ByCostAscThenVotesDesc, "ByCostAscThenVotesDesc"),
     (
         lambda p: (p.cost, -len(p.approvers), p.name),
         ProjectComparator([(Comparator.COST, Ordering.ASCENDING), (Comparator.VOTES, Ordering.DESCENDING)]),
         "ByCostAscThenVotesDesc_explicit",
+    ),
+    (
+        lambda p: (-p.cost, -len(p.approvers), p.name),
+        ProjectComparator.ByCostDescThenVotesDesc,
+        "ByCostDescThenVotesDesc",
+    ),
+    (
+        lambda p: (-p.cost, -len(p.approvers), p.name),
+        ProjectComparator([(Comparator.COST, Ordering.DESCENDING), (Comparator.VOTES, Ordering.DESCENDING)]),
+        "ByCostDescThenVotesDesc_explicit",
     ),
     (
         lambda p: (p.cost, -len(p.approvers), p.name),

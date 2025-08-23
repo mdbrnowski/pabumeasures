@@ -16,9 +16,13 @@ class ProjectComparator {
 
     // Static predefined comparators:
     static const ProjectComparator ByCostAsc;
+    static const ProjectComparator ByCostDesc;
     static const ProjectComparator ByNameAsc;
+    static const ProjectComparator ByNameDesc;
+    static const ProjectComparator ByVotesAsc;
     static const ProjectComparator ByVotesDesc;
     static const ProjectComparator ByCostAscThenVotesDesc;
+    static const ProjectComparator ByCostDescThenVotesDesc;
 
   private:
     std::vector<std::pair<Comparator, Ordering>> criteria_;

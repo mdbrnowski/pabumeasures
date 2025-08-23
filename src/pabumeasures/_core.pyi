@@ -25,9 +25,13 @@ class ProjectEmbedding:
 
 class ProjectComparator:
     ByCostAsc: ProjectComparator
+    ByCostDesc: ProjectComparator
     ByNameAsc: ProjectComparator
+    ByNameDesc: ProjectComparator
+    ByVotesAsc: ProjectComparator
     ByVotesDesc: ProjectComparator
     ByCostAscThenVotesDesc: ProjectComparator
+    ByCostDescThenVotesDesc: ProjectComparator
 
     @overload
     def __init__(self, criteria: list[tuple[Comparator, Ordering]]) -> None: ...
