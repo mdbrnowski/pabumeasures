@@ -73,14 +73,10 @@ def _translate_input_format_tmp(
 
 
 def greedy(
-    instance: Instance, profile: Profile, tie_breaking: _core.ProjectComparator | None = None
+    instance: Instance, profile: Profile, tie_breaking: _core.ProjectComparator = _core.ProjectComparator.ByCostAsc
 ) -> BudgetAllocation:
     total_budget, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
-    result = (
-        _core.greedy(total_budget, project_embeddings, tie_breaking)
-        if tie_breaking
-        else _core.greedy(total_budget, project_embeddings)
-    )
+    result = _core.greedy(total_budget, project_embeddings, tie_breaking)
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
@@ -99,14 +95,10 @@ def greedy_measure(instance: Instance, profile: Profile, project: Project, measu
 
 
 def greedy_over_cost(
-    instance: Instance, profile: Profile, tie_breaking: _core.ProjectComparator | None = None
+    instance: Instance, profile: Profile, tie_breaking: _core.ProjectComparator = _core.ProjectComparator.ByCostAsc
 ) -> BudgetAllocation:
     total_budget, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
-    result = (
-        _core.greedy_over_cost(total_budget, project_embeddings, tie_breaking)
-        if tie_breaking
-        else _core.greedy_over_cost(total_budget, project_embeddings)
-    )
+    result = _core.greedy_over_cost(total_budget, project_embeddings, tie_breaking)
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
