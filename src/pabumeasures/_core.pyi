@@ -25,6 +25,7 @@ class ProjectEmbedding:
 
 class ProjectComparator:
     ByCostAsc: ProjectComparator
+    ByNameAsc: ProjectComparator
     ByVotesDesc: ProjectComparator
     ByCostAscThenVotesDesc: ProjectComparator
 

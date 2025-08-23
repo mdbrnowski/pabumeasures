@@ -44,6 +44,8 @@ std::strong_ordering ProjectComparator::compare(const ProjectEmbedding &a, const
 // Static predefined comparator definitions:
 const ProjectComparator ProjectComparator::ByCostAsc{ProjectComparator::Comparator::COST,
                                                      ProjectComparator::Ordering::ASCENDING};
+const ProjectComparator ProjectComparator::ByNameAsc{
+    {}}; // Should be emptły <- Lexicographic sort is always the last step of comparison
 const ProjectComparator ProjectComparator::ByVotesDesc{ProjectComparator::Comparator::VOTES,
                                                        ProjectComparator::Ordering::DESCENDING};
 const ProjectComparator ProjectComparator::ByCostAscThenVotesDesc{

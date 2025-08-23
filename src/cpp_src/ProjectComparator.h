@@ -16,6 +16,7 @@ class ProjectComparator {
 
     // Static predefined comparators:
     static const ProjectComparator ByCostAsc;
+    static const ProjectComparator ByNameAsc;
     static const ProjectComparator ByVotesDesc;
     static const ProjectComparator ByCostAscThenVotesDesc;
 

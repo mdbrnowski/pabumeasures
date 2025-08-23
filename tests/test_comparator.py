@@ -19,6 +19,11 @@ projects = [random_project(1, 3) for _ in range(200)]
 test_cases = [
     (lambda p: (p.cost, p.name), ProjectComparator.ByCostAsc, "ByCostAsc"),
     (lambda p: (p.cost, p.name), ProjectComparator(Comparator.COST, Ordering.ASCENDING), "ByCostAsc_explicit"),
+    
+    (lambda p: (p.name), ProjectComparator.ByNameAsc, "ByNameAsc"),
+    (lambda p: (p.name), ProjectComparator([]), "ByNameAsc_implicit"),
+    (lambda p: (p.name), ProjectComparator(Comparator.LEXICOGRAPHIC, Ordering.ASCENDING), "ByNameAsc_explicit"),
+    
     (lambda p: (-p.cost, p.name), ProjectComparator(Comparator.COST, Ordering.DESCENDING), "ByCostDesc"),
     (lambda p: (-len(p.approvers), p.name), ProjectComparator.ByVotesDesc, "ByVotesDesc"),
     (
