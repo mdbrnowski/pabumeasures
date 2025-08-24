@@ -15,7 +15,7 @@ class Measure(Enum):
     ADD_SINGLETON = auto()
 
 
-def _translate_input_format(
+def _translate_input_format_temp(
     instance: Instance, profile: Profile
 ) -> tuple[list[Project], list[Ballot], int, list[int], list[list[int]]]:
     if not isinstance(instance, Instance):
@@ -38,7 +38,7 @@ def _translate_input_format(
     return projects, ballots, total_budget, cost, approvers
 
 
-def _translate_input_format_tmp(
+def _translate_input_format(
     instance: Instance, profile: Profile
 ) -> tuple[int, dict[str, Project], list[_core.ProjectEmbedding]]:
     if not isinstance(instance, Instance):
@@ -55,16 +55,14 @@ def _translate_input_format_tmp(
         raise ValueError("Budget limit must not exceed 1 billion")
 
     projects: list[Project] = sorted(instance)
-    frozen_ballots: list[FrozenBallot] = [ballot.frozen() for ballot in profile]
-    _ballot_to_id = {ballot: i for i, ballot in enumerate(frozen_ballots)}
+    frozen_ballots: list[tuple[int, FrozenBallot]] = [(i, ballot.frozen()) for i, ballot in enumerate(profile)]
     total_budget = int(
         instance.budget_limit
     )  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
     approvers: dict[str, list[int]] = {project.name: [] for project in projects}
-    for ballot in profile:
-        ballot_id = _ballot_to_id[ballot.frozen()]
-        for project in ballot:
-            approvers[project.name].append(ballot_id)
+    for i, frozen_ballot in frozen_ballots:
+        for project in frozen_ballot:
+            approvers[project.name].append(i)
     project_embeddings: list[_core.ProjectEmbedding] = [
         _core.ProjectEmbedding(int(project.cost), project.name, approvers[project.name]) for project in projects
     ]  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
@@ -75,13 +73,13 @@ def _translate_input_format_tmp(
 def greedy(
     instance: Instance, profile: Profile, tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc
 ) -> BudgetAllocation:
-    total_budget, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
+    total_budget, name_to_project, project_embeddings = _translate_input_format(instance, profile)
     result = _core.greedy(total_budget, project_embeddings, tie_breaking)
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def greedy_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
-    projects, ballots, total_budget, cost, approvers = _translate_input_format(instance, profile)
+    projects, ballots, total_budget, cost, approvers = _translate_input_format_temp(instance, profile)
     p = projects.index(project)
     match measure:
         case Measure.COST_REDUCTION:
@@ -97,13 +95,13 @@ def greedy_measure(instance: Instance, profile: Profile, project: Project, measu
 def greedy_over_cost(
     instance: Instance, profile: Profile, tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc
 ) -> BudgetAllocation:
-    total_budget, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
+    total_budget, name_to_project, project_embeddings = _translate_input_format(instance, profile)
     result = _core.greedy_over_cost(total_budget, project_embeddings, tie_breaking)
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def greedy_over_cost_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
-    projects, ballots, total_budget, cost, approvers = _translate_input_format(instance, profile)
+    projects, ballots, total_budget, cost, approvers = _translate_input_format_temp(instance, profile)
     p = projects.index(project)
     match measure:
         case Measure.COST_REDUCTION:
