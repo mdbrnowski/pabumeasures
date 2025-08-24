@@ -25,8 +25,12 @@ class ProjectEmbedding:
 
 class ProjectComparator:
     ByCostAsc: ProjectComparator
+    ByCostDesc: ProjectComparator
+    ByNameAsc: ProjectComparator
+    ByNameDesc: ProjectComparator
     ByVotesDesc: ProjectComparator
     ByCostAscThenVotesDesc: ProjectComparator
+    ByCostDescThenVotesDesc: ProjectComparator
 
     @overload
     def __init__(self, criteria: list[tuple[Comparator, Ordering]]) -> None: ...
@@ -38,10 +42,10 @@ class ProjectComparator:
 # ========== rules ==========
 
 def greedy(
-    total_budget: int, projects: list[ProjectEmbedding], tie_breaking: ProjectComparator = ...
+    total_budget: int, projects: list[ProjectEmbedding], tie_breaking: ProjectComparator
 ) -> list[ProjectEmbedding]: ...
 def greedy_over_cost(
-    total_budget: int, projects: list[ProjectEmbedding], tie_breaking: ProjectComparator = ...
+    total_budget: int, projects: list[ProjectEmbedding], tie_breaking: ProjectComparator
 ) -> list[ProjectEmbedding]: ...
 
 # ========== optimist-add ==========
