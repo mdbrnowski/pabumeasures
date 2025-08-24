@@ -10,6 +10,15 @@ using namespace std;
 using namespace pybind11::literals;
 namespace py = pybind11;
 
+int get_number_of_voters(const vector<ProjectEmbedding> &projects) {
+    int n_voters = 0;
+    for (const auto &project : projects) {
+        if (!project.approvers().empty())
+            n_voters = max(n_voters, *ranges::max_element(project.approvers()) + 1);
+    }
+    return n_voters;
+}
+
 vector<ProjectEmbedding> greedy(int total_budget, vector<ProjectEmbedding> projects,
                                 const ProjectComparator &tie_breaking) {
     vector<ProjectEmbedding> winners;
@@ -30,38 +39,50 @@ vector<ProjectEmbedding> greedy(int total_budget, vector<ProjectEmbedding> proje
     return winners;
 }
 
-optional<int> optimist_add_for_greedy(int num_projects, int num_voters, int total_budget, const vector<int> &cost,
-                                      const vector<vector<int>> &approvers, int p) {
-    if (cost[p] > total_budget)
-        return nullopt;
-    vector<int> projects(num_projects);
-    iota(projects.begin(), projects.end(), 0);
-    sort(projects.begin(), projects.end(),
-         [&approvers](int a, int b) { return approvers[a].size() > approvers[b].size(); });
-    // todo: add tie-breaking
-    for (int i = 0; i < num_projects; i++) {
-        auto project = projects[i];
-        if (cost[project] <= total_budget) {
-            if (project == p)
+optional<int> optimist_add_for_greedy(int total_budget, vector<ProjectEmbedding> projects, int p,
+                                      const ProjectComparator &tie_breaking) {
+    auto pp = projects[p];
+    if (pp.cost() > total_budget)
+        return {};
+
+    vector<ProjectEmbedding> winners;
+    sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+        if (a.approvers().size() == b.approvers().size()) {
+            return tie_breaking(a, b);
+        }
+        return a.approvers().size() > b.approvers().size();
+    });
+    for (const auto &project : projects) {
+        if (project.cost() <= total_budget) {
+            if (project == pp) {
                 return 0;
-            if (total_budget - cost[project] < cost[p]) {
-                int difference = approvers[project].size() - approvers[p].size(); // todo: add tie-breaking
-                if (difference + static_cast<int>(approvers[p].size()) > num_voters)
-                    return nullopt;
-                else
-                    return difference;
             }
-            total_budget -= cost[project];
+            if (pp.cost() <= total_budget && pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
+                int num_voters = get_number_of_voters(projects);
+                int new_approvers_size = project.approvers().size();
+                vector<int> new_approvers(new_approvers_size);
+                iota(new_approvers.begin(), new_approvers.end(), 0);
+                auto new_pp = ProjectEmbedding(pp.cost(), pp.name(), new_approvers);
+                if (tie_breaking(project, new_pp)) {
+                    new_approvers_size += 1;
+                }
+                if (new_approvers_size > num_voters)
+                    return {};
+                else
+                    return new_approvers_size - pp.approvers().size();
+            }
+            winners.push_back(project);
+            total_budget -= project.cost();
         }
         if (total_budget <= 0)
             break;
     }
-    return nullopt;
+    return {}; // only if project p is not feasible (won't happen)
 }
 
-optional<int> pessimist_add_for_greedy(int num_projects, int num_voters, int total_budget, const vector<int> &cost,
-                                       const vector<vector<int>> &approvers, int p) {
-    return optimist_add_for_greedy(num_projects, num_voters, total_budget, cost, approvers, p);
+optional<int> pessimist_add_for_greedy(int total_budget, vector<ProjectEmbedding> projects, int p,
+                                       const ProjectComparator &tie_breaking) {
+    return optimist_add_for_greedy(total_budget, projects, p, tie_breaking);
 }
 
 vector<ProjectEmbedding> greedy_over_cost(int total_budget, vector<ProjectEmbedding> projects,
@@ -121,7 +142,7 @@ optional<int> optimist_add_for_greedy_over_cost(int num_projects, int num_voters
 
 optional<int> pessimist_add_for_greedy_over_cost(int num_projects, int num_voters, int total_budget,
                                                  const vector<int> &cost, const vector<vector<int>> &approvers, int p) {
-    return optimist_add_for_greedy(num_projects, num_voters, total_budget, cost, approvers, p);
+    return optimist_add_for_greedy_over_cost(num_projects, num_voters, total_budget, cost, approvers, p);
 }
 
 PYBIND11_MODULE(_core, m) {
@@ -163,11 +184,11 @@ PYBIND11_MODULE(_core, m) {
 
     m.def("greedy", &greedy, "GreedyAV implementation.", "total_budget"_a, "projects"_a, "tie_breaking"_a);
 
-    m.def("optimist_add_for_greedy", &optimist_add_for_greedy, "optimist-add measure for GreedyAV", "num_projects"_a,
-          "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
+    m.def("optimist_add_for_greedy", &optimist_add_for_greedy, "optimist-add measure for GreedyAV", "total_budget"_a,
+          "projects"_a, "p"_a, "tie_breaking"_a);
 
-    m.def("pessimist_add_for_greedy", &pessimist_add_for_greedy, "pessimist-add measure for GreedyAV", "num_projects"_a,
-          "num_voters"_a, "total_budget"_a, "cost"_a, "approvers"_a, "p"_a);
+    m.def("pessimist_add_for_greedy", &pessimist_add_for_greedy, "pessimist-add measure for GreedyAV", "total_budget"_a,
+          "projects"_a, "p"_a, "tie_breaking"_a);
 
     m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost implementation", "total_budget"_a, "projects"_a,
           "tie_breaking"_a);
