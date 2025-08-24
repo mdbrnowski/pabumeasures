@@ -5,7 +5,7 @@ from pabutools.election.instance import Instance, Project
 from pabutools.election.profile import ApprovalProfile, Profile
 from pabutools.rules import BudgetAllocation
 
-from pabumeasures import _core
+from pabumeasures import _core, ProjectComparator
 
 
 class Measure(Enum):
@@ -73,7 +73,7 @@ def _translate_input_format_tmp(
 
 
 def greedy(
-    instance: Instance, profile: Profile, tie_breaking: _core.ProjectComparator = _core.ProjectComparator.ByCostAsc
+    instance: Instance, profile: Profile, tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc
 ) -> BudgetAllocation:
     total_budget, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
     result = _core.greedy(total_budget, project_embeddings, tie_breaking)
@@ -95,7 +95,7 @@ def greedy_measure(instance: Instance, profile: Profile, project: Project, measu
 
 
 def greedy_over_cost(
-    instance: Instance, profile: Profile, tie_breaking: _core.ProjectComparator = _core.ProjectComparator.ByCostAsc
+    instance: Instance, profile: Profile, tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc
 ) -> BudgetAllocation:
     total_budget, name_to_project, project_embeddings = _translate_input_format_tmp(instance, profile)
     result = _core.greedy_over_cost(total_budget, project_embeddings, tie_breaking)
