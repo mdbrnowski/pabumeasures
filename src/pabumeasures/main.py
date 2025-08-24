@@ -5,7 +5,7 @@ from pabutools.election.instance import Instance, Project
 from pabutools.election.profile import ApprovalProfile, Profile
 from pabutools.rules import BudgetAllocation
 
-from pabumeasures import _core, ProjectComparator
+from pabumeasures import ProjectComparator, _core
 
 
 class Measure(Enum):
