@@ -60,16 +60,16 @@ optional<int> optimist_add_for_greedy(int total_budget, vector<ProjectEmbedding>
             if (pp.cost() <= total_budget && pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
                 int num_voters = get_number_of_voters(projects);
                 int new_approvers_size = project.approvers().size();
-                if (new_approvers_size > num_voters) {
-                    return nullopt;
-                }
                 vector<int> new_approvers(new_approvers_size);
                 iota(new_approvers.begin(), new_approvers.end(), 0);
                 auto new_pp = ProjectEmbedding(pp.cost(), pp.name(), new_approvers);
                 if (tie_breaking(project, new_pp)) {
                     new_approvers_size += 1;
                 }
-                return new_approvers_size - pp.approvers().size();
+                if (new_approvers_size > num_voters)
+                    return nullopt;
+                else
+                    return new_approvers_size - pp.approvers().size();
             }
             winners.push_back(project);
             total_budget -= project.cost();
