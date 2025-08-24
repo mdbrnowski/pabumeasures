@@ -43,7 +43,7 @@ optional<int> optimist_add_for_greedy(int total_budget, vector<ProjectEmbedding>
                                       const ProjectComparator &tie_breaking) {
     auto pp = projects[p];
     if (pp.cost() > total_budget)
-        return nullopt;
+        return {};
 
     vector<ProjectEmbedding> winners;
     sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
@@ -67,7 +67,7 @@ optional<int> optimist_add_for_greedy(int total_budget, vector<ProjectEmbedding>
                     new_approvers_size += 1;
                 }
                 if (new_approvers_size > num_voters)
-                    return nullopt;
+                    return {};
                 else
                     return new_approvers_size - pp.approvers().size();
             }
@@ -77,7 +77,7 @@ optional<int> optimist_add_for_greedy(int total_budget, vector<ProjectEmbedding>
         if (total_budget <= 0)
             break;
     }
-    return nullopt; // only if project p is not feasible (won't happen)
+    return {}; // only if project p is not feasible (won't happen)
 }
 
 optional<int> pessimist_add_for_greedy(int total_budget, vector<ProjectEmbedding> projects, int p,
