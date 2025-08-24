@@ -28,7 +28,6 @@ class ProjectComparator:
     ByCostDesc: ProjectComparator
     ByNameAsc: ProjectComparator
     ByNameDesc: ProjectComparator
-    ByVotesAsc: ProjectComparator
     ByVotesDesc: ProjectComparator
     ByCostAscThenVotesDesc: ProjectComparator
     ByCostDescThenVotesDesc: ProjectComparator

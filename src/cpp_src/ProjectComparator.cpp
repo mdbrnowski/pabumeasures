@@ -50,8 +50,6 @@ const ProjectComparator ProjectComparator::ByNameAsc{
     {}}; // Should be emptły <- Lexicographic sort is always the last step of comparison
 const ProjectComparator ProjectComparator::ByNameDesc{ProjectComparator::Comparator::LEXICOGRAPHIC,
                                                       ProjectComparator::Ordering::DESCENDING};
-const ProjectComparator ProjectComparator::ByVotesAsc{ProjectComparator::Comparator::VOTES,
-                                                      ProjectComparator::Ordering::ASCENDING};
 const ProjectComparator ProjectComparator::ByVotesDesc{ProjectComparator::Comparator::VOTES,
                                                        ProjectComparator::Ordering::DESCENDING};
 const ProjectComparator ProjectComparator::ByCostAscThenVotesDesc{

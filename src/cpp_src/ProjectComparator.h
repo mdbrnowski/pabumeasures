@@ -19,7 +19,6 @@ class ProjectComparator {
     static const ProjectComparator ByCostDesc;
     static const ProjectComparator ByNameAsc;
     static const ProjectComparator ByNameDesc;
-    static const ProjectComparator ByVotesAsc;
     static const ProjectComparator ByVotesDesc;
     static const ProjectComparator ByCostAscThenVotesDesc;
     static const ProjectComparator ByCostDescThenVotesDesc;

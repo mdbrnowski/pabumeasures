@@ -30,7 +30,6 @@ test_cases = [
         ProjectComparator(Comparator.LEXICOGRAPHIC, Ordering.DESCENDING),
         "ByNameDesc_explicit",
     ),
-    (lambda p: (len(p.approvers), p.name), ProjectComparator.ByVotesAsc, "ByVotesAsc"),
     (
         lambda p: (len(p.approvers), p.name),
         ProjectComparator(Comparator.VOTES, Ordering.ASCENDING),

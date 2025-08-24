@@ -155,7 +155,6 @@ PYBIND11_MODULE(_core, m) {
         .def_property_readonly_static("ByCostDesc", [](py::object) { return ProjectComparator::ByCostDesc; })
         .def_property_readonly_static("ByNameAsc", [](py::object) { return ProjectComparator::ByNameAsc; })
         .def_property_readonly_static("ByNameDesc", [](py::object) { return ProjectComparator::ByNameDesc; })
-        .def_property_readonly_static("ByVotesAsc", [](py::object) { return ProjectComparator::ByVotesAsc; })
         .def_property_readonly_static("ByVotesDesc", [](py::object) { return ProjectComparator::ByVotesDesc; })
         .def_property_readonly_static("ByCostAscThenVotesDesc",
                                       [](py::object) { return ProjectComparator::ByCostAscThenVotesDesc; })
