@@ -10,7 +10,7 @@ from utils import get_random_approval_profile, get_random_instance
 import pabumeasures
 
 test_files = glob.glob("./data/*.pb")
-NUMBER_OF_TIMES = 100
+NUMBER_OF_TIMES = 500
 
 
 @pytest.mark.parametrize("file", test_files)
