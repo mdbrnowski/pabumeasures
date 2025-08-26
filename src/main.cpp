@@ -167,20 +167,31 @@ vector<ProjectEmbedding> phragmen(int total_budget, vector<ProjectEmbedding> pro
     vector<long double> load(n_voters, 0);
     while (!projects.empty()) {
         long double min_max_load = numeric_limits<long double>::max();
-        auto winner = projects[0];
+        vector<ProjectEmbedding> round_winners;
         for (const auto project : projects) {
             long double max_load = project.cost();
-            for (const auto &approver : project.approvers())
-                max_load += load[approver];
-            max_load /= project.approvers().size();
+            if (project.approvers().empty()) {
+                max_load = numeric_limits<long double>::max();
+            } else {
+                for (const auto &approver : project.approvers())
+                    max_load += load[approver];
+                max_load /= project.approvers().size();
+            }
 
-            if ((max_load == min_max_load && tie_breaking(project, winner)) || max_load < min_max_load) {
+            if (max_load < min_max_load) {
+                round_winners.clear();
                 min_max_load = max_load;
-                winner = project;
+            }
+            if (max_load == min_max_load) {
+                round_winners.push_back(project);
             }
         }
-        if (winner.cost() > total_budget)
+        if (any_of(round_winners.begin(), round_winners.end(),
+                   [total_budget](const ProjectEmbedding &winner) { return winner.cost() > total_budget; })) {
             break;
+        }
+
+        auto winner = *ranges::min_element(round_winners, tie_breaking);
 
         for (const auto &approver : winner.approvers()) {
             load[approver] = min_max_load;
