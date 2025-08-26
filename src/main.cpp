@@ -10,6 +10,14 @@ using namespace std;
 using namespace pybind11::literals;
 namespace py = pybind11;
 
+constexpr long double EPS = 1e-10;
+
+bool is_less_than(long double a, long double b) { return (b - a) > EPS; }
+
+bool is_greater_than(long double a, long double b) { return (a - b) > EPS; }
+
+bool is_equal(long double a, long double b) { return abs(a - b) <= EPS; }
+
 long long ceil_div(long long a, long long b) { return (a + b - 1) / b; }
 
 int get_number_of_voters(const vector<ProjectEmbedding> &projects) {
@@ -178,11 +186,11 @@ vector<ProjectEmbedding> phragmen(int total_budget, vector<ProjectEmbedding> pro
                 max_load /= project.approvers().size();
             }
 
-            if (max_load < min_max_load) {
+            if (is_less_than(max_load, min_max_load)) {
                 round_winners.clear();
                 min_max_load = max_load;
             }
-            if (max_load == min_max_load) {
+            if (is_equal(max_load, min_max_load)) {
                 round_winners.push_back(project);
             }
         }
