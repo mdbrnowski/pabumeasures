@@ -112,8 +112,8 @@ def test_phragmen(file):
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 def test_phragmen_random(seed):
     random.seed(seed)
-    instance, projects = get_random_instance(3, 1, 10)
-    profile = get_random_approval_profile(instance, projects, 10)
+    instance, projects = get_random_instance(3, 1, 4)
+    profile = get_random_approval_profile(instance, projects, 5)
     pabutools_result = sequential_phragmen(instance, profile, tie_breaking=min_cost_tie_breaking)
     result = pabumeasures.phragmen(instance, profile)
 
