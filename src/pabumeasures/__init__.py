@@ -1,4 +1,4 @@
-from pabumeasures._core import Comparator, Ordering, ProjectComparator
+from pabumeasures._core import Comparator, Election, Ordering, ProjectComparator
 from pabumeasures.main import (
     Measure,
     greedy,
@@ -14,6 +14,7 @@ from pabumeasures.main import (
 )
 
 __all__ = [
+    "Election",
     "Measure",
     "Comparator",
     "Ordering",

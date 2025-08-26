@@ -1,3 +1,4 @@
+#include "cpp_src/Election.h"
 #include "cpp_src/ProjectComparator.h"
 #include "cpp_src/ProjectEmbedding.h"
 #include <pybind11/native_enum.h>
@@ -20,17 +21,9 @@ bool is_equal(long double a, long double b) { return abs(a - b) <= EPS; }
 
 long long ceil_div(long long a, long long b) { return (a + b - 1) / b; }
 
-int get_number_of_voters(const vector<ProjectEmbedding> &projects) {
-    int n_voters = 0;
-    for (const auto &project : projects) {
-        if (!project.approvers().empty())
-            n_voters = max(n_voters, *ranges::max_element(project.approvers()) + 1);
-    }
-    return n_voters;
-}
-
-vector<ProjectEmbedding> greedy(int total_budget, vector<ProjectEmbedding> projects,
-                                const ProjectComparator &tie_breaking) {
+vector<ProjectEmbedding> greedy(const Election &election, const ProjectComparator &tie_breaking) {
+    int total_budget = election.budget();
+    auto projects = election.projects();
     vector<ProjectEmbedding> winners;
     sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
@@ -49,8 +42,10 @@ vector<ProjectEmbedding> greedy(int total_budget, vector<ProjectEmbedding> proje
     return winners;
 }
 
-optional<int> optimist_add_for_greedy(int total_budget, vector<ProjectEmbedding> projects, int p,
-                                      const ProjectComparator &tie_breaking) {
+optional<int> optimist_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    int total_budget = election.budget();
+    int num_voters = election.numVoters();
+    auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)
         return {};
@@ -68,7 +63,6 @@ optional<int> optimist_add_for_greedy(int total_budget, vector<ProjectEmbedding>
                 return 0;
             }
             if (pp.cost() <= total_budget && pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
-                int num_voters = get_number_of_voters(projects);
                 int new_approvers_size = project.approvers().size();
                 vector<int> new_approvers(new_approvers_size);
                 iota(new_approvers.begin(), new_approvers.end(), 0);
@@ -90,13 +84,13 @@ optional<int> optimist_add_for_greedy(int total_budget, vector<ProjectEmbedding>
     return {}; // only if project p is not feasible (won't happen)
 }
 
-optional<int> pessimist_add_for_greedy(int total_budget, vector<ProjectEmbedding> projects, int p,
-                                       const ProjectComparator &tie_breaking) {
-    return optimist_add_for_greedy(total_budget, projects, p, tie_breaking);
+optional<int> pessimist_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    return optimist_add_for_greedy(election, p, tie_breaking);
 }
 
-vector<ProjectEmbedding> greedy_over_cost(int total_budget, vector<ProjectEmbedding> projects,
-                                          const ProjectComparator &tie_breaking) {
+vector<ProjectEmbedding> greedy_over_cost(const Election &election, const ProjectComparator &tie_breaking) {
+    int total_budget = election.budget();
+    auto projects = election.projects();
     vector<ProjectEmbedding> winners;
     sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
@@ -117,8 +111,11 @@ vector<ProjectEmbedding> greedy_over_cost(int total_budget, vector<ProjectEmbedd
     return winners;
 }
 
-optional<int> optimist_add_for_greedy_over_cost(int total_budget, vector<ProjectEmbedding> projects, int p,
+optional<int> optimist_add_for_greedy_over_cost(const Election &election, int p,
                                                 const ProjectComparator &tie_breaking) {
+    int total_budget = election.budget();
+    int num_voters = election.numVoters();
+    auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)
         return {};
@@ -138,7 +135,6 @@ optional<int> optimist_add_for_greedy_over_cost(int total_budget, vector<Project
                 return 0;
             }
             if (pp.cost() <= total_budget && pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
-                int num_voters = get_number_of_voters(projects);
                 int new_approvers_size =
                     ceil_div(static_cast<long long>(project.approvers().size()) * pp.cost(), project.cost());
                 vector<int> new_approvers(new_approvers_size);
@@ -163,15 +159,17 @@ optional<int> optimist_add_for_greedy_over_cost(int total_budget, vector<Project
     return {}; // only if project p is not feasible (won't happen)
 }
 
-optional<int> pessimist_add_for_greedy_over_cost(int total_budget, vector<ProjectEmbedding> projects, int p,
+optional<int> pessimist_add_for_greedy_over_cost(const Election &election, int p,
                                                  const ProjectComparator &tie_breaking) {
-    return optimist_add_for_greedy_over_cost(total_budget, projects, p, tie_breaking);
+    return optimist_add_for_greedy_over_cost(election, p, tie_breaking);
 }
 
-vector<ProjectEmbedding> phragmen(int total_budget, vector<ProjectEmbedding> projects,
+vector<ProjectEmbedding> phragmen(const Election &election,
                                   const ProjectComparator &tie_breaking = ProjectComparator::ByCostAsc) {
+    int total_budget = election.budget();
+    int n_voters = election.numVoters();
+    auto projects = election.projects();
     vector<ProjectEmbedding> winners;
-    int n_voters = get_number_of_voters(projects);
     vector<long double> load(n_voters, 0);
     while (!projects.empty()) {
         long double min_max_load = numeric_limits<long double>::max();
@@ -200,39 +198,6 @@ vector<ProjectEmbedding> phragmen(int total_budget, vector<ProjectEmbedding> pro
         }
 
         auto winner = *ranges::min_element(round_winners, tie_breaking);
-
-        for (const auto &approver : winner.approvers()) {
-            load[approver] = min_max_load;
-        }
-
-        winners.push_back(winner);
-        total_budget -= winner.cost();
-        projects.erase(remove(projects.begin(), projects.end(), winner), projects.end());
-    }
-    return winners;
-}
-
-vector<ProjectEmbedding> phragmen(int total_budget, vector<ProjectEmbedding> projects,
-                                  const ProjectComparator &tie_breaking = ProjectComparator::ByCostAsc) {
-    vector<ProjectEmbedding> winners;
-    int n_voters = get_number_of_voters(projects);
-    vector<long double> load(n_voters, 0);
-    while (!projects.empty()) {
-        long double min_max_load = numeric_limits<long double>::max();
-        auto winner = projects[0];
-        for (const auto project : projects) {
-            long double max_load = project.cost();
-            for (const auto &approver : project.approvers())
-                max_load += load[approver];
-            max_load /= project.approvers().size();
-
-            if ((max_load == min_max_load && tie_breaking(project, winner)) || max_load < min_max_load) {
-                min_max_load = max_load;
-                winner = project;
-            }
-        }
-        if (winner.cost() > total_budget)
-            break;
 
         for (const auto &approver : winner.approvers()) {
             load[approver] = min_max_load;
@@ -282,26 +247,27 @@ PYBIND11_MODULE(_core, m) {
         .def_property_readonly_static("ByCostDescThenVotesDesc",
                                       [](py::object) { return ProjectComparator::ByCostDescThenVotesDesc; });
 
-    m.def("greedy", &greedy, "GreedyAV", "total_budget"_a, "projects"_a, "tie_breaking"_a);
+    py::class_<Election>(m, "Election")
+        .def(py::init<int, int, std::vector<ProjectEmbedding>>(), "budget"_a, "numVoters"_a, "projects"_a)
+        .def_property_readonly("budget", &Election::budget)
+        .def_property_readonly("num_voters", &Election::numVoters)
+        .def_property_readonly("projects", &Election::projects);
 
-    m.def("optimist_add_for_greedy", &optimist_add_for_greedy, "optimist-add measure for GreedyAV", "total_budget"_a,
-          "projects"_a, "p"_a, "tie_breaking"_a);
+    m.def("greedy", &greedy, "GreedyAV", "election"_a, "tie_breaking"_a);
 
-    m.def("pessimist_add_for_greedy", &pessimist_add_for_greedy, "pessimist-add measure for GreedyAV", "total_budget"_a,
-          "projects"_a, "p"_a, "tie_breaking"_a);
+    m.def("optimist_add_for_greedy", &optimist_add_for_greedy, "optimist-add measure for GreedyAV", "election"_a, "p"_a,
+          "tie_breaking"_a);
 
-    m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost", "total_budget"_a, "projects"_a, "tie_breaking"_a);
+    m.def("pessimist_add_for_greedy", &pessimist_add_for_greedy, "pessimist-add measure for GreedyAV", "election"_a,
+          "p"_a, "tie_breaking"_a);
+
+    m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost", "election"_a, "tie_breaking"_a);
 
     m.def("optimist_add_for_greedy_over_cost", &optimist_add_for_greedy_over_cost,
-          "optimist-add measure for GreedyAV/Cost", "total_budget"_a, "projects"_a, "p"_a, "tie_breaking"_a);
+          "optimist-add measure for GreedyAV/Cost", "election"_a, "p"_a, "tie_breaking"_a);
 
     m.def("pessimist_add_for_greedy_over_cost", &pessimist_add_for_greedy_over_cost,
-<<<<<<< HEAD
-          "pessimist-add measure for GreedyAV/Cost", "total_budget"_a, "projects"_a, "p"_a, "tie_breaking"_a);
-=======
-          "pessimist-add measure for GreedyAV/Cost", "num_projects"_a, "num_voters"_a, "total_budget"_a, "cost"_a,
-          "approvers"_a, "p"_a);
->>>>>>> 74a096c (Implement the Phragmén rule)
+          "pessimist-add measure for GreedyAV/Cost", "election"_a, "p"_a, "tie_breaking"_a);
 
-    m.def("phragmen", &phragmen, "Sequential Phragmén", "total_budget"_a, "projects"_a, "tie_breaking"_a);
+    m.def("phragmen", &phragmen, "Sequential Phragmén", "election"_a, "tie_breaking"_a);
 }

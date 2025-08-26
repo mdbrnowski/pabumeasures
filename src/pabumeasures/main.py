@@ -15,9 +15,7 @@ class Measure(Enum):
     ADD_SINGLETON = auto()
 
 
-def _translate_input_format(
-    instance: Instance, profile: Profile
-) -> tuple[int, dict[str, Project], list[_core.ProjectEmbedding]]:
+def _translate_input_format(instance: Instance, profile: Profile) -> tuple[_core.Election, dict[str, Project]]:
     if not isinstance(instance, Instance):
         raise TypeError("Instance must be of type Instance")
     if not isinstance(profile, ApprovalProfile):
@@ -44,29 +42,29 @@ def _translate_input_format(
         _core.ProjectEmbedding(int(project.cost), project.name, approvers[project.name]) for project in projects
     ]  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
     name_to_project: dict[str, Project] = {project.name: project for project in projects}
-    return total_budget, name_to_project, project_embeddings
+    return _core.Election(total_budget, len(profile), project_embeddings), name_to_project
 
 
 def greedy(
     instance: Instance, profile: Profile, tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc
 ) -> BudgetAllocation:
-    total_budget, name_to_project, project_embeddings = _translate_input_format(instance, profile)
-    result = _core.greedy(total_budget, project_embeddings, tie_breaking)
+    election, name_to_project = _translate_input_format(instance, profile)
+    result = _core.greedy(election, tie_breaking)
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def greedy_measure(
     instance: Instance, profile: Profile, project: Project, measure: Measure, tie_breaking=ProjectComparator.ByCostAsc
 ) -> int | None:
-    total_budget, _, project_embeddings = _translate_input_format(instance, profile)
+    election, _ = _translate_input_format(instance, profile)
     p = sorted(instance).index(project)
     match measure:
         case Measure.COST_REDUCTION:
             raise NotImplementedError()
         case Measure.ADD_APPROVAL_OPTIMIST:
-            return _core.optimist_add_for_greedy(total_budget, project_embeddings, p, tie_breaking)
+            return _core.optimist_add_for_greedy(election, p, tie_breaking)
         case Measure.ADD_APPROVAL_PESSIMIST:
-            return _core.pessimist_add_for_greedy(total_budget, project_embeddings, p, tie_breaking)
+            return _core.pessimist_add_for_greedy(election, p, tie_breaking)
         case Measure.ADD_SINGLETON:
             raise NotImplementedError()
 
@@ -74,23 +72,23 @@ def greedy_measure(
 def greedy_over_cost(
     instance: Instance, profile: Profile, tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc
 ) -> BudgetAllocation:
-    total_budget, name_to_project, project_embeddings = _translate_input_format(instance, profile)
-    result = _core.greedy_over_cost(total_budget, project_embeddings, tie_breaking)
+    election, name_to_project = _translate_input_format(instance, profile)
+    result = _core.greedy_over_cost(election, tie_breaking)
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def greedy_over_cost_measure(
     instance: Instance, profile: Profile, project: Project, measure: Measure, tie_breaking=ProjectComparator.ByCostAsc
 ) -> int | None:
-    total_budget, _, project_embeddings = _translate_input_format(instance, profile)
+    election, _ = _translate_input_format(instance, profile)
     p = sorted(instance).index(project)
     match measure:
         case Measure.COST_REDUCTION:
             raise NotImplementedError()
         case Measure.ADD_APPROVAL_OPTIMIST:
-            return _core.optimist_add_for_greedy_over_cost(total_budget, project_embeddings, p, tie_breaking)
+            return _core.optimist_add_for_greedy_over_cost(election, p, tie_breaking)
         case Measure.ADD_APPROVAL_PESSIMIST:
-            return _core.pessimist_add_for_greedy_over_cost(total_budget, project_embeddings, p, tie_breaking)
+            return _core.pessimist_add_for_greedy_over_cost(election, p, tie_breaking)
         case Measure.ADD_SINGLETON:
             raise NotImplementedError()
 
@@ -114,8 +112,8 @@ def mes_cost_measure(instance: Instance, profile: Profile, project: Project, mea
 def phragmen(
     instance: Instance, profile: Profile, tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc
 ) -> BudgetAllocation:
-    total_budget, name_to_project, project_embeddings = _translate_input_format(instance, profile)
-    result = _core.phragmen(total_budget, project_embeddings, tie_breaking)
+    election, name_to_project = _translate_input_format(instance, profile)
+    result = _core.phragmen(election, tie_breaking)
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
