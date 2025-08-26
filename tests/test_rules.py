@@ -4,10 +4,14 @@ import random
 import pytest
 from pabutools.election import ApprovalProfile, Cardinality_Sat, Cost_Sat, parse_pabulib
 from pabutools.rules import greedy_utilitarian_welfare, sequential_phragmen
-from pabutools.tiebreaking import max_cost_tie_breaking, min_cost_tie_breaking
+from pabutools.tiebreaking import TieBreakingRule
 from utils import get_random_approval_profile, get_random_instance
 
 import pabumeasures
+
+# redefined pabutools tie-breaking rules to include project name as a secondary criterion
+min_cost_tie_breaking = TieBreakingRule(lambda inst, prof, proj: (proj.cost, proj.name))
+max_cost_tie_breaking = TieBreakingRule(lambda inst, prof, proj: (-proj.cost, proj.name))
 
 test_files = glob.glob("./data/*.pb")
 NUMBER_OF_TIMES = 500
