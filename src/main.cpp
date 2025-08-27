@@ -106,7 +106,7 @@ vector<ProjectEmbedding> greedy_over_cost(int total_budget, vector<ProjectEmbedd
         }
         return cross_term_a_approvals_b_cost > cross_term_b_approvals_a_cost;
     });
-    for (const auto project : projects) {
+    for (const auto &project : projects) {
         if (project.cost() <= total_budget) {
             winners.push_back(project);
             total_budget -= project.cost();
@@ -176,7 +176,7 @@ vector<ProjectEmbedding> phragmen(int total_budget, vector<ProjectEmbedding> pro
     while (!projects.empty()) {
         long double min_max_load = numeric_limits<long double>::max();
         vector<ProjectEmbedding> round_winners;
-        for (const auto project : projects) {
+        for (const auto &project : projects) {
             long double max_load = project.cost();
             if (project.approvers().empty()) {
                 max_load = numeric_limits<long double>::max();
