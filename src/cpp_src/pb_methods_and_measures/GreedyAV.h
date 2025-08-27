@@ -1,0 +1,12 @@
+#include "utils/Election.h"
+#include "utils/ProjectComparator.h"
+#include "utils/ProjectEmbedding.h"
+
+#include <optional>
+#include <vector>
+
+std::vector<ProjectEmbedding> greedy(const Election &election, const ProjectComparator &tie_breaking);
+
+std::optional<int> optimist_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking);
+
+std::optional<int> pessimist_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking);
