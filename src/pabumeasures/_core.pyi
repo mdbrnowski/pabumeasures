@@ -47,6 +47,9 @@ def greedy(
 def greedy_over_cost(
     total_budget: int, projects: list[ProjectEmbedding], tie_breaking: ProjectComparator
 ) -> list[ProjectEmbedding]: ...
+def phragmen(
+    total_budget: int, projects: list[ProjectEmbedding], tie_breaking: ProjectComparator
+) -> list[ProjectEmbedding]: ...
 
 # ========== optimist-add ==========
 
