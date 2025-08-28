@@ -42,7 +42,7 @@ def _translate_input_format(instance: Instance, profile: Profile) -> tuple[_core
         _core.ProjectEmbedding(int(project.cost), project.name, approvers[project.name]) for project in projects
     ]  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
     name_to_project: dict[str, Project] = {project.name: project for project in projects}
-    return _core.Election(total_budget, len(profile), project_embeddings), name_to_project
+    return _core.Election(total_budget, len(frozen_ballots), project_embeddings), name_to_project
 
 
 def greedy(
