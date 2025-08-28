@@ -49,7 +49,7 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
             if (project == pp) {
                 return 0;
             }
-            if (pp.cost() <= total_budget && pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
+            if (pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
                 int new_approvers_size = project.approvers().size();
                 std::vector<int> new_approvers(new_approvers_size);
                 std::iota(new_approvers.begin(), new_approvers.end(), 0);
@@ -65,8 +65,6 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
             winners.push_back(project);
             total_budget -= project.cost();
         }
-        if (total_budget <= 0)
-            break;
     }
     return {}; // LCOV_EXCL_LINE (every project should be feasible)
 }
