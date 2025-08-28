@@ -38,7 +38,7 @@ std::strong_ordering ProjectComparator::compare(const ProjectEmbedding &a, const
     case Comparator::LEXICOGRAPHIC:
         return applyOrder(a.name_ <=> b.name_, order);
     }
-    return std::strong_ordering::equal;
+    return std::strong_ordering::equal; // LCOV_EXCL_LINE (project names should be different)
 }
 
 // Static predefined comparator definitions:

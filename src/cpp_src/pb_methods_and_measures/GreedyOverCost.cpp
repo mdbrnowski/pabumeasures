@@ -40,7 +40,7 @@ std::optional<int> optimist_add_for_greedy_over_cost(const Election &election, i
     auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)
-        return {};
+        return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
     std::vector<ProjectEmbedding> winners;
     std::sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
@@ -78,7 +78,7 @@ std::optional<int> optimist_add_for_greedy_over_cost(const Election &election, i
         if (total_budget <= 0)
             break;
     }
-    return {}; // only if project p is not feasible (won't happen)
+    return {}; // LCOV_EXCL_LINE (every project should be feasible)
 }
 
 std::optional<int> pessimist_add_for_greedy_over_cost(const Election &election, int p,
