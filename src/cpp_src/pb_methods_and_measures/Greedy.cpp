@@ -1,4 +1,4 @@
-#include "GreedyAV.h"
+#include "Greedy.h"
 #include "utils/Election.h"
 #include "utils/ProjectComparator.h"
 #include "utils/ProjectEmbedding.h"

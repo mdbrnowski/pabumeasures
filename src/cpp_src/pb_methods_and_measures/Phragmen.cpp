@@ -12,7 +12,7 @@ bool is_less_than(long double a, long double b) { return (b - a) > EPS; }
 
 bool is_greater_than(long double a, long double b) { return (a - b) > EPS; }
 
-bool is_equal(long double a, long double b) { return abs(a - b) <= EPS; }
+bool is_equal(long double a, long double b) { return std::abs(a - b) <= EPS; }
 
 std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectComparator &tie_breaking) {
     // todo: try with max_load recalculation skipping

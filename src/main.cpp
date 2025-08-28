@@ -1,4 +1,4 @@
-#include "cpp_src/pb_methods_and_measures/GreedyAV.h"
+#include "cpp_src/pb_methods_and_measures/Greedy.h"
 #include "cpp_src/pb_methods_and_measures/GreedyOverCost.h"
 #include "cpp_src/pb_methods_and_measures/Phragmen.h"
 #include "cpp_src/utils/Election.h"
@@ -50,7 +50,7 @@ PYBIND11_MODULE(_core, m) {
                                       [](py::object) { return ProjectComparator::ByCostDescThenVotesDesc; });
 
     py::class_<Election>(m, "Election")
-        .def(py::init<int, int, std::vector<ProjectEmbedding>>(), "budget"_a, "numVoters"_a, "projects"_a)
+        .def(py::init<int, int, std::vector<ProjectEmbedding>>(), "budget"_a, "num_voters"_a, "projects"_a)
         .def_property_readonly("budget", &Election::budget)
         .def_property_readonly("num_voters", &Election::numVoters)
         .def_property_readonly("projects", &Election::projects);

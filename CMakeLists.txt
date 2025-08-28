@@ -8,7 +8,7 @@ set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 CONFIG REQUIRED)
 
 pybind11_add_module(_core MODULE 
-    src/cpp_src/pb_methods_and_measures/GreedyAV.cpp
+    src/cpp_src/pb_methods_and_measures/Greedy.cpp
     src/cpp_src/pb_methods_and_measures/GreedyOverCost.cpp
     src/cpp_src/pb_methods_and_measures/Phragmen.cpp
     src/cpp_src/utils/ProjectComparator.cpp
