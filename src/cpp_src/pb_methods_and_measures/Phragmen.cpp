@@ -1,18 +1,13 @@
 #include "Phragmen.h"
 
 #include "utils/Election.h"
+#include "utils/Math.h"
 #include "utils/ProjectComparator.h"
 #include "utils/ProjectEmbedding.h"
 
 #include <algorithm>
 #include <limits>
 #include <vector>
-
-bool is_less_than(long double a, long double b) { return (b - a) > EPS; }
-
-bool is_greater_than(long double a, long double b) { return (a - b) > EPS; }
-
-bool is_equal(long double a, long double b) { return std::abs(a - b) <= EPS; }
 
 std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectComparator &tie_breaking) {
     // todo: try with max_load recalculation skipping
@@ -34,11 +29,11 @@ std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectCo
                 max_load /= project.approvers().size();
             }
 
-            if (is_less_than(max_load, min_max_load)) {
+            if (pbmath::is_less_than(max_load, min_max_load)) {
                 round_winners.clear();
                 min_max_load = max_load;
             }
-            if (is_equal(max_load, min_max_load)) {
+            if (pbmath::is_equal(max_load, min_max_load)) {
                 round_winners.push_back(project);
             }
         }
