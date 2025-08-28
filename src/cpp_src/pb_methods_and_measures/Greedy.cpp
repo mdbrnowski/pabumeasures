@@ -35,7 +35,7 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
     auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)
-        return {};
+        return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
     std::vector<ProjectEmbedding> winners;
     std::sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
@@ -49,7 +49,7 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
             if (project == pp) {
                 return 0;
             }
-            if (pp.cost() <= total_budget && pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
+            if (pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
                 int new_approvers_size = project.approvers().size();
                 std::vector<int> new_approvers(new_approvers_size);
                 std::iota(new_approvers.begin(), new_approvers.end(), 0);
@@ -65,10 +65,8 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
             winners.push_back(project);
             total_budget -= project.cost();
         }
-        if (total_budget <= 0)
-            break;
     }
-    return {}; // only if project p is not feasible (won't happen)
+    return {}; // LCOV_EXCL_LINE (every project should be feasible)
 }
 
 std::optional<int> pessimist_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {

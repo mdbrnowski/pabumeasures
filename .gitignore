@@ -20,3 +20,7 @@ uv.lock
 CMakeCache.txt
 CMakeFiles/
 .clangd
+
+# Code coverage
+*.info
+cpp_coverage_html/
