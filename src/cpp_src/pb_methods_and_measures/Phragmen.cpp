@@ -5,8 +5,8 @@
 #include "utils/ProjectEmbedding.h"
 
 #include <algorithm>
-#include <vector>
 #include <limits>
+#include <vector>
 
 bool is_less_than(long double a, long double b) { return (b - a) > EPS; }
 
