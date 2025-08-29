@@ -20,16 +20,18 @@ def test_greedy_measure(seed, measure):
     if project in allocation:
         assert result == 0
     else:
-        if result is None:
-            return
-        assert result >= 1
         non_approvers = [ballot for ballot in profile if project not in ballot]
-        assert result <= len(non_approvers)
-        for na in non_approvers[:result]:
-            na.add(project)
-        assert project in pabumeasures.greedy(instance, profile)
-        non_approvers[0].remove(project)
-        assert project not in pabumeasures.greedy(instance, profile)
+        if result is None:
+            for na in non_approvers:
+                na.add(project)
+            assert project not in pabumeasures.greedy(instance, profile)
+        else:
+            assert 1 <= result <= len(non_approvers)
+            for na in non_approvers[:result]:
+                na.add(project)
+            assert project in pabumeasures.greedy(instance, profile)
+            non_approvers[0].remove(project)
+            assert project not in pabumeasures.greedy(instance, profile)
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
@@ -43,13 +45,15 @@ def test_greedy_over_cost_measure(seed, measure):
     if project in allocation:
         assert result == 0
     else:
-        if result is None:
-            return
-        assert result >= 1
         non_approvers = [ballot for ballot in profile if project not in ballot]
-        assert result <= len(non_approvers)
-        for na in non_approvers[:result]:
-            na.add(project)
-        assert project in pabumeasures.greedy_over_cost(instance, profile)
-        non_approvers[0].remove(project)
-        assert project not in pabumeasures.greedy_over_cost(instance, profile)
+        if result is None:
+            for na in non_approvers:
+                na.add(project)
+            assert project not in pabumeasures.greedy_over_cost(instance, profile)
+        else:
+            assert 1 <= result <= len(non_approvers)
+            for na in non_approvers[:result]:
+                na.add(project)
+            assert project in pabumeasures.greedy_over_cost(instance, profile)
+            non_approvers[0].remove(project)
+            assert project not in pabumeasures.greedy_over_cost(instance, profile)
