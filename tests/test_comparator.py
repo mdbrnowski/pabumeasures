@@ -6,7 +6,9 @@ import pytest
 from pabumeasures._core import Comparator, Ordering, ProjectComparator, ProjectEmbedding
 
 
-def random_project(min_cost: int, max_cost: int, name_length: int = 5, max_approvers: int = 3):
+def random_project_embedding(
+    min_cost: int, max_cost: int, name_length: int = 5, max_approvers: int = 3
+) -> ProjectEmbedding:
     cost = random.randint(min_cost, max_cost)
     name = "".join(random.choices(string.ascii_letters, k=name_length))
     approvers = random.sample(range(max_approvers), random.randint(0, max_approvers))
@@ -14,7 +16,7 @@ def random_project(min_cost: int, max_cost: int, name_length: int = 5, max_appro
 
 
 random.seed(42)
-projects = [random_project(1, 3) for _ in range(200)]
+projects = [random_project_embedding(1, 3) for _ in range(200)]
 
 test_cases = [
     (lambda p: (p.cost, p.name), ProjectComparator.ByCostAsc, "ByCostAsc"),
