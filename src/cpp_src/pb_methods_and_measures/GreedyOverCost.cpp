@@ -1,5 +1,6 @@
 #include "GreedyOverCost.h"
 #include "utils/Election.h"
+#include "utils/Math.h"
 #include "utils/ProjectComparator.h"
 #include "utils/ProjectEmbedding.h"
 
@@ -7,8 +8,6 @@
 #include <numeric>
 #include <optional>
 #include <vector>
-
-long long ceil_div(long long a, long long b) { return (a + b - 1) / b; }
 
 std::vector<ProjectEmbedding> greedy_over_cost(const Election &election, const ProjectComparator &tie_breaking) {
     int total_budget = election.budget();
@@ -58,7 +57,7 @@ std::optional<int> optimist_add_for_greedy_over_cost(const Election &election, i
             }
             if (pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
                 int new_approvers_size =
-                    ceil_div(static_cast<long long>(project.approvers().size()) * pp.cost(), project.cost());
+                    pbmath::ceil_div(static_cast<long long>(project.approvers().size()) * pp.cost(), project.cost());
                 std::vector<int> new_approvers(new_approvers_size);
                 std::iota(new_approvers.begin(), new_approvers.end(), 0);
                 auto new_pp = ProjectEmbedding(pp.cost(), pp.name(), new_approvers);
