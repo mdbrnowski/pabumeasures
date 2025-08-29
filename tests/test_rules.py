@@ -5,7 +5,7 @@ import pytest
 from pabutools.election import ApprovalProfile, Cardinality_Sat, Cost_Sat, parse_pabulib
 from pabutools.rules import greedy_utilitarian_welfare, sequential_phragmen
 from pabutools.tiebreaking import TieBreakingRule
-from utils import get_random_approval_profile, get_random_instance
+from utils import get_random_election
 
 import pabumeasures
 
@@ -31,8 +31,7 @@ def test_greedy(file):
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 def test_greedy_random(seed):
     random.seed(seed)
-    instance, projects = get_random_instance(3, 1, 10)
-    profile = get_random_approval_profile(instance, projects, 10)
+    instance, profile = get_random_election()
     pabutools_result = greedy_utilitarian_welfare(
         instance, profile, sat_class=Cost_Sat, tie_breaking=min_cost_tie_breaking
     )
@@ -44,8 +43,7 @@ def test_greedy_random(seed):
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 def test_greedy_random_different_comparator(seed):
     random.seed(seed)
-    instance, projects = get_random_instance(3, 1, 10)
-    profile = get_random_approval_profile(instance, projects, 10)
+    instance, profile = get_random_election()
     pabutools_result = greedy_utilitarian_welfare(
         instance, profile, sat_class=Cost_Sat, tie_breaking=max_cost_tie_breaking
     )
@@ -72,8 +70,7 @@ def test_greedy_over_cost(file):
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 def test_greedy_over_cost_random(seed):
     random.seed(seed)
-    instance, projects = get_random_instance(3, 1, 10)
-    profile = get_random_approval_profile(instance, projects, 10)
+    instance, profile = get_random_election()
     pabutools_result = greedy_utilitarian_welfare(
         instance, profile, sat_class=Cardinality_Sat, tie_breaking=min_cost_tie_breaking
     )
@@ -85,8 +82,7 @@ def test_greedy_over_cost_random(seed):
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 def test_greedy_over_cost_random_different_comparator(seed):
     random.seed(seed)
-    instance, projects = get_random_instance(3, 1, 10)
-    profile = get_random_approval_profile(instance, projects, 10)
+    instance, profile = get_random_election()
     pabutools_result = greedy_utilitarian_welfare(
         instance, profile, sat_class=Cardinality_Sat, tie_breaking=max_cost_tie_breaking
     )
@@ -112,8 +108,7 @@ def test_phragmen(file):
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 def test_phragmen_random(seed):
     random.seed(seed)
-    instance, projects = get_random_instance(3, 1, 4)
-    profile = get_random_approval_profile(instance, projects, 5)
+    instance, profile = get_random_election()
     pabutools_result = sequential_phragmen(instance, profile, tie_breaking=min_cost_tie_breaking)
     result = pabumeasures.phragmen(instance, profile)
 
