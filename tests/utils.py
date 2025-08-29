@@ -7,6 +7,18 @@ from math import ceil
 from pabutools.election import ApprovalBallot, ApprovalProfile, Instance, Project
 
 
+def get_random_election(
+    num_projects: int = 3, min_cost: int = 1, max_cost: int = 4, num_agents: int = 5
+) -> tuple[Instance, ApprovalProfile]:
+    instance, projects = get_random_instance(num_projects, min_cost, max_cost)
+    profile = get_random_approval_profile(instance, projects, num_agents)
+    return instance, profile
+
+
+def get_random_project(instance: Instance) -> Project:
+    return random.choice(sorted(instance))
+
+
 def get_random_instance(num_projects: int, min_cost: int, max_cost: int) -> tuple[Instance, list[Project]]:
     inst = Instance()
     projects = [
