@@ -66,7 +66,7 @@ def greedy_measure(
         case Measure.ADD_APPROVAL_PESSIMIST:
             return _core.pessimist_add_for_greedy(election, p, tie_breaking)
         case Measure.ADD_SINGLETON:
-            raise NotImplementedError()
+            return _core.singleton_add_for_greedy(election, p, tie_breaking)
 
 
 def greedy_over_cost(
