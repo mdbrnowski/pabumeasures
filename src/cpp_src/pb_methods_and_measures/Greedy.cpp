@@ -12,7 +12,7 @@ std::vector<ProjectEmbedding> greedy(const Election &election, const ProjectComp
     int total_budget = election.budget();
     auto projects = election.projects();
     std::vector<ProjectEmbedding> winners;
-    std::sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+    std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
             return tie_breaking(a, b);
         }
@@ -38,7 +38,7 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
         return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
     std::vector<ProjectEmbedding> winners;
-    std::sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+    std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
             return tie_breaking(a, b);
         }
@@ -81,7 +81,7 @@ std::optional<int> singleton_add_for_greedy(const Election &election, int p, con
         return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
     std::vector<ProjectEmbedding> winners;
-    std::sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+    std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
             return tie_breaking(a, b);
         }
