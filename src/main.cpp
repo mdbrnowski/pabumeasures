@@ -81,7 +81,8 @@ PYBIND11_MODULE(_core, m) {
 
     m.def("mes_apr", &mes_apr, "Method of Equal Shares with approval utilities", "election"_a, "tie_breaking"_a);
 
-    m.def("cost_reduction_for_mes_apr", &cost_reduction_for_mes_apr, "Cost reduction measure for Method of Equal Shares with approval utilities", "election"_a, "p"_a,
+    m.def("cost_reduction_for_mes_apr", &cost_reduction_for_mes_apr,
+          "Cost reduction measure for Method of Equal Shares with approval utilities", "election"_a, "p"_a,
           "tie_breaking"_a);
 
     m.def("mes_cost", &mes_cost, "Method of Equal Shares with cost utilities", "election"_a, "tie_breaking"_a);
