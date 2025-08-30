@@ -74,5 +74,8 @@ PYBIND11_MODULE(_core, m) {
     m.def("pessimist_add_for_greedy_over_cost", &pessimist_add_for_greedy_over_cost,
           "pessimist-add measure for GreedyAV/Cost", "election"_a, "p"_a, "tie_breaking"_a);
 
+    m.def("singleton_add_for_greedy_over_cost", &singleton_add_for_greedy_over_cost,
+          "singleton-add measure for GreedyAV/Cost", "election"_a, "p"_a, "tie_breaking"_a);
+
     m.def("phragmen", &phragmen, "Sequential Phragmén", "election"_a, "tie_breaking"_a);
 }
