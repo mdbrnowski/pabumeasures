@@ -77,3 +77,22 @@ def test_greedy_over_cost_measure(seed, measure):
             assert project in pabumeasures.greedy_over_cost(instance, profile)
             non_approvers[0].remove(project)
             assert project not in pabumeasures.greedy_over_cost(instance, profile)
+
+
+@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
+def test_singleton_add_for_greedy_over_cost(seed):
+    random.seed(seed)
+    instance, profile = get_random_election()
+    project = get_random_project(instance)
+    allocation = pabumeasures.greedy_over_cost(instance, profile)
+    result = pabumeasures.greedy_over_cost_measure(instance, profile, project, Measure.ADD_SINGLETON)
+    assert result is not None
+    if project in allocation:
+        assert result == 0
+    else:
+        assert result >= 1
+        for i in range(len(profile), len(profile) + result):
+            profile.append(ApprovalBallot({project}, name=f"SingletonAppBallot {i}"))
+        assert project in pabumeasures.greedy_over_cost(instance, profile)
+        profile[-1].remove(project)
+        assert project not in pabumeasures.greedy_over_cost(instance, profile)

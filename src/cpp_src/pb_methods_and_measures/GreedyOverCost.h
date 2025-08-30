@@ -12,3 +12,6 @@ std::optional<int> optimist_add_for_greedy_over_cost(const Election &election, i
 
 std::optional<int> pessimist_add_for_greedy_over_cost(const Election &election, int p,
                                                       const ProjectComparator &tie_breaking);
+
+std::optional<int> singleton_add_for_greedy_over_cost(const Election &election, int p,
+                                                      const ProjectComparator &tie_breaking);
