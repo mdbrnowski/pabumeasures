@@ -52,7 +52,7 @@ std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectCom
 
             if (pbmath::is_greater_than(previous_max_payment, min_max_payment)) {
                 candidates_to_reinsert.push_back(current_candidate);
-                break; // We already selected the best possible - max_payment_by_cost value can only increase
+                break; // We already selected the best possible - max_payment value can only increase
             }
 
             long double money_behind_project = 0;
