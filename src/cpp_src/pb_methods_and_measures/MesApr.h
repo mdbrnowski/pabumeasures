@@ -6,3 +6,5 @@
 #include <vector>
 
 std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectComparator &tie_breaking);
+
+std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, const ProjectComparator &tie_breaking);
