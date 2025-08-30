@@ -63,6 +63,9 @@ PYBIND11_MODULE(_core, m) {
     m.def("pessimist_add_for_greedy", &pessimist_add_for_greedy, "pessimist-add measure for GreedyAV", "election"_a,
           "p"_a, "tie_breaking"_a);
 
+    m.def("singleton_add_for_greedy", &singleton_add_for_greedy, "singleton-add measure for GreedyAV", "election"_a,
+          "p"_a, "tie_breaking"_a);
+
     m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost", "election"_a, "tie_breaking"_a);
 
     m.def("optimist_add_for_greedy_over_cost", &optimist_add_for_greedy_over_cost,

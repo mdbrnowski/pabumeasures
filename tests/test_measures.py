@@ -1,6 +1,7 @@
 import random
 
 import pytest
+from pabutools.election import ApprovalBallot
 from utils import get_random_election, get_random_project
 
 import pabumeasures
@@ -32,6 +33,25 @@ def test_greedy_measure(seed, measure):
             assert project in pabumeasures.greedy(instance, profile)
             non_approvers[0].remove(project)
             assert project not in pabumeasures.greedy(instance, profile)
+
+
+@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
+def test_singleton_add_for_greedy(seed):
+    random.seed(seed)
+    instance, profile = get_random_election()
+    project = get_random_project(instance)
+    allocation = pabumeasures.greedy(instance, profile)
+    result = pabumeasures.greedy_measure(instance, profile, project, Measure.ADD_SINGLETON)
+    assert result is not None
+    if project in allocation:
+        assert result == 0
+    else:
+        assert result >= 1
+        for i in range(len(profile), len(profile) + result):
+            profile.append(ApprovalBallot({project}, name=f"SingletonAppBallot {i}"))
+        assert project in pabumeasures.greedy(instance, profile)
+        profile[-1].remove(project)
+        assert project not in pabumeasures.greedy(instance, profile)
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
