@@ -77,7 +77,7 @@ PYBIND11_MODULE(_core, m) {
 
     m.def("singleton_add_for_greedy_over_cost", &singleton_add_for_greedy_over_cost,
           "singleton-add measure for GreedyAV/Cost", "election"_a, "p"_a, "tie_breaking"_a);
-  
+
     m.def("mes_apr", &mes_apr, "Method of Equal Shares with approval utilities", "election"_a, "tie_breaking"_a);
 
     m.def("phragmen", &phragmen, "Sequential Phragmén", "election"_a, "tie_breaking"_a);
