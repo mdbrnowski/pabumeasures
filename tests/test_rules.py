@@ -3,7 +3,7 @@ import random
 
 import pytest
 from pabutools.election import ApprovalProfile, Cardinality_Sat, Cost_Sat, parse_pabulib
-from pabutools.rules import greedy_utilitarian_welfare, sequential_phragmen
+from pabutools.rules import greedy_utilitarian_welfare, method_of_equal_shares, sequential_phragmen
 from pabutools.tiebreaking import TieBreakingRule
 from utils import get_random_election
 
@@ -91,6 +91,29 @@ def test_greedy_over_cost_random_different_comparator(seed):
         profile,
         pabumeasures.ProjectComparator(pabumeasures.Comparator.COST, pabumeasures.Ordering.DESCENDING),
     )
+
+    assert sorted(pabutools_result) == sorted(result)
+
+
+@pytest.mark.parametrize("file", test_files)
+def test_mes_apr(file):
+    instance, profile = parse_pabulib(file)
+    pabutools_result = method_of_equal_shares(
+        instance, profile, sat_class=Cardinality_Sat, tie_breaking=min_cost_tie_breaking
+    )
+    result = pabumeasures.mes_apr(instance, profile)
+
+    assert sorted(pabutools_result) == sorted(result)
+
+
+@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
+def test_mes_apr_random(seed):
+    random.seed(seed)
+    instance, profile = get_random_election()
+    pabutools_result = method_of_equal_shares(
+        instance, profile, sat_class=Cardinality_Sat, tie_breaking=min_cost_tie_breaking
+    )
+    result = pabumeasures.mes_apr(instance, profile)
 
     assert sorted(pabutools_result) == sorted(result)
 
