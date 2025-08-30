@@ -119,6 +119,25 @@ def test_mes_apr_random(seed):
 
 
 @pytest.mark.parametrize("file", test_files)
+def test_mes_cost(file):
+    instance, profile = parse_pabulib(file)
+    pabutools_result = method_of_equal_shares(instance, profile, sat_class=Cost_Sat, tie_breaking=min_cost_tie_breaking)
+    result = pabumeasures.mes_cost(instance, profile)
+
+    assert sorted(pabutools_result) == sorted(result)
+
+
+@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
+def test_mes_cost_random(seed):
+    random.seed(seed)
+    instance, profile = get_random_election()
+    pabutools_result = method_of_equal_shares(instance, profile, sat_class=Cost_Sat, tie_breaking=min_cost_tie_breaking)
+    result = pabumeasures.mes_cost(instance, profile)
+
+    assert sorted(pabutools_result) == sorted(result)
+
+
+@pytest.mark.parametrize("file", test_files)
 def test_phragmen(file):
     instance, profile = parse_pabulib(file)
     assert isinstance(profile, ApprovalProfile)  # for type checking

@@ -105,8 +105,12 @@ def mes_apr_measure(instance: Instance, profile: Profile, project: Project, meas
     raise NotImplementedError()
 
 
-def mes_cost(instance: Instance, profile: Profile) -> BudgetAllocation:
-    raise NotImplementedError()
+def mes_cost(
+    instance: Instance, profile: Profile, tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc
+) -> BudgetAllocation:
+    election, name_to_project = _translate_input_format(instance, profile)
+    result = _core.mes_cost(election, tie_breaking)
+    return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
 def mes_cost_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
