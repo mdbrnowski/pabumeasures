@@ -13,7 +13,7 @@ std::vector<ProjectEmbedding> greedy_over_cost(const Election &election, const P
     int total_budget = election.budget();
     auto projects = election.projects();
     std::vector<ProjectEmbedding> winners;
-    std::sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+    std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
                   cross_term_b_approvals_a_cost = static_cast<long long>(b.approvers().size()) * a.cost();
         if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
@@ -42,7 +42,7 @@ std::optional<int> optimist_add_for_greedy_over_cost(const Election &election, i
         return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
     std::vector<ProjectEmbedding> winners;
-    std::sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+    std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
                   cross_term_b_approvals_a_cost = static_cast<long long>(b.approvers().size()) * a.cost();
         if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
@@ -92,7 +92,7 @@ std::optional<int> singleton_add_for_greedy_over_cost(const Election &election, 
         return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
     std::vector<ProjectEmbedding> winners;
-    std::sort(projects.begin(), projects.end(), [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+    std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
                   cross_term_b_approvals_a_cost = static_cast<long long>(b.approvers().size()) * a.cost();
         if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
