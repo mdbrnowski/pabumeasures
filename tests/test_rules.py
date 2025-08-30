@@ -98,7 +98,6 @@ def test_greedy_over_cost_random_different_comparator(seed):
 @pytest.mark.parametrize("file", test_files)
 def test_mes_apr(file):
     instance, profile = parse_pabulib(file)
-    assert isinstance(profile, ApprovalProfile)  # for type checking
     pabutools_result = method_of_equal_shares(
         instance, profile, sat_class=Cardinality_Sat, tie_breaking=min_cost_tie_breaking
     )
