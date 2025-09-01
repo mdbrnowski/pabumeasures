@@ -6,10 +6,18 @@
 #include "utils/ProjectEmbedding.h"
 
 #include <algorithm>
+#include <functional>
 #include <limits>
 #include <queue>
 #include <ranges>
 #include <vector>
+
+struct Candidate {
+    int index;
+    long double max_payment_by_cost;
+
+    bool operator>(const Candidate &other) const { return max_payment_by_cost > other.max_payment_by_cost; }
+};
 
 std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectComparator &tie_breaking) {
     int total_budget = election.budget();
@@ -18,21 +26,10 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
 
     std::vector<ProjectEmbedding> winners;
 
-    struct Candidate {
-        int index, num_approvals;
-        long double max_payment_by_cost;
-    };
-
-    auto pq_cmp = [](const Candidate &a, const Candidate &b) {
-        if (pbmath::is_equal(a.max_payment_by_cost, b.max_payment_by_cost))
-            return a.num_approvals < b.num_approvals;
-        return a.max_payment_by_cost > b.max_payment_by_cost;
-    };
-
-    std::priority_queue<Candidate, std::vector<Candidate>, decltype(pq_cmp)> remaining_candidates(pq_cmp);
+    std::priority_queue<Candidate, std::vector<Candidate>, std::greater<Candidate>> remaining_candidates;
 
     for (int i = 0; i < projects.size(); i++) {
-        remaining_candidates.emplace(i, projects[i].approvers().size(), 0);
+        remaining_candidates.emplace(i, 0);
     }
 
     std::vector<long double> budget(n_voters, static_cast<long double>(total_budget) / n_voters);
