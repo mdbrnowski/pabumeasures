@@ -39,7 +39,6 @@ std::optional<int> cost_reduction_for_greedy(const Election &election, int p, co
 
     std::optional<int> max_price_to_be_chosen{};
 
-    std::vector<ProjectEmbedding> winners;
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
             return tie_breaking(a, b);
@@ -55,22 +54,26 @@ std::optional<int> cost_reduction_for_greedy(const Election &election, int p, co
             if (project == pp) {
                 return pp.cost();
             }
-            if (project.approvers().size() == pp.approvers().size() &&
-                tie_breaking(ProjectEmbedding(project.cost() - 1, pp.name(), pp.approvers()),
-                             project)) { // Not taken because lost tie-breaking
+            if (project.approvers().size() == pp.approvers().size()) { // Not taken because lost tie-breaking
+                int current_max_price = 0;
+                if (tie_breaking(ProjectEmbedding(project.cost(), pp.name(), pp.approvers()), project)) {
+                    current_max_price = std::max(current_max_price, project.cost());
+                }
+                if (tie_breaking(ProjectEmbedding(project.cost()-1, pp.name(), pp.approvers()), project)) {
+                    current_max_price = std::max(current_max_price, project.cost()-1);
+                }
                 if (max_price_to_be_chosen) {
-                    *max_price_to_be_chosen = std::max(*max_price_to_be_chosen, static_cast<int>(project.cost() - 1));
+                    *max_price_to_be_chosen = std::max(*max_price_to_be_chosen, current_max_price);
                 } else {
-                    max_price_to_be_chosen = static_cast<int>(project.cost() - 1);
+                    max_price_to_be_chosen = current_max_price;
                 }
             }
-            winners.push_back(project);
             total_budget -= project.cost();
         } else if (project == pp) { // not taken because budget too tight
             if (max_price_to_be_chosen) {
-                *max_price_to_be_chosen = std::max(*max_price_to_be_chosen, static_cast<int>(total_budget));
+                *max_price_to_be_chosen = std::max(*max_price_to_be_chosen, total_budget);
             } else {
-                max_price_to_be_chosen = static_cast<int>(total_budget);
+                max_price_to_be_chosen = total_budget;
             }
         }
     }
@@ -85,7 +88,6 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
     if (pp.cost() > total_budget)
         return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
-    std::vector<ProjectEmbedding> winners;
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
             return tie_breaking(a, b);
@@ -110,7 +112,6 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
                 else
                     return new_approvers_size - pp.approvers().size();
             }
-            winners.push_back(project);
             total_budget -= project.cost();
         }
     }
@@ -128,7 +129,6 @@ std::optional<int> singleton_add_for_greedy(const Election &election, int p, con
     if (pp.cost() > total_budget)
         return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
-    std::vector<ProjectEmbedding> winners;
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
             return tie_breaking(a, b);
@@ -150,7 +150,6 @@ std::optional<int> singleton_add_for_greedy(const Election &election, int p, con
                 }
                 return new_approvers_size - pp.approvers().size();
             }
-            winners.push_back(project);
             total_budget -= project.cost();
         }
     }
