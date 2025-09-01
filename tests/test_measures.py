@@ -112,14 +112,14 @@ def test_cost_reduction_for_mes_apr(seed):
     else:
         assert result is not None
 
-        assert result >= 0
-
         if project in allocation:
             assert result == project.cost
         else:
             if result > 0:
                 project.cost = result
                 assert project in pabumeasures.mes_apr(instance, profile)
+            else:
+                assert result == 0
 
             project.cost = result + 1
             assert project not in pabumeasures.mes_apr(instance, profile)
