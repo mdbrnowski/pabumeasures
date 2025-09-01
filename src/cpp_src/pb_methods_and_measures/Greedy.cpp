@@ -59,8 +59,8 @@ std::optional<int> cost_reduction_for_greedy(const Election &election, int p, co
                 if (tie_breaking(ProjectEmbedding(project.cost(), pp.name(), pp.approvers()), project)) {
                     current_max_price = std::max(current_max_price, project.cost());
                 }
-                if (tie_breaking(ProjectEmbedding(project.cost()-1, pp.name(), pp.approvers()), project)) {
-                    current_max_price = std::max(current_max_price, project.cost()-1);
+                if (tie_breaking(ProjectEmbedding(project.cost() - 1, pp.name(), pp.approvers()), project)) {
+                    current_max_price = std::max(current_max_price, project.cost() - 1);
                 }
                 if (max_price_to_be_chosen) {
                     *max_price_to_be_chosen = std::max(*max_price_to_be_chosen, current_max_price);
