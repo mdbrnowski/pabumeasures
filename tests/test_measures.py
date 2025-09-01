@@ -52,6 +52,45 @@ def test_singleton_add_for_greedy(seed):
         assert project in pabumeasures.greedy(instance, profile)
         profile[-1].remove(project)
         assert project not in pabumeasures.greedy(instance, profile)
+        
+@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
+def test_cost_reduction_for_greedy(seed):
+    random.seed(seed)
+    instance, profile = get_random_election()
+    tested_project = get_random_project(instance)
+    allocation = pabumeasures.greedy(instance, profile)
+    result = pabumeasures.greedy_measure(instance, profile, tested_project, Measure.COST_REDUCTION)
+    
+    number_of_approvals = {project.name : 0 for project in instance}
+    for ballot in profile:
+        for project in ballot:
+            number_of_approvals[project.name]+=1
+    
+    lowest_approval_num_in_allocation = number_of_approvals[allocation[-1].name]
+    
+    # for proj in allocation:
+    #     assert sum(proj in ballot for ballot in profile) >= lowest_approval_num_in_allocation
+    
+    
+    # if lowest_approval_num_in_allocation > project_approval_num: # Project didn't fit in the budget...
+    #     budget_leftover = instance.budget_limit - sum(proj.cost for proj in allocation)
+    #     if any(proj not in allocation and proj.cost > tested_project.cost for proj in instance):
+    #         assert result is None
+    #     else:
+    #         assert result == budget_leftover        
+    # else:
+    #     assert result is not None
+    
+    # assert result is not None
+    # if project in allocation:
+    #     assert result == 0
+    # else:
+    #     assert result >= 1
+    #     for i in range(len(profile), len(profile) + result):
+    #         profile.append(ApprovalBallot({project}, name=f"SingletonAppBallot {i}"))
+    #     assert project in pabumeasures.greedy(instance, profile)
+    #     profile[-1].remove(project)
+    #     assert project not in pabumeasures.greedy(instance, profile)
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
