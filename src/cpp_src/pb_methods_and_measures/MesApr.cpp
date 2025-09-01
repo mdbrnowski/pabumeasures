@@ -6,10 +6,18 @@
 #include "utils/ProjectEmbedding.h"
 
 #include <algorithm>
+#include <functional>
 #include <limits>
 #include <queue>
 #include <ranges>
 #include <vector>
+
+struct Candidate {
+    int index;
+    long double max_payment;
+
+    bool operator>(const Candidate &other) const { return max_payment > other.max_payment; }
+};
 
 std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectComparator &tie_breaking) {
     int total_budget = election.budget();
@@ -18,14 +26,7 @@ std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectCom
 
     std::vector<ProjectEmbedding> winners;
 
-    struct Candidate {
-        int index;
-        long double max_payment;
-    };
-
-    auto pq_cmp = [](const Candidate &a, const Candidate &b) { return a.max_payment > b.max_payment; };
-
-    std::priority_queue<Candidate, std::vector<Candidate>, decltype(pq_cmp)> remaining_candidates(pq_cmp);
+    std::priority_queue<Candidate, std::vector<Candidate>, std::greater<Candidate>> remaining_candidates;
 
     for (int i = 0; i < projects.size(); i++) {
         remaining_candidates.emplace(i, 0);
@@ -122,14 +123,7 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
     if (pp_approvers.size() == 0)
         return {};
 
-    struct Candidate {
-        int index;
-        long double max_payment;
-    };
-
-    auto pq_cmp = [](const Candidate &a, const Candidate &b) { return a.max_payment > b.max_payment; };
-
-    std::priority_queue<Candidate, std::vector<Candidate>, decltype(pq_cmp)> remaining_candidates(pq_cmp);
+    std::priority_queue<Candidate, std::vector<Candidate>, std::greater<Candidate>> remaining_candidates;
 
     for (int i = 0; i < projects.size(); i++) {
         remaining_candidates.emplace(i, 0);
@@ -215,7 +209,7 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
 
         auto winner = projects[best_candidate.index];
 
-        {
+        { // measure calculation
             std::ranges::sort(pp_approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
 
             long double price_to_be_chosen = 0, full_participators_number = pp_approvers.size();

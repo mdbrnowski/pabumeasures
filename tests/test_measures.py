@@ -112,6 +112,8 @@ def test_cost_reduction_for_mes_apr(seed):
     else:
         assert result is not None
 
+        assert result >= 0
+
         if project in allocation:
             assert result == project.cost
         else:
