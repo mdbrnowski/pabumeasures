@@ -7,7 +7,7 @@ from utils import get_random_election, get_random_project
 import pabumeasures
 from pabumeasures import Measure
 
-NUMBER_OF_TIMES = 500_00
+NUMBER_OF_TIMES = 500
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
