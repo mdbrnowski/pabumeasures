@@ -60,7 +60,7 @@ def greedy_measure(
     p = sorted(instance).index(project)
     match measure:
         case Measure.COST_REDUCTION:
-            raise NotImplementedError()
+            return _core.cost_reduction_for_greedy(election, p, tie_breaking)
         case Measure.ADD_APPROVAL_OPTIMIST:
             return _core.optimist_add_for_greedy(election, p, tie_breaking)
         case Measure.ADD_APPROVAL_PESSIMIST:
