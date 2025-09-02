@@ -31,7 +31,6 @@ std::vector<ProjectEmbedding> greedy(const Election &election, const ProjectComp
 
 std::optional<int> cost_reduction_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
     int total_budget = election.budget();
-    int num_voters = election.numVoters();
     auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)
