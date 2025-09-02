@@ -7,7 +7,7 @@ from utils import get_random_election, get_random_project
 import pabumeasures
 from pabumeasures import Measure
 
-NUMBER_OF_TIMES = 500
+NUMBER_OF_TIMES = 500_00
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
@@ -100,6 +100,29 @@ def test_greedy_over_cost_measure(seed, measure):
             assert project in pabumeasures.greedy_over_cost(instance, profile)
             non_approvers[0].remove(project)
             assert project not in pabumeasures.greedy_over_cost(instance, profile)
+
+
+@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
+def test_cost_reduction_for_greedy_over_cost(seed):
+    random.seed(seed)
+    instance, profile = get_random_election()
+    project = get_random_project(instance)
+    allocation = pabumeasures.greedy_over_cost(instance, profile)
+    result = pabumeasures.greedy_over_cost_measure(instance, profile, project, Measure.COST_REDUCTION)
+
+    assert result is not None
+
+    if project in allocation:
+        assert result == project.cost
+    else:
+        if result > 0:
+            project.cost = result
+            assert project in pabumeasures.greedy_over_cost(instance, profile)
+        else:
+            assert result == 0
+
+        project.cost = result + 1
+        assert project not in pabumeasures.greedy_over_cost(instance, profile)
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))

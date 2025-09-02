@@ -36,7 +36,7 @@ std::optional<int> cost_reduction_for_greedy_over_cost(const Election &election,
                                                        const ProjectComparator &tie_breaking) {
     int total_budget = election.budget();
     auto projects = election.projects();
-
+    auto pp = projects[p];
     if (pp.cost() > total_budget)
         return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
@@ -54,6 +54,24 @@ std::optional<int> cost_reduction_for_greedy_over_cost(const Election &election,
         if (project.cost() <= total_budget) {
             if (project == pp) {
                 return pp.cost();
+            } else {
+                int curr_max_price =
+                    std::min(static_cast<int>(project.cost() * pp.approvers().size() / project.approvers().size()),
+                             total_budget); // todo: change if price doesn't have to be int
+                if (pp.approvers().size() == project.approvers().size()) { // needed in case pp has cost == 0
+                    curr_max_price = std::max(curr_max_price, project.cost());
+                }
+
+                if (pp.approvers().size() * project.cost() == project.approvers().size() * curr_max_price &&
+                    tie_breaking(project, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers()))) {
+                    curr_max_price--;
+                }
+
+                if (max_price_to_be_chosen) {
+                    *max_price_to_be_chosen = std::max(*max_price_to_be_chosen, curr_max_price);
+                } else {
+                    max_price_to_be_chosen = curr_max_price;
+                }
             }
             total_budget -= project.cost();
         } else if (project == pp) { // not taken because budget too tight
@@ -63,8 +81,6 @@ std::optional<int> cost_reduction_for_greedy_over_cost(const Election &election,
                 max_price_to_be_chosen = total_budget;
             }
         }
-        if (total_budget <= 0)
-            break;
     }
     return max_price_to_be_chosen;
 }
