@@ -12,12 +12,14 @@
 #include <ranges>
 #include <vector>
 
+namespace {
 struct Candidate {
     int index;
     long double max_payment;
 
     bool operator>(const Candidate &other) const { return max_payment > other.max_payment; }
 };
+} // namespace
 
 std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectComparator &tie_breaking) {
     int total_budget = election.budget();
