@@ -55,11 +55,13 @@ std::optional<int> cost_reduction_for_greedy_over_cost(const Election &election,
             if (project == pp) {
                 return pp.cost();
             } else {
-                int curr_max_price =
-                    std::min(static_cast<int>(project.cost() * pp.approvers().size() / project.approvers().size()),
-                             total_budget); // todo: change if price doesn't have to be int
-                if (pp.approvers().size() == project.approvers().size()) { // needed in case pp has zero approvers
-                    curr_max_price = std::max(curr_max_price, project.cost());
+                int curr_max_price = 0;
+                if (project.approvers().size() == 0) {
+                    curr_max_price = project.cost();
+                } else {
+                    curr_max_price =
+                        std::min(static_cast<int>(project.cost() * pp.approvers().size() / project.approvers().size()),
+                                 total_budget); // todo: change if price doesn't have to be int
                 }
 
                 if (pp.approvers().size() * project.cost() == project.approvers().size() * curr_max_price &&
