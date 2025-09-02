@@ -58,7 +58,7 @@ std::optional<int> cost_reduction_for_greedy_over_cost(const Election &election,
                 int curr_max_price =
                     std::min(static_cast<int>(project.cost() * pp.approvers().size() / project.approvers().size()),
                              total_budget); // todo: change if price doesn't have to be int
-                if (pp.approvers().size() == project.approvers().size()) { // needed in case pp has cost == 0
+                if (pp.approvers().size() == project.approvers().size()) { // needed in case pp has zero approvers
                     curr_max_price = std::max(curr_max_price, project.cost());
                 }
 
