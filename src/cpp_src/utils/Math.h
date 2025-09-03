@@ -1,8 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
-#include <algorithm>
 #include <optional>
 
 namespace pbmath {

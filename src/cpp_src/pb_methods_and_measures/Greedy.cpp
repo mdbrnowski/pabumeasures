@@ -4,7 +4,6 @@
 #include "utils/ProjectComparator.h"
 #include "utils/ProjectEmbedding.h"
 
-
 #include <algorithm>
 #include <numeric>
 #include <optional>
