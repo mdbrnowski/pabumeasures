@@ -1,5 +1,10 @@
 #pragma once
 
+#include <cmath>
+#include <cstdlib>
+#include <algorithm>
+#include <optional>
+
 namespace pbmath {
 
 constexpr long double EPS = 1e-10;
@@ -13,5 +18,12 @@ bool is_greater_than(long double a, long double b);
 bool is_equal(long double a, long double b);
 
 long double floor(long double x);
+
+template <typename T> std::optional<T> optional_max(const std::optional<T> &current, const T &new_value) {
+    if (current) {
+        return std::max(*current, new_value);
+    }
+    return new_value;
+}
 
 } // namespace pbmath
