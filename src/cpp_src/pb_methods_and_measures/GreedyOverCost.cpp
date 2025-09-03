@@ -37,8 +37,6 @@ std::optional<int> cost_reduction_for_greedy_over_cost(const Election &election,
     int total_budget = election.budget();
     auto projects = election.projects();
     auto pp = projects[p];
-    if (pp.cost() > total_budget)
-        return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
     std::optional<int> max_price_to_be_chosen{};
 

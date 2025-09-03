@@ -119,9 +119,6 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
     auto pp_approvers = pp.approvers();
     std::optional<int> max_price_to_be_chosen{};
 
-    if (pp.cost() > total_budget)
-        return {}; // LCOV_EXCL_LINE (every project should be feasible)
-
     if (pp_approvers.size() == 0)
         return {};
 
