@@ -32,6 +32,51 @@ std::vector<ProjectEmbedding> greedy_over_cost(const Election &election, const P
     return winners;
 }
 
+std::optional<int> cost_reduction_for_greedy_over_cost(const Election &election, int p,
+                                                       const ProjectComparator &tie_breaking) {
+    int total_budget = election.budget();
+    auto projects = election.projects();
+    auto pp = projects[p];
+
+    std::optional<int> max_price_to_be_chosen{};
+
+    std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
+        long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
+                  cross_term_b_approvals_a_cost = static_cast<long long>(b.approvers().size()) * a.cost();
+        if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
+            return tie_breaking(a, b);
+        }
+        return cross_term_a_approvals_b_cost > cross_term_b_approvals_a_cost;
+    });
+    for (const auto &project : projects) {
+        if (project.cost() <= total_budget) {
+            if (project == pp) {
+                return pp.cost();
+            } else {
+                int curr_max_price = 0;
+                if (project.approvers().size() == 0) {
+                    curr_max_price = project.cost();
+                } else {
+                    curr_max_price =
+                        std::min(static_cast<int>(project.cost() * pp.approvers().size() / project.approvers().size()),
+                                 total_budget); // todo: change if price doesn't have to be int
+                }
+
+                if (pp.approvers().size() * project.cost() == project.approvers().size() * curr_max_price &&
+                    tie_breaking(project, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers()))) {
+                    curr_max_price--;
+                }
+
+                max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, curr_max_price);
+            }
+            total_budget -= project.cost();
+        } else if (project == pp) { // not taken because budget too tight
+            max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, total_budget);
+        }
+    }
+    return max_price_to_be_chosen;
+}
+
 std::optional<int> optimist_add_for_greedy_over_cost(const Election &election, int p,
                                                      const ProjectComparator &tie_breaking) {
     int total_budget = election.budget();

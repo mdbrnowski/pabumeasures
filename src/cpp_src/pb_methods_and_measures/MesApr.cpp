@@ -119,9 +119,6 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
     auto pp_approvers = pp.approvers();
     std::optional<int> max_price_to_be_chosen{};
 
-    if (pp.cost() > total_budget)
-        return {}; // LCOV_EXCL_LINE (every project should be feasible)
-
     if (pp_approvers.size() == 0)
         return {};
 
@@ -197,11 +194,9 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
             }
             price_to_be_chosen =
                 pbmath::floor(price_to_be_chosen); // todo: if price doesn't have to be int, change here
-            if (max_price_to_be_chosen) {
-                *max_price_to_be_chosen = std::max(*max_price_to_be_chosen, static_cast<int>(price_to_be_chosen));
-            } else {
-                max_price_to_be_chosen = static_cast<int>(price_to_be_chosen);
-            }
+
+            max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, static_cast<int>(price_to_be_chosen));
+
             break;
         }
 
@@ -232,12 +227,8 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
                 floored_price_to_be_chosen--;
             }
 
-            if (max_price_to_be_chosen) {
-                *max_price_to_be_chosen =
-                    std::max(*max_price_to_be_chosen, static_cast<int>(floored_price_to_be_chosen));
-            } else {
-                max_price_to_be_chosen = static_cast<int>(floored_price_to_be_chosen);
-            }
+            max_price_to_be_chosen =
+                pbmath::optional_max(max_price_to_be_chosen, static_cast<int>(floored_price_to_be_chosen));
         }
 
         for (const auto &approver : winner.approvers()) {

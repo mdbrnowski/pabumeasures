@@ -73,6 +73,9 @@ PYBIND11_MODULE(_core, m) {
 
     m.def("greedy_over_cost", &greedy_over_cost, "GreedyAV/Cost", "election"_a, "tie_breaking"_a);
 
+    m.def("cost_reduction_for_greedy_over_cost", &cost_reduction_for_greedy_over_cost,
+          "Cost reduction measure for GreedyAV/Cost", "election"_a, "p"_a, "tie_breaking"_a);
+
     m.def("optimist_add_for_greedy_over_cost", &optimist_add_for_greedy_over_cost,
           "optimist-add measure for GreedyAV/Cost", "election"_a, "p"_a, "tie_breaking"_a);
 
