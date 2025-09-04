@@ -22,8 +22,8 @@ struct Candidate {
 } // namespace
 
 std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectComparator &tie_breaking) {
-    long long total_budget = election.budget();
-    long long n_voters = election.numVoters();
+    auto total_budget = election.budget();
+    auto n_voters = election.numVoters();
     auto projects = election.projects();
 
     std::vector<ProjectEmbedding> winners;
@@ -47,7 +47,7 @@ std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectCom
             auto current_candidate = remaining_candidates.top();
             remaining_candidates.pop();
             auto project = projects[current_candidate.index];
-            long double previous_max_payment = current_candidate.max_payment;
+            auto previous_max_payment = current_candidate.max_payment;
 
             if (pbmath::is_greater_than(previous_max_payment, min_max_payment)) {
                 candidates_to_reinsert.push_back(current_candidate);
@@ -65,8 +65,7 @@ std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectCom
                 continue;
             }
 
-            std::ranges::sort(approvers,
-                              [&budget](const long long a, const long long b) { return budget[a] < budget[b]; });
+            std::ranges::sort(approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
 
             long double paid_so_far = 0, denominator = approvers.size();
 
@@ -161,8 +160,7 @@ std::optional<long long> cost_reduction_for_mes_apr(const Election &election, in
                 continue;
             }
 
-            std::ranges::sort(approvers,
-                              [&budget](const long long a, const long long b) { return budget[a] < budget[b]; });
+            std::ranges::sort(approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
 
             long double paid_so_far = 0, denominator = approvers.size();
 
@@ -211,8 +209,7 @@ std::optional<long long> cost_reduction_for_mes_apr(const Election &election, in
         auto winner = projects[best_candidate.index];
 
         { // measure calculation
-            std::ranges::sort(pp_approvers,
-                              [&budget](const long long a, const long long b) { return budget[a] < budget[b]; });
+            std::ranges::sort(pp_approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
 
             long double price_to_be_chosen = 0, full_participators_number = pp_approvers.size();
             for (const auto &approver : pp_approvers) {

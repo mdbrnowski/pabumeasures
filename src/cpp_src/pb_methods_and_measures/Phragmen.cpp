@@ -11,8 +11,8 @@
 
 std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectComparator &tie_breaking) {
     // todo: try with max_load recalculation skipping
-    long long total_budget = election.budget();
-    long long n_voters = election.numVoters();
+    auto total_budget = election.budget();
+    auto n_voters = election.numVoters();
     auto projects = election.projects();
     std::vector<ProjectEmbedding> winners;
     std::vector<long double> load(n_voters, 0);

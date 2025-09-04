@@ -92,7 +92,7 @@ std::optional<long long> optimist_add_for_greedy(const Election &election, int p
                 return 0;
             }
             if (pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
-                long long new_approvers_size = project.approvers().size();
+                int new_approvers_size = project.approvers().size();
                 std::vector<int> new_approvers(new_approvers_size);
                 std::iota(new_approvers.begin(), new_approvers.end(), 0);
                 auto new_pp = ProjectEmbedding(pp.cost(), pp.name(), new_approvers);
@@ -135,7 +135,7 @@ std::optional<long long> singleton_add_for_greedy(const Election &election, int 
                 return 0;
             }
             if (pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
-                long long new_approvers_size = project.approvers().size();
+                int new_approvers_size = project.approvers().size();
                 std::vector<int> new_approvers(new_approvers_size);
                 std::iota(new_approvers.begin(), new_approvers.end(), 0);
                 auto new_pp = ProjectEmbedding(pp.cost(), pp.name(), new_approvers);

@@ -22,8 +22,8 @@ struct Candidate {
 } // namespace
 
 std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectComparator &tie_breaking) {
-    long long total_budget = election.budget();
-    long long n_voters = election.numVoters();
+    auto total_budget = election.budget();
+    auto n_voters = election.numVoters();
     auto projects = election.projects();
 
     std::vector<ProjectEmbedding> winners;
@@ -47,7 +47,7 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
             auto current_candidate = remaining_candidates.top();
             remaining_candidates.pop();
             auto project = projects[current_candidate.index];
-            long double previous_max_payment_by_cost = current_candidate.max_payment_by_cost;
+            auto previous_max_payment_by_cost = current_candidate.max_payment_by_cost;
 
             if (pbmath::is_greater_than(previous_max_payment_by_cost, min_max_payment_by_cost)) {
                 candidates_to_reinsert.push_back(current_candidate);
@@ -65,8 +65,7 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
                 continue;
             }
 
-            std::ranges::sort(approvers,
-                              [&budget](const long long a, const long long b) { return budget[a] < budget[b]; });
+            std::ranges::sort(approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
 
             long double paid_so_far = 0, denominator = approvers.size();
 
