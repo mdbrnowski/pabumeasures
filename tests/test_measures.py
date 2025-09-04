@@ -55,29 +55,6 @@ def test_singleton_add_for_greedy(seed):
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
-def test_cost_reduction_for_greedy(seed):
-    random.seed(seed)
-    instance, profile = get_random_election()
-    project = get_random_project(instance)
-    allocation = pabumeasures.greedy(instance, profile)
-    result = pabumeasures.greedy_measure(instance, profile, project, Measure.COST_REDUCTION)
-
-    assert result is not None
-
-    if project in allocation:
-        assert result == project.cost
-    else:
-        if result > 0:
-            project.cost = result
-            assert project in pabumeasures.greedy(instance, profile)
-        else:
-            assert result == 0
-
-        project.cost = result + 1
-        assert project not in pabumeasures.greedy(instance, profile)
-
-
-@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 @pytest.mark.parametrize("measure", [Measure.ADD_APPROVAL_OPTIMIST, Measure.ADD_APPROVAL_PESSIMIST])
 def test_greedy_over_cost_measure(seed, measure):
     random.seed(seed)
@@ -103,29 +80,6 @@ def test_greedy_over_cost_measure(seed, measure):
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
-def test_cost_reduction_for_greedy_over_cost(seed):
-    random.seed(seed)
-    instance, profile = get_random_election()
-    project = get_random_project(instance)
-    allocation = pabumeasures.greedy_over_cost(instance, profile)
-    result = pabumeasures.greedy_over_cost_measure(instance, profile, project, Measure.COST_REDUCTION)
-
-    assert result is not None
-
-    if project in allocation:
-        assert result == project.cost
-    else:
-        if result > 0:
-            project.cost = result
-            assert project in pabumeasures.greedy_over_cost(instance, profile)
-        else:
-            assert result == 0
-
-        project.cost = result + 1
-        assert project not in pabumeasures.greedy_over_cost(instance, profile)
-
-
-@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 def test_singleton_add_for_greedy_over_cost(seed):
     random.seed(seed)
     instance, profile = get_random_election()
@@ -145,12 +99,21 @@ def test_singleton_add_for_greedy_over_cost(seed):
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
-def test_cost_reduction_for_mes_apr(seed):
+@pytest.mark.parametrize(
+    "rule_pair",
+    [
+        (pabumeasures.mes_apr, pabumeasures.mes_apr_measure),
+        (pabumeasures.greedy, pabumeasures.greedy_measure),
+        (pabumeasures.greedy_over_cost, pabumeasures.greedy_over_cost_measure),
+    ],
+)
+def test_cost_reduction_measure(seed, rule_pair):
     random.seed(seed)
+    rule, measure = rule_pair
     instance, profile = get_random_election()
     project = get_random_project(instance)
-    allocation = pabumeasures.mes_apr(instance, profile)
-    result = pabumeasures.mes_apr_measure(instance, profile, project, Measure.COST_REDUCTION)
+    allocation = rule(instance, profile)
+    result = measure(instance, profile, project, Measure.COST_REDUCTION)
 
     assert result is not None
 
@@ -159,9 +122,9 @@ def test_cost_reduction_for_mes_apr(seed):
     else:
         if result > 0:
             project.cost = result
-            assert project in pabumeasures.mes_apr(instance, profile)
+            assert project in rule(instance, profile)
         else:
             assert result == 0
 
         project.cost = result + 1
-        assert project not in pabumeasures.mes_apr(instance, profile)
+        assert project not in rule(instance, profile)
