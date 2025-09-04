@@ -119,9 +119,6 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
     auto pp_approvers = pp.approvers();
     std::optional<int> max_price_to_be_chosen{};
 
-    if (pp_approvers.size() == 0)
-        return {};
-
     std::priority_queue<Candidate, std::vector<Candidate>, std::greater<Candidate>> remaining_candidates;
 
     for (int i = 0; i < projects.size(); i++) {

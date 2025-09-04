@@ -151,21 +151,17 @@ def test_cost_reduction_for_mes_apr(seed):
     project = get_random_project(instance)
     allocation = pabumeasures.mes_apr(instance, profile)
     result = pabumeasures.mes_apr_measure(instance, profile, project, Measure.COST_REDUCTION)
-    has_approvers = any(project in ballot for ballot in profile)
 
-    if not has_approvers:
-        assert result is None
+    assert result is not None
+
+    if project in allocation:
+        assert result == project.cost
     else:
-        assert result is not None
-
-        if project in allocation:
-            assert result == project.cost
+        if result > 0:
+            project.cost = result
+            assert project in pabumeasures.mes_apr(instance, profile)
         else:
-            if result > 0:
-                project.cost = result
-                assert project in pabumeasures.mes_apr(instance, profile)
-            else:
-                assert result == 0
+            assert result == 0
 
-            project.cost = result + 1
-            assert project not in pabumeasures.mes_apr(instance, profile)
+        project.cost = result + 1
+        assert project not in pabumeasures.mes_apr(instance, profile)
