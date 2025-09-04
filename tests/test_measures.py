@@ -100,20 +100,20 @@ def test_singleton_add_for_greedy_over_cost(seed):
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
 @pytest.mark.parametrize(
-    "rule_pair",
+    "rule,rule_measure",
     [
         (pabumeasures.mes_apr, pabumeasures.mes_apr_measure),
         (pabumeasures.greedy, pabumeasures.greedy_measure),
         (pabumeasures.greedy_over_cost, pabumeasures.greedy_over_cost_measure),
     ],
+    ids=["mes_apr", "greedy", "greedy_over_cost"],
 )
-def test_cost_reduction_measure(seed, rule_pair):
+def test_cost_reduction_measure(seed, rule, rule_measure):
     random.seed(seed)
-    rule, measure = rule_pair
     instance, profile = get_random_election()
     project = get_random_project(instance)
     allocation = rule(instance, profile)
-    result = measure(instance, profile, project, Measure.COST_REDUCTION)
+    result = rule_measure(instance, profile, project, Measure.COST_REDUCTION)
 
     assert result is not None
 
