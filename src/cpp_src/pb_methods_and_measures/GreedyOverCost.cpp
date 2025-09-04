@@ -14,8 +14,8 @@ std::vector<ProjectEmbedding> greedy_over_cost(const Election &election, const P
     auto projects = election.projects();
     std::vector<ProjectEmbedding> winners;
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
-        long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
-                  cross_term_b_approvals_a_cost = static_cast<long long>(b.approvers().size()) * a.cost();
+        long long cross_term_a_approvals_b_cost = a.approvers().size() * b.cost(),
+                  cross_term_b_approvals_a_cost = b.approvers().size() * a.cost();
         if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
             return tie_breaking(a, b);
         }
@@ -41,8 +41,8 @@ std::optional<long long> cost_reduction_for_greedy_over_cost(const Election &ele
     std::optional<long long> max_price_to_be_chosen{};
 
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
-        long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
-                  cross_term_b_approvals_a_cost = static_cast<long long>(b.approvers().size()) * a.cost();
+        long long cross_term_a_approvals_b_cost = a.approvers().size() * b.cost(),
+                  cross_term_b_approvals_a_cost = b.approvers().size() * a.cost();
         if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
             return tie_breaking(a, b);
         }
@@ -88,8 +88,8 @@ std::optional<long long> optimist_add_for_greedy_over_cost(const Election &elect
 
     std::vector<ProjectEmbedding> winners;
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
-        long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
-                  cross_term_b_approvals_a_cost = static_cast<long long>(b.approvers().size()) * a.cost();
+        long long cross_term_a_approvals_b_cost = a.approvers().size() * b.cost(),
+                  cross_term_b_approvals_a_cost = b.approvers().size() * a.cost();
         if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
             return tie_breaking(a, b);
         }
@@ -101,13 +101,11 @@ std::optional<long long> optimist_add_for_greedy_over_cost(const Election &elect
                 return 0;
             }
             if (pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
-                long long new_approvers_size =
-                    pbmath::ceil_div(static_cast<long long>(project.approvers().size()) * pp.cost(), project.cost());
+                long long new_approvers_size = pbmath::ceil_div(project.approvers().size() * pp.cost(), project.cost());
                 std::vector<int> new_approvers(new_approvers_size);
                 std::iota(new_approvers.begin(), new_approvers.end(), 0);
                 auto new_pp = ProjectEmbedding(pp.cost(), pp.name(), new_approvers);
-                if (static_cast<long long>(project.approvers().size()) * new_pp.cost() ==
-                        static_cast<long long>(new_pp.approvers().size()) * project.cost() &&
+                if (project.approvers().size() * new_pp.cost() == new_pp.approvers().size() * project.cost() &&
                     tie_breaking(project, new_pp)) {
                     new_approvers_size += 1;
                 }
@@ -138,8 +136,8 @@ std::optional<long long> singleton_add_for_greedy_over_cost(const Election &elec
 
     std::vector<ProjectEmbedding> winners;
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
-        long long cross_term_a_approvals_b_cost = static_cast<long long>(a.approvers().size()) * b.cost(),
-                  cross_term_b_approvals_a_cost = static_cast<long long>(b.approvers().size()) * a.cost();
+        long long cross_term_a_approvals_b_cost = a.approvers().size() * b.cost(),
+                  cross_term_b_approvals_a_cost = b.approvers().size() * a.cost();
         if (cross_term_a_approvals_b_cost == cross_term_b_approvals_a_cost) {
             return tie_breaking(a, b);
         }
@@ -151,13 +149,11 @@ std::optional<long long> singleton_add_for_greedy_over_cost(const Election &elec
                 return 0;
             }
             if (pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
-                long long new_approvers_size =
-                    pbmath::ceil_div(static_cast<long long>(project.approvers().size()) * pp.cost(), project.cost());
+                long long new_approvers_size = pbmath::ceil_div(project.approvers().size() * pp.cost(), project.cost());
                 std::vector<int> new_approvers(new_approvers_size);
                 std::iota(new_approvers.begin(), new_approvers.end(), 0);
                 auto new_pp = ProjectEmbedding(pp.cost(), pp.name(), new_approvers);
-                if (static_cast<long long>(project.approvers().size()) * new_pp.cost() ==
-                        static_cast<long long>(new_pp.approvers().size()) * project.cost() &&
+                if (project.approvers().size() * new_pp.cost() == new_pp.approvers().size() * project.cost() &&
                     tie_breaking(project, new_pp)) {
                     new_approvers_size += 1;
                 }
