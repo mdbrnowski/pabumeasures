@@ -22,8 +22,8 @@ struct Candidate {
 } // namespace
 
 std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectComparator &tie_breaking) {
-    int total_budget = election.budget();
-    int n_voters = election.numVoters();
+    long long total_budget = election.budget();
+    long long n_voters = election.numVoters();
     auto projects = election.projects();
 
     std::vector<ProjectEmbedding> winners;
@@ -65,7 +65,8 @@ std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectCom
                 continue;
             }
 
-            std::ranges::sort(approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
+            std::ranges::sort(approvers,
+                              [&budget](const long long a, const long long b) { return budget[a] < budget[b]; });
 
             long double paid_so_far = 0, denominator = approvers.size();
 
@@ -111,13 +112,14 @@ std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectCom
     return winners;
 }
 
-std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, const ProjectComparator &tie_breaking) {
-    int total_budget = election.budget();
-    int n_voters = election.numVoters();
+std::optional<long long> cost_reduction_for_mes_apr(const Election &election, int p,
+                                                    const ProjectComparator &tie_breaking) {
+    long long total_budget = election.budget();
+    long long n_voters = election.numVoters();
     auto projects = election.projects();
     auto pp = projects[p];
     auto pp_approvers = pp.approvers();
-    std::optional<int> max_price_to_be_chosen{};
+    std::optional<long long> max_price_to_be_chosen{};
 
     if (pp_approvers.size() == 0)
         return {};
@@ -159,7 +161,8 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
                 continue;
             }
 
-            std::ranges::sort(approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
+            std::ranges::sort(approvers,
+                              [&budget](const long long a, const long long b) { return budget[a] < budget[b]; });
 
             long double paid_so_far = 0, denominator = approvers.size();
 
@@ -193,9 +196,10 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
                 price_to_be_chosen += budget[approver];
             }
             price_to_be_chosen =
-                pbmath::floor(price_to_be_chosen); // todo: if price doesn't have to be int, change here
+                pbmath::floor(price_to_be_chosen); // todo: if price doesn't have to be long long, change here
 
-            max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, static_cast<int>(price_to_be_chosen));
+            max_price_to_be_chosen =
+                pbmath::optional_max(max_price_to_be_chosen, static_cast<long long>(price_to_be_chosen));
 
             break;
         }
@@ -207,7 +211,8 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
         auto winner = projects[best_candidate.index];
 
         { // measure calculation
-            std::ranges::sort(pp_approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
+            std::ranges::sort(pp_approvers,
+                              [&budget](const long long a, const long long b) { return budget[a] < budget[b]; });
 
             long double price_to_be_chosen = 0, full_participators_number = pp_approvers.size();
             for (const auto &approver : pp_approvers) {
@@ -221,14 +226,14 @@ std::optional<int> cost_reduction_for_mes_apr(const Election &election, int p, c
             }
 
             long double floored_price_to_be_chosen =
-                pbmath::floor(price_to_be_chosen); // todo: if price doesn't have to be int, change here
+                pbmath::floor(price_to_be_chosen); // todo: if price doesn't have to be long long, change here
             if (pbmath::is_equal(floored_price_to_be_chosen, price_to_be_chosen) &&
                 tie_breaking(winner, ProjectEmbedding(floored_price_to_be_chosen, pp.name(), pp_approvers))) {
                 floored_price_to_be_chosen--;
             }
 
             max_price_to_be_chosen =
-                pbmath::optional_max(max_price_to_be_chosen, static_cast<int>(floored_price_to_be_chosen));
+                pbmath::optional_max(max_price_to_be_chosen, static_cast<long long>(floored_price_to_be_chosen));
         }
 
         for (const auto &approver : winner.approvers()) {
