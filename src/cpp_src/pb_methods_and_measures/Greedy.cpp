@@ -10,7 +10,7 @@
 #include <vector>
 
 std::vector<ProjectEmbedding> greedy(const Election &election, const ProjectComparator &tie_breaking) {
-    long long total_budget = election.budget();
+    auto total_budget = election.budget();
     auto projects = election.projects();
     std::vector<ProjectEmbedding> winners;
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
@@ -32,7 +32,7 @@ std::vector<ProjectEmbedding> greedy(const Election &election, const ProjectComp
 
 std::optional<long long> cost_reduction_for_greedy(const Election &election, int p,
                                                    const ProjectComparator &tie_breaking) {
-    long long total_budget = election.budget();
+    auto total_budget = election.budget();
     auto projects = election.projects();
     auto pp = projects[p];
 
@@ -71,10 +71,9 @@ std::optional<long long> cost_reduction_for_greedy(const Election &election, int
     return max_price_to_be_chosen;
 }
 
-std::optional<long long> optimist_add_for_greedy(const Election &election, int p,
-                                                 const ProjectComparator &tie_breaking) {
-    long long total_budget = election.budget();
-    long long num_voters = election.numVoters();
+std::optional<int> optimist_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    auto total_budget = election.budget();
+    auto num_voters = election.numVoters();
     auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)
@@ -110,14 +109,12 @@ std::optional<long long> optimist_add_for_greedy(const Election &election, int p
     return {}; // LCOV_EXCL_LINE (every project should be feasible)
 }
 
-std::optional<long long> pessimist_add_for_greedy(const Election &election, int p,
-                                                  const ProjectComparator &tie_breaking) {
+std::optional<int> pessimist_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
     return optimist_add_for_greedy(election, p, tie_breaking);
 }
 
-std::optional<long long> singleton_add_for_greedy(const Election &election, int p,
-                                                  const ProjectComparator &tie_breaking) {
-    long long total_budget = election.budget();
+std::optional<int> singleton_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    auto total_budget = election.budget();
     auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)

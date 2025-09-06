@@ -113,8 +113,8 @@ std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectCom
 
 std::optional<long long> cost_reduction_for_mes_apr(const Election &election, int p,
                                                     const ProjectComparator &tie_breaking) {
-    long long total_budget = election.budget();
-    long long n_voters = election.numVoters();
+    auto total_budget = election.budget();
+    auto n_voters = election.numVoters();
     auto projects = election.projects();
     auto pp = projects[p];
     auto pp_approvers = pp.approvers();
