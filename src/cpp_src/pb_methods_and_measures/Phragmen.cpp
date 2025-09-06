@@ -1,5 +1,6 @@
 #include "Phragmen.h"
 
+#include "Greedy.h"
 #include "utils/Election.h"
 #include "utils/Math.h"
 #include "utils/ProjectComparator.h"
@@ -98,18 +99,10 @@ std::optional<long long> cost_reduction_for_phragmen(const Election &election, i
         auto winner = *std::ranges::min_element(round_winners, tie_breaking);
 
         if (pp.approvers().empty()) {
-            if (winner == pp && !would_break)
-                return pp.cost();
             if (winner.approvers().empty() && !would_break_without_pp) {
-                auto curr_max_price = total_budget;
-                if (tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))
-                    // make the costs equal and hope that pp.name() < winner.name()
-                    curr_max_price = winner.cost();
-                if (tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))
-                    // make pp.cost() one less than winner.cost() (if possible)
-                    curr_max_price = std::max(curr_max_price - 1, 0ll);
-                if (!tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))
-                    max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, curr_max_price);
+                int new_p = std::ranges::find(round_winners, pp) - round_winners.begin();
+                auto new_election = Election(total_budget, round_winners.size(), round_winners);
+                return cost_reduction_for_greedy(new_election, new_p, tie_breaking);
             }
         } else {
             long double load_sum = 0;
