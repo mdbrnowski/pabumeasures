@@ -125,8 +125,20 @@ def mes_cost(
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
-def mes_cost_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
-    raise NotImplementedError()
+def mes_cost_measure(
+    instance: Instance, profile: Profile, project: Project, measure: Measure, tie_breaking=ProjectComparator.ByCostAsc
+) -> int | None:
+    election, _ = _translate_input_format(instance, profile)
+    p = sorted(instance).index(project)
+    match measure:
+        case Measure.COST_REDUCTION:
+            return _core.cost_reduction_for_mes_cost(election, p, tie_breaking)
+        case Measure.ADD_APPROVAL_OPTIMIST:
+            raise NotImplementedError()
+        case Measure.ADD_APPROVAL_PESSIMIST:
+            raise NotImplementedError()
+        case Measure.ADD_SINGLETON:
+            raise NotImplementedError()
 
 
 def phragmen(
