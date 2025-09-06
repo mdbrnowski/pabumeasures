@@ -61,9 +61,9 @@ std::optional<long long> cost_reduction_for_phragmen(const Election &election, i
     auto n_voters = election.numVoters();
     auto projects = election.projects();
     auto pp = projects[p];
-    std::vector<long double> load(n_voters, 0);
 
-    std::optional<long long> max_price_to_be_chosen{};
+    std::vector<long double> load(n_voters, 0);
+    std::optional<long long> max_price_to_be_chosen = 0;
 
     while (!projects.empty()) {
         long double min_max_load = std::numeric_limits<long double>::max();
@@ -87,34 +87,48 @@ std::optional<long long> cost_reduction_for_phragmen(const Election &election, i
             }
         }
 
-        bool normally_would_break =
+        bool would_break =
             any_of(round_winners.begin(), round_winners.end(),
                    [total_budget](const ProjectEmbedding &winner) { return winner.cost() > total_budget; });
+        bool would_break_without_pp =
+            any_of(round_winners.begin(), round_winners.end(), [total_budget, &pp](const ProjectEmbedding &winner) {
+                return winner.cost() > total_budget && !(winner == pp);
+            });
 
         auto winner = *std::ranges::min_element(round_winners, tie_breaking);
 
-        if (winner == pp && !normally_would_break) {
-            return pp.cost();
+        if (pp.approvers().empty()) {
+            if (winner == pp && !would_break)
+                return pp.cost();
+            if (winner.approvers().empty() && !would_break_without_pp) {
+                auto curr_max_price = total_budget;
+                if (tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))
+                    // make the costs equal and hope that pp.name() < winner.name()
+                    curr_max_price = winner.cost();
+                if (tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))
+                    // make pp.cost() one less than winner.cost() (if possible)
+                    curr_max_price = std::max(curr_max_price - 1, 0ll);
+                if (!tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))
+                    max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, curr_max_price);
+            }
+        } else {
+            long double load_sum = 0;
+            for (const auto &approver : pp.approvers()) {
+                load_sum += load[approver];
+            }
+            long long curr_max_price = pbmath::floor(min_max_load * pp.approvers().size() - load_sum);
+            curr_max_price = std::min({curr_max_price, pp.cost(), total_budget});
+            long double pp_max_load = (curr_max_price + load_sum) / pp.approvers().size();
+
+            if (pbmath::is_equal(pp_max_load, min_max_load) &&
+                (would_break_without_pp ||
+                 tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))) {
+                curr_max_price--;
+            }
+            max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, curr_max_price);
         }
 
-        long double load_sum = 0;
-        for (const auto &approver : pp.approvers()) {
-            load_sum += load[approver];
-        }
-        long long curr_max_price = pbmath::floor(min_max_load * pp.approvers().size() - load_sum);
-        curr_max_price = std::min({curr_max_price, pp.cost(), total_budget});
-
-        long double pp_max_load = pp.approvers().empty() ? std::numeric_limits<long double>::max()
-                                                         : (curr_max_price + load_sum) / pp.approvers().size();
-
-        if (pbmath::is_equal(pp_max_load, min_max_load) &&
-            (normally_would_break ||
-             tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))) {
-            curr_max_price--;
-        }
-        max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, curr_max_price);
-
-        if (normally_would_break) {
+        if (would_break) {
             break;
         }
 
