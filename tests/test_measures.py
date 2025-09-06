@@ -102,11 +102,12 @@ def test_singleton_add_for_greedy_over_cost(seed):
 @pytest.mark.parametrize(
     "rule,rule_measure",
     [
-        (pabumeasures.mes_apr, pabumeasures.mes_apr_measure),
         (pabumeasures.greedy, pabumeasures.greedy_measure),
         (pabumeasures.greedy_over_cost, pabumeasures.greedy_over_cost_measure),
+        (pabumeasures.mes_apr, pabumeasures.mes_apr_measure),
+        (pabumeasures.phragmen, pabumeasures.phragmen_measure),
     ],
-    ids=["mes_apr", "greedy", "greedy_over_cost"],
+    ids=["greedy", "greedy_over_cost", "mes_apr", "phragmen"],
 )
 def test_cost_reduction_measure(seed, rule, rule_measure):
     random.seed(seed)
