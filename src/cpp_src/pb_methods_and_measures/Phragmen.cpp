@@ -63,10 +63,6 @@ std::optional<long long> cost_reduction_for_phragmen(const Election &election, i
     auto pp = projects[p];
     std::vector<long double> load(n_voters, 0);
 
-    if (pp.approvers().empty()) {
-        return 0;
-    }
-
     std::optional<long long> max_price_to_be_chosen{};
 
     while (!projects.empty()) {
@@ -92,7 +88,6 @@ std::optional<long long> cost_reduction_for_phragmen(const Election &election, i
         }
 
         bool normally_would_break =
-            min_max_load == std::numeric_limits<long double>::max() ||
             any_of(round_winners.begin(), round_winners.end(),
                    [total_budget](const ProjectEmbedding &winner) { return winner.cost() > total_budget; });
 
@@ -109,7 +104,9 @@ std::optional<long long> cost_reduction_for_phragmen(const Election &election, i
         long long curr_max_price = pbmath::floor(min_max_load * pp.approvers().size() - load_sum);
         curr_max_price = std::min({curr_max_price, pp.cost(), total_budget});
 
-        long double pp_max_load = (curr_max_price + load_sum) / pp.approvers().size();
+        long double pp_max_load = pp.approvers().empty() ? std::numeric_limits<long double>::max()
+                                                         : (curr_max_price + load_sum) / pp.approvers().size();
+
         if (pbmath::is_equal(pp_max_load, min_max_load) &&
             (normally_would_break ||
              tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))) {
