@@ -10,7 +10,7 @@
 #include <vector>
 
 std::vector<ProjectEmbedding> greedy(const Election &election, const ProjectComparator &tie_breaking) {
-    int total_budget = election.budget();
+    auto total_budget = election.budget();
     auto projects = election.projects();
     std::vector<ProjectEmbedding> winners;
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
@@ -30,12 +30,13 @@ std::vector<ProjectEmbedding> greedy(const Election &election, const ProjectComp
     return winners;
 }
 
-std::optional<int> cost_reduction_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
-    int total_budget = election.budget();
+std::optional<long long> cost_reduction_for_greedy(const Election &election, int p,
+                                                   const ProjectComparator &tie_breaking) {
+    auto total_budget = election.budget();
     auto projects = election.projects();
     auto pp = projects[p];
 
-    std::optional<int> max_price_to_be_chosen{};
+    std::optional<long long> max_price_to_be_chosen{};
 
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
@@ -53,7 +54,7 @@ std::optional<int> cost_reduction_for_greedy(const Election &election, int p, co
                 return pp.cost();
             }
             if (project.approvers().size() == pp.approvers().size()) { // Not taken because lost tie-breaking
-                int current_max_price = 0;
+                long long current_max_price = 0;
                 if (tie_breaking(ProjectEmbedding(project.cost(), pp.name(), pp.approvers()), project)) {
                     current_max_price = std::max(current_max_price, project.cost());
                 }
@@ -71,8 +72,8 @@ std::optional<int> cost_reduction_for_greedy(const Election &election, int p, co
 }
 
 std::optional<int> optimist_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
-    int total_budget = election.budget();
-    int num_voters = election.numVoters();
+    auto total_budget = election.budget();
+    auto num_voters = election.numVoters();
     auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)
@@ -113,7 +114,7 @@ std::optional<int> pessimist_add_for_greedy(const Election &election, int p, con
 }
 
 std::optional<int> singleton_add_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
-    int total_budget = election.budget();
+    auto total_budget = election.budget();
     auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)
