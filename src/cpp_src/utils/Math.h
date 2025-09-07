@@ -19,6 +19,15 @@ bool is_equal(long double a, long double b);
 
 long double floor(long double x);
 
+long double ceil(long double x);
+
+template <typename T> std::optional<T> optional_min(const std::optional<T> &current, const T &new_value) {
+    if (current) {
+        return std::min(*current, new_value);
+    }
+    return new_value;
+}
+
 template <typename T> std::optional<T> optional_max(const std::optional<T> &current, const T &new_value) {
     if (current) {
         return std::max(*current, new_value);
