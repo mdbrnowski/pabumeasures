@@ -66,8 +66,9 @@ def test_greedy_over_cost_measure(seed, measure):
     [
         (pabumeasures.greedy, pabumeasures.greedy_measure),
         (pabumeasures.greedy_over_cost, pabumeasures.greedy_over_cost_measure),
+        (pabumeasures.phragmen, pabumeasures.phragmen_measure),
     ],
-    ids=["greedy", "greedy_over_cost"],
+    ids=["greedy", "greedy_over_cost", "phragmen"],
 )
 def test_singleton_add_measure(seed, rule, rule_measure):
     random.seed(seed)
@@ -75,6 +76,7 @@ def test_singleton_add_measure(seed, rule, rule_measure):
     project = get_random_project(instance)
     allocation = rule(instance, profile)
     result = rule_measure(instance, profile, project, Measure.ADD_SINGLETON)
+
     assert result is not None
     if project in allocation:
         assert result == 0
@@ -106,7 +108,6 @@ def test_cost_reduction_measure(seed, rule, rule_measure):
     result = rule_measure(instance, profile, project, Measure.COST_REDUCTION)
 
     assert result is not None
-
     if project in allocation:
         assert result == project.cost
     else:

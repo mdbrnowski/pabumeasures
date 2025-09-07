@@ -15,4 +15,6 @@ bool is_equal(long double a, long double b) { return std::abs(a - b) <= pbmath::
 
 long double floor(long double x) { return std::floor(x + pbmath::EPS); }
 
+long double ceil(long double x) { return std::ceil(x - pbmath::EPS); }
+
 } // namespace pbmath
