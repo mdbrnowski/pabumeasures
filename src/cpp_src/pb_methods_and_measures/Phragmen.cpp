@@ -134,3 +134,7 @@ std::optional<long long> cost_reduction_for_phragmen(const Election &election, i
     }
     return max_price_to_be_chosen;
 }
+
+std::optional<int> singleton_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    return {};
+};

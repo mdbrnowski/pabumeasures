@@ -150,4 +150,4 @@ def phragmen_measure(
         case Measure.ADD_APPROVAL_PESSIMIST:
             raise NotImplementedError()
         case Measure.ADD_SINGLETON:
-            raise NotImplementedError()
+            return _core.singleton_add_for_phragmen(election, p, tie_breaking)
