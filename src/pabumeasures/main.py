@@ -142,7 +142,17 @@ def mes_cost_measure(
     measure: Measure,
     tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc,
 ) -> int | None:
-    raise NotImplementedError()
+    election, _ = _translate_input_format(instance, profile)
+    p = sorted(instance).index(project)
+    match measure:
+        case Measure.COST_REDUCTION:
+            return _core.cost_reduction_for_mes_cost(election, p, tie_breaking)
+        case Measure.ADD_APPROVAL_OPTIMIST:
+            raise NotImplementedError()
+        case Measure.ADD_APPROVAL_PESSIMIST:
+            raise NotImplementedError()
+        case Measure.ADD_SINGLETON:
+            raise NotImplementedError()
 
 
 def phragmen(

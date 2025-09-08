@@ -93,6 +93,10 @@ PYBIND11_MODULE(_core, m) {
 
     m.def("mes_cost", &mes_cost, "Method of Equal Shares with cost utilities", "election"_a, "tie_breaking"_a);
 
+    m.def("cost_reduction_for_mes_cost", &cost_reduction_for_mes_cost,
+          "Cost reduction measure for Method of Equal Shares with cost utilities", "election"_a, "p"_a,
+          "tie_breaking"_a);
+
     m.def("phragmen", &phragmen, "Sequential Phragmén", "election"_a, "tie_breaking"_a);
 
     m.def("cost_reduction_for_phragmen", &cost_reduction_for_phragmen, "Cost reduction measure for Sequential Phragmén",
