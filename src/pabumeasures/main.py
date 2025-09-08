@@ -136,7 +136,11 @@ def mes_cost(
 
 
 def mes_cost_measure(
-    instance: Instance, profile: Profile, project: Project, measure: Measure, tie_breaking=ProjectComparator.ByCostAsc
+    instance: Instance,
+    profile: Profile,
+    project: Project,
+    measure: Measure,
+    tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc,
 ) -> int | None:
     election, _ = _translate_input_format(instance, profile)
     p = sorted(instance).index(project)
