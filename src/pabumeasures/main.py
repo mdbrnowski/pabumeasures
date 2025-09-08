@@ -31,16 +31,14 @@ def _translate_input_format(instance: Instance, profile: Profile) -> tuple[_core
 
     projects: list[Project] = sorted(instance)
     frozen_ballots: list[tuple[int, FrozenBallot]] = [(i, ballot.frozen()) for i, ballot in enumerate(profile)]
-    total_budget = int(
-        instance.budget_limit
-    )  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
+    total_budget = int(instance.budget_limit)
     approvers: dict[str, list[int]] = {project.name: [] for project in projects}
     for i, frozen_ballot in frozen_ballots:
         for project in frozen_ballot:
             approvers[project.name].append(i)
     project_embeddings: list[_core.ProjectEmbedding] = [
         _core.ProjectEmbedding(int(project.cost), project.name, approvers[project.name]) for project in projects
-    ]  # todo: remove int() (and type in ProjectEmbedding) if budget_limit can be float/mpq
+    ]
     name_to_project: dict[str, Project] = {project.name: project for project in projects}
     return _core.Election(total_budget, len(profile), project_embeddings), name_to_project
 
@@ -54,7 +52,11 @@ def greedy(
 
 
 def greedy_measure(
-    instance: Instance, profile: Profile, project: Project, measure: Measure, tie_breaking=ProjectComparator.ByCostAsc
+    instance: Instance,
+    profile: Profile,
+    project: Project,
+    measure: Measure,
+    tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc,
 ) -> int | None:
     election, _ = _translate_input_format(instance, profile)
     p = sorted(instance).index(project)
@@ -78,7 +80,11 @@ def greedy_over_cost(
 
 
 def greedy_over_cost_measure(
-    instance: Instance, profile: Profile, project: Project, measure: Measure, tie_breaking=ProjectComparator.ByCostAsc
+    instance: Instance,
+    profile: Profile,
+    project: Project,
+    measure: Measure,
+    tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc,
 ) -> int | None:
     election, _ = _translate_input_format(instance, profile)
     p = sorted(instance).index(project)
@@ -102,7 +108,11 @@ def mes_apr(
 
 
 def mes_apr_measure(
-    instance: Instance, profile: Profile, project: Project, measure: Measure, tie_breaking=ProjectComparator.ByCostAsc
+    instance: Instance,
+    profile: Profile,
+    project: Project,
+    measure: Measure,
+    tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc,
 ) -> int | None:
     election, _ = _translate_input_format(instance, profile)
     p = sorted(instance).index(project)
@@ -149,5 +159,21 @@ def phragmen(
     return BudgetAllocation(name_to_project[project_embeding.name] for project_embeding in result)
 
 
-def phragmen_measure(instance: Instance, profile: Profile, project: Project, measure: Measure) -> int | None:
-    raise NotImplementedError()
+def phragmen_measure(
+    instance: Instance,
+    profile: Profile,
+    project: Project,
+    measure: Measure,
+    tie_breaking: ProjectComparator = ProjectComparator.ByCostAsc,
+) -> int | None:
+    election, _ = _translate_input_format(instance, profile)
+    p = sorted(instance).index(project)
+    match measure:
+        case Measure.COST_REDUCTION:
+            return _core.cost_reduction_for_phragmen(election, p, tie_breaking)
+        case Measure.ADD_APPROVAL_OPTIMIST:
+            raise NotImplementedError()
+        case Measure.ADD_APPROVAL_PESSIMIST:
+            raise NotImplementedError()
+        case Measure.ADD_SINGLETON:
+            return _core.singleton_add_for_phragmen(election, p, tie_breaking)
