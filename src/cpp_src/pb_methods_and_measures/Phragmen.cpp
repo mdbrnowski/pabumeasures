@@ -58,15 +58,14 @@ std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectCo
     return winners;
 }
 
-std::optional<long long> cost_reduction_for_phragmen(const Election &election, int p,
-                                                     const ProjectComparator &tie_breaking) {
+long long cost_reduction_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
     auto n_voters = election.numVoters();
     auto projects = election.projects();
     std::vector<long double> load(n_voters, 0);
 
     auto pp = projects[p];
-    std::optional<long long> max_price_to_be_chosen = 0;
+    long long max_price_to_be_chosen = 0;
 
     while (!projects.empty()) {
         long double min_max_load = std::numeric_limits<long double>::max();
@@ -120,7 +119,7 @@ std::optional<long long> cost_reduction_for_phragmen(const Election &election, i
                  tie_breaking(winner, ProjectEmbedding(curr_max_price, pp.name(), pp.approvers())))) {
                 curr_max_price--;
             }
-            max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, curr_max_price);
+            max_price_to_be_chosen = std::max(max_price_to_be_chosen, curr_max_price);
         }
 
         if (would_break) {
