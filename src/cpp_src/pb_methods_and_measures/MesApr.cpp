@@ -111,14 +111,13 @@ std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectCom
     return winners;
 }
 
-std::optional<long long> cost_reduction_for_mes_apr(const Election &election, int p,
-                                                    const ProjectComparator &tie_breaking) {
+long long cost_reduction_for_mes_apr(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
     auto n_voters = election.numVoters();
     auto projects = election.projects();
     auto pp = projects[p];
     auto pp_approvers = pp.approvers();
-    std::optional<long long> max_price_to_be_chosen{};
+    long long max_price_to_be_chosen = 0;
 
     std::priority_queue<Candidate, std::vector<Candidate>, std::greater<Candidate>> remaining_candidates;
 
@@ -193,8 +192,7 @@ std::optional<long long> cost_reduction_for_mes_apr(const Election &election, in
             price_to_be_chosen =
                 pbmath::floor(price_to_be_chosen); // todo: if price doesn't have to be long long, change here
 
-            max_price_to_be_chosen =
-                pbmath::optional_max(max_price_to_be_chosen, static_cast<long long>(price_to_be_chosen));
+            max_price_to_be_chosen = std::max(max_price_to_be_chosen, static_cast<long long>(price_to_be_chosen));
 
             break;
         }
@@ -227,7 +225,7 @@ std::optional<long long> cost_reduction_for_mes_apr(const Election &election, in
             }
 
             max_price_to_be_chosen =
-                pbmath::optional_max(max_price_to_be_chosen, static_cast<long long>(floored_price_to_be_chosen));
+                std::max(max_price_to_be_chosen, static_cast<long long>(floored_price_to_be_chosen));
         }
 
         for (const auto &approver : winner.approvers()) {

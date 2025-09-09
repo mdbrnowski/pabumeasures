@@ -108,7 +108,6 @@ def test_cost_reduction_measure(seed, rule, rule_measure):
     allocation = rule(instance, profile)
     result = rule_measure(instance, profile, project, Measure.COST_REDUCTION)
 
-    assert result is not None
     if project in allocation:
         assert result == project.cost
     else:

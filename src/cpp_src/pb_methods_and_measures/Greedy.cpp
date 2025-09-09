@@ -30,13 +30,12 @@ std::vector<ProjectEmbedding> greedy(const Election &election, const ProjectComp
     return winners;
 }
 
-std::optional<long long> cost_reduction_for_greedy(const Election &election, int p,
-                                                   const ProjectComparator &tie_breaking) {
+long long cost_reduction_for_greedy(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
     auto projects = election.projects();
     auto pp = projects[p];
 
-    std::optional<long long> max_price_to_be_chosen{};
+    long long max_price_to_be_chosen = 0;
 
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
         if (a.approvers().size() == b.approvers().size()) {
@@ -61,11 +60,11 @@ std::optional<long long> cost_reduction_for_greedy(const Election &election, int
                 if (tie_breaking(ProjectEmbedding(project.cost() - 1, pp.name(), pp.approvers()), project)) {
                     current_max_price = std::max(current_max_price, project.cost() - 1);
                 }
-                max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, current_max_price);
+                max_price_to_be_chosen = std::max(max_price_to_be_chosen, current_max_price);
             }
             total_budget -= project.cost();
         } else if (project == pp) { // not taken because budget too tight
-            max_price_to_be_chosen = pbmath::optional_max(max_price_to_be_chosen, total_budget);
+            max_price_to_be_chosen = std::max(max_price_to_be_chosen, total_budget);
         }
     }
     return max_price_to_be_chosen;
