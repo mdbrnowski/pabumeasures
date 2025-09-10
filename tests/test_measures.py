@@ -27,40 +27,6 @@ NUMBER_OF_TIMES = 500
     ],
     ids=["greedy", "greedy_over_cost"],
 )
-def test_optimist_add_and_pessimist_add_measure(seed, rule, rule_measure):
-    """Test optimist-add and pessimist-add measures for rules for which they are equal."""
-    random.seed(seed)
-    instance, profile = get_random_election()
-    project = get_random_project(instance)
-    allocation = rule(instance, profile)
-    result = rule_measure(instance, profile, project, Measure.ADD_APPROVAL_OPTIMIST)
-    assert result == rule_measure(instance, profile, project, Measure.ADD_APPROVAL_PESSIMIST)
-    if project in allocation:
-        assert result == 0
-    else:
-        non_approvers = [ballot for ballot in profile if project not in ballot]
-        if result is None:
-            for na in non_approvers:
-                na.add(project)
-            assert project not in rule(instance, profile)
-        else:
-            assert 1 <= result <= len(non_approvers)
-            for na in non_approvers[:result]:
-                na.add(project)
-            assert project in rule(instance, profile)
-            non_approvers[0].remove(project)
-            assert project not in rule(instance, profile)
-
-
-@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
-@pytest.mark.parametrize(
-    "rule,rule_measure",
-    [
-        # todo: remove this, it's prepared for Phragmen and MES
-        (pabumeasures.greedy, pabumeasures.greedy_measure),
-    ],
-    ids=["greedy"],
-)
 def test_optimist_add_measure(seed, rule, rule_measure):
     random.seed(seed)
     instance, profile = get_random_election()
@@ -86,6 +52,45 @@ def test_optimist_add_measure(seed, rule, rule_measure):
                     return
                 for na in new_approvers:
                     na.remove(project)
+
+
+@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
+@pytest.mark.parametrize(
+    "rule,rule_measure",
+    [
+        (pabumeasures.greedy, pabumeasures.greedy_measure),
+        (pabumeasures.greedy_over_cost, pabumeasures.greedy_over_cost_measure),
+    ],
+    ids=["greedy", "greedy_over_cost"],
+)
+def test_pessimist_add_measure(seed, rule, rule_measure):
+    random.seed(seed)
+    instance, profile = get_random_election()
+    project = get_random_project(instance)
+    allocation = rule(instance, profile)
+    result = rule_measure(instance, profile, project, Measure.ADD_APPROVAL_PESSIMIST)
+    if project in allocation:
+        assert result == 0
+    else:
+        non_approvers = [ballot for ballot in profile if project not in ballot]
+        if result is None:
+            for na in non_approvers:
+                na.add(project)
+            assert project not in rule(instance, profile)
+        else:
+            assert 1 <= result <= len(non_approvers)
+            good_subsets: list[set[str]] = []  # subsets (of ballot names) that if added, make project selected
+            for new_approvers in _powerset(non_approvers):
+                for na in new_approvers:
+                    na.add(project)
+                if project in rule(instance, profile):
+                    current_subset: set[str] = {na.name for na in new_approvers}
+                    # here we use the fact that subsets are generated in increasing order of size
+                    if not any(previous_subset.issubset(current_subset) for previous_subset in good_subsets):
+                        good_subsets.append(current_subset)
+                for na in new_approvers:
+                    na.remove(project)
+            assert result == max(len(good_subset) for good_subset in good_subsets)
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
