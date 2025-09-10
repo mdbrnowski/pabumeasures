@@ -10,6 +10,7 @@ from pabumeasures import Measure
 
 
 def _powerset(iterable):
+    # powerset([1,2,3]) → () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
@@ -76,15 +77,15 @@ def test_optimist_add_measure(seed, rule, rule_measure):
             assert project not in rule(instance, profile)
         else:
             assert 1 <= result <= len(non_approvers)
-            best_result = len(non_approvers) + 1
             for new_approvers in _powerset(non_approvers):
                 for na in new_approvers:
                     na.add(project)
                 if project in rule(instance, profile):
-                    best_result = min(best_result, len(new_approvers))
+                    # here we use the fact that subsets are generated in increasing order of size
+                    assert result == len(new_approvers)
+                    return
                 for na in new_approvers:
                     na.remove(project)
-            assert result == best_result
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
