@@ -25,7 +25,8 @@ lcov --capture \
 
 # filter out system and third-party files from C++ coverage info
 lcov --remove coverage.info '/usr/*' '*/pybind11/*' '*/uv/python/*' \
-     -o coverage_filtered.info --ignore-errors unused
+     --output-file coverage_filtered.info \
+     --ignore-errors unused
 rm coverage.info
 
 # fix paths in Python coverage info
