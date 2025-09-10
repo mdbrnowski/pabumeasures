@@ -1,4 +1,5 @@
 import random
+from itertools import chain, combinations
 
 import pytest
 from pabutools.election import ApprovalBallot
@@ -6,6 +7,12 @@ from utils import get_random_election, get_random_project
 
 import pabumeasures
 from pabumeasures import Measure
+
+
+def _powerset(iterable):
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
+
 
 NUMBER_OF_TIMES = 500
 
@@ -45,13 +52,20 @@ def test_optimist_add_and_pessimist_add_measure(seed, rule, rule_measure):
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
-@pytest.mark.parametrize("measure", [Measure.ADD_APPROVAL_OPTIMIST, Measure.ADD_APPROVAL_PESSIMIST])
-def test_greedy_over_cost_measure(seed, measure):
+@pytest.mark.parametrize(
+    "rule,rule_measure",
+    [
+        # todo: remove this, it's prepared for Phragmen and MES
+        (pabumeasures.greedy, pabumeasures.greedy_measure),
+    ],
+    ids=["greedy"],
+)
+def test_optimist_add_measure(seed, rule, rule_measure):
     random.seed(seed)
     instance, profile = get_random_election()
     project = get_random_project(instance)
-    allocation = pabumeasures.greedy_over_cost(instance, profile)
-    result = pabumeasures.greedy_over_cost_measure(instance, profile, project, measure)
+    allocation = rule(instance, profile)
+    result = rule_measure(instance, profile, project, Measure.ADD_APPROVAL_OPTIMIST)
     if project in allocation:
         assert result == 0
     else:
@@ -59,14 +73,18 @@ def test_greedy_over_cost_measure(seed, measure):
         if result is None:
             for na in non_approvers:
                 na.add(project)
-            assert project not in pabumeasures.greedy_over_cost(instance, profile)
+            assert project not in rule(instance, profile)
         else:
             assert 1 <= result <= len(non_approvers)
-            for na in non_approvers[:result]:
-                na.add(project)
-            assert project in pabumeasures.greedy_over_cost(instance, profile)
-            non_approvers[0].remove(project)
-            assert project not in pabumeasures.greedy_over_cost(instance, profile)
+            best_result = len(non_approvers) + 1
+            for new_approvers in _powerset(non_approvers):
+                for na in new_approvers:
+                    na.add(project)
+                if project in rule(instance, profile):
+                    best_result = min(best_result, len(new_approvers))
+                for na in new_approvers:
+                    na.remove(project)
+            assert result == best_result
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
