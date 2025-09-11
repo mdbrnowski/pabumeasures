@@ -85,8 +85,38 @@ def test_singleton_add_measure(seed, rule, rule_measure):
         for i in range(len(profile), len(profile) + result):
             profile.append(ApprovalBallot({project}, name=f"SingletonAppBallot {i}"))
         assert project in rule(instance, profile)
-        profile[-1].remove(project)
+        profile.pop()
         assert project not in rule(instance, profile)
+
+
+@pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
+@pytest.mark.parametrize(
+    "rule,rule_measure",
+    [
+        (pabumeasures.mes_apr, pabumeasures.mes_apr_measure),
+        (pabumeasures.mes_cost, pabumeasures.mes_cost_measure),
+    ],
+    ids=["mes_apr", "mes_cost"],
+)
+def test_singleton_add_measure_for_mes(seed, rule, rule_measure):
+    random.seed(seed)
+    instance, profile = get_random_election()
+    project = get_random_project(instance)
+    allocation = rule(instance, profile)
+    result = rule_measure(instance, profile, project, Measure.ADD_SINGLETON)
+
+    if result is None:
+        assert instance.budget_limit == project.cost
+    else:
+        if project in allocation:
+            assert result == 0
+        else:
+            assert result >= 1
+            for i in range(len(profile), len(profile) + result):
+                profile.append(ApprovalBallot({project}, name=f"SingletonAppBallot {i}"))
+            assert project in rule(instance, profile)
+            profile.pop()
+            assert project not in rule(instance, profile)
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))

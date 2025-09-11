@@ -124,7 +124,7 @@ def mes_apr_measure(
         case Measure.ADD_APPROVAL_PESSIMIST:
             raise NotImplementedError()
         case Measure.ADD_SINGLETON:
-            raise NotImplementedError()
+            return _core.singleton_add_for_mes_apr(election, p, tie_breaking)
 
 
 def mes_cost(
@@ -152,7 +152,7 @@ def mes_cost_measure(
         case Measure.ADD_APPROVAL_PESSIMIST:
             raise NotImplementedError()
         case Measure.ADD_SINGLETON:
-            raise NotImplementedError()
+            return _core.singleton_add_for_mes_cost(election, p, tie_breaking)
 
 
 def phragmen(
