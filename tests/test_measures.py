@@ -80,7 +80,7 @@ def test_singleton_add_measure(seed, rule, rule_measure):
     result = rule_measure(instance, profile, project, Measure.ADD_SINGLETON)
 
     if rule in [pabumeasures.mes_apr, pabumeasures.mes_cost] and result is None:
-            assert instance.budget_limit == project.cost
+        assert instance.budget_limit == project.cost
     else:
         assert result is not None
 
@@ -93,7 +93,6 @@ def test_singleton_add_measure(seed, rule, rule_measure):
             assert project in rule(instance, profile)
             profile.pop()
             assert project not in rule(instance, profile)
-
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
