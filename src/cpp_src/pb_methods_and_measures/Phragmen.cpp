@@ -187,15 +187,15 @@ std::optional<int> singleton_add_for_phragmen(const Election &election, int p, c
 
         if (winner == pp && !would_break)
             return 0;
-        long double pp_max_load_denominator = pp.cost();
+        long double pp_max_load_numerator = pp.cost();
         for (const auto &approver : pp.approvers()) {
-            pp_max_load_denominator += load[approver];
+            pp_max_load_numerator += load[approver];
         }
-        int new_approvers_size = pbmath::ceil(pp_max_load_denominator / min_max_load);
+        int new_approvers_size = pbmath::ceil(pp_max_load_numerator / min_max_load);
         std::vector<int> new_approvers(new_approvers_size);
         std::iota(new_approvers.begin(), new_approvers.end(), 0);
         auto pp_max_load = new_approvers_size == 0 ? std::numeric_limits<long double>::max()
-                                                   : pp_max_load_denominator / new_approvers_size;
+                                                   : pp_max_load_numerator / new_approvers_size;
         if (pbmath::is_equal(min_max_load, pp_max_load) &&
             (would_break || tie_breaking(winner, ProjectEmbedding(pp.cost(), pp.name(), new_approvers)))) {
             new_approvers_size += 1;
