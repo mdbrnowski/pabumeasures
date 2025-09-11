@@ -49,5 +49,7 @@ def get_random_approval_profile(instance: Instance, num_agents: int) -> Approval
     profile = ApprovalProfile(instance=instance)
     sorted_instance: list[Project] = sorted(instance)
     for i in range(num_agents):
-        profile.append(get_random_approval_ballot(sorted_instance, name=f"RandomAppBallot {i}"))
+        ballot = get_random_approval_ballot(sorted_instance, name=f"RandomAppBallot {i}")
+        ballot.name = f"RandomAppBallot {i}"  # due to a bug in pabutools
+        profile.append(ballot)
     return profile
