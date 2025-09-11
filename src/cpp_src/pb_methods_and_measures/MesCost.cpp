@@ -259,16 +259,13 @@ std::optional<int> singleton_add_for_mes_cost(const Election &election, int p, c
     auto pp = projects[p];
     auto pp_approvers = pp.approvers();
 
-    if (pp.cost() == budget) {
-        if (pp_approvers.size() < num_voters) {
-            return {};
-        }
-        for (const auto &project : projects) {
-            if (tie_breaking(project, pp) && project.approvers().size() > 0) {
-                return {};
-            }
-        }
+    auto allocation = mes_cost(election, tie_breaking);
+    if (std::ranges::find(allocation, pp) != allocation.end()) {
         return 0;
+    }
+
+    if (pp.cost() == budget) {
+        return {};
     }
 
     int minimal_ans =
