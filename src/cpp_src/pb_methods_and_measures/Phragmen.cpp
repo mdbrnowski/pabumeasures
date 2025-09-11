@@ -136,6 +136,15 @@ long long cost_reduction_for_phragmen(const Election &election, int p, const Pro
     return max_price_to_be_chosen;
 }
 
+std::optional<int> optimist_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    auto total_budget = election.budget();
+    auto n_voters = election.numVoters();
+    auto projects = election.projects();
+    std::vector<long double> load(n_voters, 0);
+
+    return {};
+}
+
 std::optional<int> singleton_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
     auto n_voters = election.numVoters();

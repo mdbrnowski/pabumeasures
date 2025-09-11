@@ -9,4 +9,6 @@ std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectCo
 
 long long cost_reduction_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking);
 
+std::optional<int> optimist_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking);
+
 std::optional<int> singleton_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking);

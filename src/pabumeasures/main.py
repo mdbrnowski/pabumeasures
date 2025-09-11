@@ -176,7 +176,7 @@ def phragmen_measure(
         case Measure.COST_REDUCTION:
             return _core.cost_reduction_for_phragmen(election, p, tie_breaking)
         case Measure.ADD_APPROVAL_OPTIMIST:
-            raise NotImplementedError()
+            return _core.optimist_add_for_phragmen(election, p, tie_breaking)
         case Measure.ADD_APPROVAL_PESSIMIST:
             raise NotImplementedError()
         case Measure.ADD_SINGLETON:
