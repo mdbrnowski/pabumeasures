@@ -23,7 +23,8 @@ CMakeFiles/
 
 # Code coverage
 *.info
-cpp_coverage_html/
+.coverage
+html_coverage/
 
 # OS metadata
 .DS_Store

@@ -23,6 +23,7 @@ build-backend = "scikit_build_core.build"
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
+    "pytest-cov>=7.0.0",
     "ruff>=0.12.2",
 ]
 
@@ -31,3 +32,8 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.coverage.run]
+branch = true
+source = ["."]
+omit = ["tests/*"]
