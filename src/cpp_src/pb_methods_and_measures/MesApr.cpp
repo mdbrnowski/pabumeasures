@@ -247,7 +247,7 @@ std::optional<int> singleton_add_for_mes_apr(const Election &election, int p, co
     auto num_voters = election.numVoters();
     auto original_num_voters = num_voters;
 
-    auto pp = projects[p];
+    auto &pp = projects[p];
     auto pp_approvers = pp.approvers();
 
     auto allocation = mes_apr(election, tie_breaking);
@@ -266,7 +266,6 @@ std::optional<int> singleton_add_for_mes_apr(const Election &election, int p, co
         num_voters++;
     }
     pp = ProjectEmbedding(pp.cost(), pp.name(), pp_approvers);
-    projects[p] = pp;
 
     while (true) {
         auto allocation = mes_apr(Election(budget, num_voters, projects), tie_breaking);
@@ -277,6 +276,5 @@ std::optional<int> singleton_add_for_mes_apr(const Election &election, int p, co
         pp_approvers.push_back(num_voters);
         num_voters++;
         pp = ProjectEmbedding(pp.cost(), pp.name(), pp_approvers);
-        projects[p] = pp;
     }
 }
