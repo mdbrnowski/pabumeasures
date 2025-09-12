@@ -24,8 +24,9 @@ NUMBER_OF_TIMES = 500
     [
         (pabumeasures.greedy, pabumeasures.greedy_measure),
         (pabumeasures.greedy_over_cost, pabumeasures.greedy_over_cost_measure),
+        (pabumeasures.phragmen, pabumeasures.phragmen_measure),
     ],
-    ids=["greedy", "greedy_over_cost"],
+    ids=["greedy", "greedy_over_cost", "phragmen"],
 )
 def test_optimist_add_measure(seed, rule, rule_measure):
     random.seed(seed)
