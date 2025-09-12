@@ -249,3 +249,41 @@ long long cost_reduction_for_mes_cost(const Election &election, int p, const Pro
 
     return max_price_to_be_chosen;
 }
+
+std::optional<int> singleton_add_for_mes_cost(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    auto projects = election.projects();
+    auto budget = election.budget();
+    auto num_voters = election.numVoters();
+    auto original_num_voters = num_voters;
+
+    auto &pp = projects[p];
+    auto pp_approvers = pp.approvers();
+
+    auto allocation = mes_cost(election, tie_breaking);
+    if (std::ranges::find(allocation, pp) != allocation.end()) {
+        return 0;
+    }
+
+    if (pp.cost() == budget) {
+        return {};
+    }
+
+    int minimal_ans =
+        pbmath::ceil_div(static_cast<long long>(num_voters - pp_approvers.size()) * pp.cost(), budget - pp.cost());
+    while (pp_approvers.size() < minimal_ans) {
+        pp_approvers.push_back(num_voters);
+        num_voters++;
+    }
+    pp = ProjectEmbedding(pp.cost(), pp.name(), pp_approvers);
+
+    while (true) {
+        auto allocation = mes_cost(Election(budget, num_voters, projects), tie_breaking);
+        if (std::ranges::find(allocation, pp) != allocation.end()) {
+            return num_voters - original_num_voters;
+        }
+
+        pp_approvers.push_back(num_voters);
+        num_voters++;
+        pp = ProjectEmbedding(pp.cost(), pp.name(), pp_approvers);
+    }
+}
