@@ -26,12 +26,12 @@ std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectCo
         std::vector<ProjectEmbedding> round_winners;
         for (const auto &project : projects) {
             long double max_load = project.cost();
-            if (project.approvers().empty()) {
+            if (project.num_of_approvers() == 0) {
                 max_load = std::numeric_limits<long double>::max();
             } else {
                 for (const auto &approver : project.approvers())
                     max_load += load[approver];
-                max_load /= project.approvers().size();
+                max_load /= project.num_of_approvers();
             }
 
             if (pbmath::is_less_than(max_load, min_max_load)) {
@@ -47,7 +47,7 @@ std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectCo
             break;
         }
 
-        auto winner = *std::ranges::min_element(round_winners, tie_breaking);
+        const auto &winner = *std::ranges::min_element(round_winners, tie_breaking);
 
         for (const auto &approver : winner.approvers()) {
             load[approver] = min_max_load;
@@ -74,12 +74,12 @@ long long cost_reduction_for_phragmen(const Election &election, int p, const Pro
         std::vector<ProjectEmbedding> round_winners;
         for (const auto &project : projects) {
             long double max_load = project.cost();
-            if (project.approvers().empty()) {
+            if (project.num_of_approvers() == 0) {
                 max_load = std::numeric_limits<long double>::max();
             } else {
                 for (const auto &approver : project.approvers())
                     max_load += load[approver];
-                max_load /= project.approvers().size();
+                max_load /= project.num_of_approvers();
             }
 
             if (pbmath::is_less_than(max_load, min_max_load)) {
@@ -99,10 +99,10 @@ long long cost_reduction_for_phragmen(const Election &election, int p, const Pro
                 return winner.cost() > total_budget && !(winner == pp);
             });
 
-        auto winner = *std::ranges::min_element(round_winners, tie_breaking);
+        const auto &winner = *std::ranges::min_element(round_winners, tie_breaking);
 
-        if (pp.approvers().empty()) {
-            if (winner.approvers().empty() && !would_break_without_pp) {
+        if (pp.num_of_approvers() == 0) {
+            if (winner.num_of_approvers() == 0 && !would_break_without_pp) {
                 int new_p = std::ranges::find(round_winners, pp) - round_winners.begin();
                 auto new_election = Election(total_budget, round_winners.size(), round_winners);
                 return cost_reduction_for_greedy(new_election, new_p, tie_breaking);
@@ -112,9 +112,9 @@ long long cost_reduction_for_phragmen(const Election &election, int p, const Pro
             for (const auto &approver : pp.approvers()) {
                 load_sum += load[approver];
             }
-            long long curr_max_price = pbmath::floor(min_max_load * pp.approvers().size() - load_sum);
+            long long curr_max_price = pbmath::floor(min_max_load * pp.num_of_approvers() - load_sum);
             curr_max_price = std::min({curr_max_price, pp.cost(), total_budget});
-            long double pp_max_load = (curr_max_price + load_sum) / pp.approvers().size();
+            long double pp_max_load = (curr_max_price + load_sum) / pp.num_of_approvers();
 
             if (pbmath::is_equal(pp_max_load, min_max_load) &&
                 (would_break_without_pp ||
@@ -153,12 +153,12 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
         std::vector<ProjectEmbedding> round_winners;
         for (const auto &project : projects) {
             long double max_load = project.cost();
-            if (project.approvers().empty()) {
+            if (project.num_of_approvers() == 0) {
                 max_load = std::numeric_limits<long double>::max();
             } else {
                 for (const auto &approver : project.approvers())
                     max_load += load[approver];
-                max_load /= project.approvers().size();
+                max_load /= project.num_of_approvers();
             }
 
             if (pbmath::is_less_than(max_load, min_max_load)) {
@@ -177,7 +177,7 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
             any_of(round_winners.begin(), round_winners.end(),
                    [total_budget](const ProjectEmbedding &winner) { return winner.cost() > total_budget; });
 
-        auto winner = *std::ranges::min_element(round_winners, tie_breaking);
+        const auto &winner = *std::ranges::min_element(round_winners, tie_breaking);
 
         if (winner == pp && !would_break)
             return 0;
@@ -206,7 +206,7 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
                   (would_break || tie_breaking(winner, ProjectEmbedding(pp.cost(), pp.name(), new_approvers)))));
 
         if (enough_approvers) {
-            result = pbmath::optional_min(result, static_cast<int>(new_approvers.size() - pp.approvers().size()));
+            result = pbmath::optional_min(result, static_cast<int>(new_approvers.size() - pp.num_of_approvers()));
         }
 
         if (would_break) {
@@ -237,12 +237,12 @@ std::optional<int> singleton_add_for_phragmen(const Election &election, int p, c
         std::vector<ProjectEmbedding> round_winners;
         for (const auto &project : projects) {
             long double max_load = project.cost();
-            if (project.approvers().empty()) {
+            if (project.num_of_approvers() == 0) {
                 max_load = std::numeric_limits<long double>::max();
             } else {
                 for (const auto &approver : project.approvers())
                     max_load += load[approver];
-                max_load /= project.approvers().size();
+                max_load /= project.num_of_approvers();
             }
 
             if (pbmath::is_less_than(max_load, min_max_load)) {
@@ -261,7 +261,7 @@ std::optional<int> singleton_add_for_phragmen(const Election &election, int p, c
             any_of(round_winners.begin(), round_winners.end(),
                    [total_budget](const ProjectEmbedding &winner) { return winner.cost() > total_budget; });
 
-        auto winner = *std::ranges::min_element(round_winners, tie_breaking);
+        const auto &winner = *std::ranges::min_element(round_winners, tie_breaking);
 
         if (winner == pp && !would_break)
             return 0;
@@ -279,7 +279,7 @@ std::optional<int> singleton_add_for_phragmen(const Election &election, int p, c
             new_approvers_size += 1;
         }
 
-        result = pbmath::optional_min(result, new_approvers_size - static_cast<int>(pp.approvers().size()));
+        result = pbmath::optional_min(result, new_approvers_size - static_cast<int>(pp.num_of_approvers()));
 
         if (would_break) {
             break;
