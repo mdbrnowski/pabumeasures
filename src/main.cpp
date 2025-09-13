@@ -33,7 +33,8 @@ PYBIND11_MODULE(_core, m) {
         .def(py::init<int, std::string>(), "cost"_a, "name"_a)
         .def_property_readonly("cost", &ProjectEmbedding::cost)
         .def_property_readonly("name", &ProjectEmbedding::name)
-        .def_property_readonly("approvers", &ProjectEmbedding::approvers);
+        .def_property_readonly("approvers", &ProjectEmbedding::approvers)
+        .def_property_readonly("num_of_approvers", &ProjectEmbedding::num_of_approvers);
 
     py::class_<ProjectComparator>(m, "ProjectComparator")
         .def(py::init<std::vector<std::pair<ProjectComparator::Comparator, ProjectComparator::Ordering>>>(),
