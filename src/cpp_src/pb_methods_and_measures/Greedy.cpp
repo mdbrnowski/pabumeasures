@@ -14,10 +14,10 @@ std::vector<ProjectEmbedding> greedy(const Election &election, const ProjectComp
     auto projects = election.projects();
     std::vector<ProjectEmbedding> winners;
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
-        if (a.approvers().size() == b.approvers().size()) {
+        if (a.num_of_approvers() == b.num_of_approvers()) {
             return tie_breaking(a, b);
         }
-        return a.approvers().size() > b.approvers().size();
+        return a.num_of_approvers() > b.num_of_approvers();
     });
     for (const auto &project : projects) {
         if (project.cost() <= total_budget) {
@@ -38,21 +38,21 @@ long long cost_reduction_for_greedy(const Election &election, int p, const Proje
     long long max_price_to_be_chosen = 0;
 
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
-        if (a.approvers().size() == b.approvers().size()) {
+        if (a.num_of_approvers() == b.num_of_approvers()) {
             return tie_breaking(a, b);
         }
-        return a.approvers().size() > b.approvers().size();
+        return a.num_of_approvers() > b.num_of_approvers();
     });
 
     for (const auto &project : projects) {
-        if (project.approvers().size() < pp.approvers().size()) {
+        if (project.num_of_approvers() < pp.num_of_approvers()) {
             break;
         }
         if (project.cost() <= total_budget) {
             if (project == pp) {
                 return pp.cost();
             }
-            if (project.approvers().size() == pp.approvers().size()) { // Not taken because lost tie-breaking
+            if (project.num_of_approvers() == pp.num_of_approvers()) { // Not taken because lost tie-breaking
                 long long current_max_price = 0;
                 if (tie_breaking(ProjectEmbedding(project.cost(), pp.name(), pp.approvers()), project)) {
                     current_max_price = std::max(current_max_price, project.cost());
@@ -79,10 +79,10 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
         return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
-        if (a.approvers().size() == b.approvers().size()) {
+        if (a.num_of_approvers() == b.num_of_approvers()) {
             return tie_breaking(a, b);
         }
-        return a.approvers().size() > b.approvers().size();
+        return a.num_of_approvers() > b.num_of_approvers();
     });
     for (const auto &project : projects) {
         if (project.cost() <= total_budget) {
@@ -90,7 +90,7 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
                 return 0;
             }
             if (pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
-                int new_approvers_size = project.approvers().size();
+                int new_approvers_size = project.num_of_approvers();
                 std::vector<int> new_approvers(new_approvers_size);
                 std::iota(new_approvers.begin(), new_approvers.end(), 0);
                 auto new_pp = ProjectEmbedding(pp.cost(), pp.name(), new_approvers);
@@ -100,7 +100,7 @@ std::optional<int> optimist_add_for_greedy(const Election &election, int p, cons
                 if (new_approvers_size > num_voters)
                     return {};
                 else
-                    return new_approvers_size - pp.approvers().size();
+                    return new_approvers_size - pp.num_of_approvers();
             }
             total_budget -= project.cost();
         }
@@ -120,10 +120,10 @@ std::optional<int> singleton_add_for_greedy(const Election &election, int p, con
         return {}; // LCOV_EXCL_LINE (every project should be feasible)
 
     std::ranges::sort(projects, [&tie_breaking](ProjectEmbedding a, ProjectEmbedding b) {
-        if (a.approvers().size() == b.approvers().size()) {
+        if (a.num_of_approvers() == b.num_of_approvers()) {
             return tie_breaking(a, b);
         }
-        return a.approvers().size() > b.approvers().size();
+        return a.num_of_approvers() > b.num_of_approvers();
     });
     for (const auto &project : projects) {
         if (project.cost() <= total_budget) {
@@ -131,14 +131,14 @@ std::optional<int> singleton_add_for_greedy(const Election &election, int p, con
                 return 0;
             }
             if (pp.cost() > total_budget - project.cost()) { // if (last moment to add pp)
-                int new_approvers_size = project.approvers().size();
+                int new_approvers_size = project.num_of_approvers();
                 std::vector<int> new_approvers(new_approvers_size);
                 std::iota(new_approvers.begin(), new_approvers.end(), 0);
                 auto new_pp = ProjectEmbedding(pp.cost(), pp.name(), new_approvers);
                 if (tie_breaking(project, new_pp)) {
                     new_approvers_size += 1;
                 }
-                return new_approvers_size - pp.approvers().size();
+                return new_approvers_size - pp.num_of_approvers();
             }
             total_budget -= project.cost();
         }

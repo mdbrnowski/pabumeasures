@@ -24,7 +24,7 @@ struct Candidate {
 std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
     auto n_voters = election.numVoters();
-    auto projects = election.projects();
+    const auto &projects = election.projects();
 
     std::vector<ProjectEmbedding> winners;
 
@@ -46,7 +46,7 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
         while (!remaining_candidates.empty()) {
             auto current_candidate = remaining_candidates.top();
             remaining_candidates.pop();
-            auto project = projects[current_candidate.index];
+            const auto &project = projects[current_candidate.index];
             auto previous_max_payment_by_cost = current_candidate.max_payment_by_cost;
 
             if (pbmath::is_greater_than(previous_max_payment_by_cost, min_max_payment_by_cost)) {
@@ -105,7 +105,7 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
         }
 
         for (auto &candidate : candidates_to_reinsert) {
-            remaining_candidates.push(std::move(candidate));
+            remaining_candidates.push(candidate);
         }
         candidates_to_reinsert.clear();
     }
@@ -116,8 +116,8 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
 long long cost_reduction_for_mes_cost(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
     auto n_voters = election.numVoters();
-    auto projects = election.projects();
-    auto pp = projects[p];
+    const auto &projects = election.projects();
+    const auto &pp = projects[p];
     auto pp_approvers = pp.approvers();
     long long max_price_to_be_chosen = 0;
 
@@ -139,7 +139,7 @@ long long cost_reduction_for_mes_cost(const Election &election, int p, const Pro
         while (!remaining_candidates.empty()) {
             auto current_candidate = remaining_candidates.top();
             remaining_candidates.pop();
-            auto project = projects[current_candidate.index];
+            const auto &project = projects[current_candidate.index];
             auto previous_max_payment_by_cost = current_candidate.max_payment_by_cost;
 
             if (pbmath::is_greater_than(previous_max_payment_by_cost, min_max_payment_by_cost)) {
@@ -242,7 +242,7 @@ long long cost_reduction_for_mes_cost(const Election &election, int p, const Pro
         }
 
         for (auto &candidate : candidates_to_reinsert) {
-            remaining_candidates.push(std::move(candidate));
+            remaining_candidates.push(candidate);
         }
         candidates_to_reinsert.clear();
     }
