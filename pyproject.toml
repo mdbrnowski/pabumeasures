@@ -27,6 +27,13 @@ dev = [
     "ruff>=0.12.2",
 ]
 
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "src/**/*.{h,c,hpp,cpp}" },
+    { file = "CMakeLists.txt" },
+]
+
 [tool.ruff]
 line-length = 120
 
