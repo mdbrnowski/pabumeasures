@@ -7,8 +7,8 @@ ProjectComparator::ProjectComparator(Comparator comparator, Ordering ordering)
     : criteria_{std::make_pair(comparator, ordering)} {}
 
 bool ProjectComparator::operator()(const ProjectEmbedding &a, const ProjectEmbedding &b) const {
-    for (const auto &[cmpType, order] : criteria_) {
-        auto cmp = compare(a, b, cmpType, order);
+    for (const auto &[cmp_type, order] : criteria_) {
+        auto cmp = compare(a, b, cmp_type, order);
         if (cmp != std::strong_ordering::equal) {
             return cmp == std::strong_ordering::less;
         }
@@ -18,7 +18,7 @@ bool ProjectComparator::operator()(const ProjectEmbedding &a, const ProjectEmbed
     // todo: add information about tie-breaking ensuring total ordering to documentation
 }
 
-std::strong_ordering ProjectComparator::applyOrder(std::strong_ordering cmp, Ordering order) {
+std::strong_ordering ProjectComparator::apply_order(std::strong_ordering cmp, Ordering order) {
     if (order == Ordering::ASCENDING)
         return cmp;
     if (cmp == std::strong_ordering::less)
@@ -29,14 +29,14 @@ std::strong_ordering ProjectComparator::applyOrder(std::strong_ordering cmp, Ord
 }
 
 std::strong_ordering ProjectComparator::compare(const ProjectEmbedding &a, const ProjectEmbedding &b,
-                                                Comparator cmpType, Ordering order) {
-    switch (cmpType) {
+                                                Comparator cmp_type, Ordering order) {
+    switch (cmp_type) {
     case Comparator::COST:
-        return applyOrder(a.cost_ <=> b.cost_, order);
+        return apply_order(a.cost_ <=> b.cost_, order);
     case Comparator::VOTES:
-        return applyOrder(a.approvers_.size() <=> b.approvers_.size(), order);
+        return apply_order(a.approvers_.size() <=> b.approvers_.size(), order);
     case Comparator::LEXICOGRAPHIC:
-        return applyOrder(a.name_ <=> b.name_, order);
+        return apply_order(a.name_ <=> b.name_, order);
     }
     return std::strong_ordering::equal; // LCOV_EXCL_LINE (project names should be different)
 }

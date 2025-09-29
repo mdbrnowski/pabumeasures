@@ -1,4 +1,4 @@
-#include "MesCost.h"
+#include "MesApr.h"
 
 #include "utils/Election.h"
 #include "utils/Math.h"
@@ -15,15 +15,15 @@
 namespace {
 struct Candidate {
     int index;
-    long double max_payment_by_cost;
+    long double max_payment;
 
-    bool operator>(const Candidate &other) const { return max_payment_by_cost > other.max_payment_by_cost; }
+    bool operator>(const Candidate &other) const { return max_payment > other.max_payment; }
 };
 } // namespace
 
-std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectComparator &tie_breaking) {
+std::vector<ProjectEmbedding> mes_apr(const Election &election, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
-    auto n_voters = election.numVoters();
+    auto n_voters = election.num_of_voters();
     const auto &projects = election.projects();
 
     std::vector<ProjectEmbedding> winners;
@@ -40,18 +40,18 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
     candidates_to_reinsert.reserve(projects.size());
 
     while (true) {
-        long double min_max_payment_by_cost = std::numeric_limits<long double>::max();
+        long double min_max_payment = std::numeric_limits<long double>::max();
         Candidate best_candidate;
 
         while (!remaining_candidates.empty()) {
             auto current_candidate = remaining_candidates.top();
             remaining_candidates.pop();
             const auto &project = projects[current_candidate.index];
-            auto previous_max_payment_by_cost = current_candidate.max_payment_by_cost;
+            auto previous_max_payment = current_candidate.max_payment;
 
-            if (pbmath::is_greater_than(previous_max_payment_by_cost, min_max_payment_by_cost)) {
+            if (pbmath::is_greater_than(previous_max_payment, min_max_payment)) {
                 candidates_to_reinsert.push_back(current_candidate);
-                break; // We already selected the best possible - max_payment_by_cost value can only increase
+                break; // We already selected the best possible - max_payment value can only increase
             }
 
             long double money_behind_project = 0;
@@ -71,20 +71,19 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
 
             for (const auto &approver : approvers) {
                 long double max_payment = (static_cast<long double>(project.cost()) - paid_so_far) / denominator;
-                long double max_payment_by_cost = max_payment / project.cost();
                 if (pbmath::is_greater_than(max_payment, budget[approver])) { // cannot afford to fully participate
                     paid_so_far += budget[approver];
                     denominator--;
                 } else { // from this voter, everyone can fully participate
-                    current_candidate.max_payment_by_cost = max_payment_by_cost;
-                    if (pbmath::is_less_than(max_payment_by_cost, min_max_payment_by_cost) ||
-                        (pbmath::is_equal(max_payment_by_cost, min_max_payment_by_cost) &&
+                    current_candidate.max_payment = max_payment;
+                    if (pbmath::is_less_than(max_payment, min_max_payment) ||
+                        (pbmath::is_equal(max_payment, min_max_payment) &&
                          tie_breaking(project, projects[best_candidate.index]))) {
-                        if (min_max_payment_by_cost !=
+                        if (min_max_payment !=
                             std::numeric_limits<long double>::max()) { // Not the first "best" candidate
                             candidates_to_reinsert.push_back(best_candidate);
                         }
-                        min_max_payment_by_cost = max_payment_by_cost;
+                        min_max_payment = max_payment;
                         best_candidate = current_candidate;
                     } else {
                         candidates_to_reinsert.push_back(current_candidate);
@@ -94,14 +93,13 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
             }
         }
 
-        if (min_max_payment_by_cost == std::numeric_limits<long double>::max()) { // No more affordable projects
+        if (min_max_payment == std::numeric_limits<long double>::max()) { // No more affordable projects
             break;
         }
         winners.push_back(projects[best_candidate.index]);
 
         for (const auto &approver : projects[best_candidate.index].approvers()) {
-            budget[approver] =
-                std::max(0.0L, budget[approver] - min_max_payment_by_cost * projects[best_candidate.index].cost());
+            budget[approver] = std::max(0.0L, budget[approver] - min_max_payment);
         }
 
         for (auto &candidate : candidates_to_reinsert) {
@@ -113,9 +111,9 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
     return winners;
 }
 
-long long cost_reduction_for_mes_cost(const Election &election, int p, const ProjectComparator &tie_breaking) {
+long long cost_reduction_for_mes_apr(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
-    auto n_voters = election.numVoters();
+    auto n_voters = election.num_of_voters();
     const auto &projects = election.projects();
     const auto &pp = projects[p];
     auto pp_approvers = pp.approvers();
@@ -133,18 +131,18 @@ long long cost_reduction_for_mes_cost(const Election &election, int p, const Pro
     candidates_to_reinsert.reserve(projects.size());
 
     while (true) {
-        long double min_max_payment_by_cost = std::numeric_limits<long double>::max();
+        long double min_max_payment = std::numeric_limits<long double>::max();
         Candidate best_candidate;
 
         while (!remaining_candidates.empty()) {
             auto current_candidate = remaining_candidates.top();
             remaining_candidates.pop();
             const auto &project = projects[current_candidate.index];
-            auto previous_max_payment_by_cost = current_candidate.max_payment_by_cost;
+            long double previous_max_payment = current_candidate.max_payment;
 
-            if (pbmath::is_greater_than(previous_max_payment_by_cost, min_max_payment_by_cost)) {
+            if (pbmath::is_greater_than(previous_max_payment, min_max_payment)) {
                 candidates_to_reinsert.push_back(current_candidate);
-                break; // We already selected the best possible - max_payment_by_cost value can only increase
+                break; // We already selected the best possible - max_payment value can only increase
             }
 
             long double money_behind_project = 0;
@@ -164,20 +162,19 @@ long long cost_reduction_for_mes_cost(const Election &election, int p, const Pro
 
             for (const auto &approver : approvers) {
                 long double max_payment = (static_cast<long double>(project.cost()) - paid_so_far) / denominator;
-                long double max_payment_by_cost = max_payment / project.cost();
                 if (pbmath::is_greater_than(max_payment, budget[approver])) { // cannot afford to fully participate
                     paid_so_far += budget[approver];
                     denominator--;
                 } else { // from this voter, everyone can fully participate
-                    current_candidate.max_payment_by_cost = max_payment_by_cost;
-                    if (pbmath::is_less_than(max_payment_by_cost, min_max_payment_by_cost) ||
-                        (pbmath::is_equal(max_payment_by_cost, min_max_payment_by_cost) &&
+                    current_candidate.max_payment = max_payment;
+                    if (pbmath::is_less_than(max_payment, min_max_payment) ||
+                        (pbmath::is_equal(max_payment, min_max_payment) &&
                          tie_breaking(project, projects[best_candidate.index]))) {
-                        if (min_max_payment_by_cost !=
+                        if (min_max_payment !=
                             std::numeric_limits<long double>::max()) { // Not the first "best" candidate
                             candidates_to_reinsert.push_back(best_candidate);
                         }
-                        min_max_payment_by_cost = max_payment_by_cost;
+                        min_max_payment = max_payment;
                         best_candidate = current_candidate;
                     } else {
                         candidates_to_reinsert.push_back(current_candidate);
@@ -187,7 +184,7 @@ long long cost_reduction_for_mes_cost(const Election &election, int p, const Pro
             }
         }
 
-        if (min_max_payment_by_cost == std::numeric_limits<long double>::max()) { // No more affordable projects
+        if (min_max_payment == std::numeric_limits<long double>::max()) { // No more affordable projects
             long double price_to_be_chosen = 0;
             for (const auto &approver : pp_approvers) {
                 price_to_be_chosen += budget[approver];
@@ -200,45 +197,39 @@ long long cost_reduction_for_mes_cost(const Election &election, int p, const Pro
             break;
         }
 
-        auto winner = projects[best_candidate.index];
-
-        if (winner == pp) {
+        if (best_candidate.index == p) {
             return pp.cost();
         }
 
-        // todo: try lowering complexity to O(1) per iteration
+        auto winner = projects[best_candidate.index];
+
         { // measure calculation
             std::ranges::sort(pp_approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
-            long long price_l = 0, price_r = pp.cost();
-            while (price_l + 1 < price_r) {
-                long long price_mid = (price_l + price_r) / 2;
-                long double paid_so_far = 0, denominator = pp_approvers.size();
 
-                for (const auto &approver : pp_approvers) {
-                    long double max_payment = (static_cast<long double>(price_mid) - paid_so_far) / denominator;
-                    long double max_payment_by_cost = max_payment / price_mid;
-                    if (pbmath::is_greater_than(max_payment, budget[approver])) { // cannot afford to fully participate
-                        paid_so_far += budget[approver];
-                        denominator--;
-                    } else { // from this voter, everyone can fully participate
-                        if (pbmath::is_less_than(max_payment_by_cost, min_max_payment_by_cost) ||
-                            (pbmath::is_equal(max_payment_by_cost, min_max_payment_by_cost) &&
-                             tie_breaking(ProjectEmbedding(price_mid, pp.name(), pp_approvers), winner))) {
-                            price_l = price_mid;
-                        }
-                        break;
-                    }
-                }
-                if (price_l != price_mid) {
-                    price_r = price_mid;
+            long double price_to_be_chosen = 0, full_participators_number = pp_approvers.size();
+            for (const auto &approver : pp_approvers) {
+                if (pbmath::is_greater_than(min_max_payment, budget[approver])) { // cannot afford to fully participate
+                    price_to_be_chosen += budget[approver];
+                    full_participators_number--;
+                } else {
+                    price_to_be_chosen += full_participators_number * min_max_payment;
+                    break;
                 }
             }
 
-            max_price_to_be_chosen = std::max(max_price_to_be_chosen, price_l);
+            long double floored_price_to_be_chosen =
+                pbmath::floor(price_to_be_chosen); // todo: if price doesn't have to be long long, change here
+            if (pbmath::is_equal(floored_price_to_be_chosen, price_to_be_chosen) &&
+                tie_breaking(winner, ProjectEmbedding(floored_price_to_be_chosen, pp.name(), pp_approvers))) {
+                floored_price_to_be_chosen--;
+            }
+
+            max_price_to_be_chosen =
+                std::max(max_price_to_be_chosen, static_cast<long long>(floored_price_to_be_chosen));
         }
 
         for (const auto &approver : winner.approvers()) {
-            budget[approver] = std::max(0.0L, budget[approver] - min_max_payment_by_cost * winner.cost());
+            budget[approver] = std::max(0.0L, budget[approver] - min_max_payment);
         }
 
         for (auto &candidate : candidates_to_reinsert) {
@@ -250,16 +241,16 @@ long long cost_reduction_for_mes_cost(const Election &election, int p, const Pro
     return max_price_to_be_chosen;
 }
 
-std::optional<int> singleton_add_for_mes_cost(const Election &election, int p, const ProjectComparator &tie_breaking) {
+std::optional<int> singleton_add_for_mes_apr(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto projects = election.projects();
     auto budget = election.budget();
-    auto num_voters = election.numVoters();
-    auto original_num_voters = num_voters;
+    auto num_of_voters = election.num_of_voters();
+    auto original_num_of_voters = num_of_voters;
 
     auto &pp = projects[p];
     auto pp_approvers = pp.approvers();
 
-    auto allocation = mes_cost(election, tie_breaking);
+    auto allocation = mes_apr(election, tie_breaking);
     if (std::ranges::find(allocation, pp) != allocation.end()) {
         return 0;
     }
@@ -269,21 +260,21 @@ std::optional<int> singleton_add_for_mes_cost(const Election &election, int p, c
     }
 
     int minimal_ans =
-        pbmath::ceil_div(static_cast<long long>(num_voters - pp_approvers.size()) * pp.cost(), budget - pp.cost());
+        pbmath::ceil_div(static_cast<long long>(num_of_voters - pp_approvers.size()) * pp.cost(), budget - pp.cost());
     while (pp_approvers.size() < minimal_ans) {
-        pp_approvers.push_back(num_voters);
-        num_voters++;
+        pp_approvers.push_back(num_of_voters);
+        num_of_voters++;
     }
     pp = ProjectEmbedding(pp.cost(), pp.name(), pp_approvers);
 
     while (true) {
-        auto allocation = mes_cost(Election(budget, num_voters, projects), tie_breaking);
+        auto allocation = mes_apr(Election(budget, num_of_voters, projects), tie_breaking);
         if (std::ranges::find(allocation, pp) != allocation.end()) {
-            return num_voters - original_num_voters;
+            return num_of_voters - original_num_of_voters;
         }
 
-        pp_approvers.push_back(num_voters);
-        num_voters++;
+        pp_approvers.push_back(num_of_voters);
+        num_of_voters++;
         pp = ProjectEmbedding(pp.cost(), pp.name(), pp_approvers);
     }
 }

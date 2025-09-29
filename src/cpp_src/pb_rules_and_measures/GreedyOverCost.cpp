@@ -79,7 +79,7 @@ long long cost_reduction_for_greedy_over_cost(const Election &election, int p, c
 std::optional<int> optimist_add_for_greedy_over_cost(const Election &election, int p,
                                                      const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
-    auto num_voters = election.numVoters();
+    auto num_of_voters = election.num_of_voters();
     auto projects = election.projects();
     auto pp = projects[p];
     if (pp.cost() > total_budget)
@@ -108,7 +108,7 @@ std::optional<int> optimist_add_for_greedy_over_cost(const Election &election, i
                     tie_breaking(project, new_pp)) {
                     new_approvers_size += 1;
                 }
-                if (new_approvers_size > num_voters)
+                if (new_approvers_size > num_of_voters)
                     return {};
                 else
                     return new_approvers_size - pp.num_of_approvers();

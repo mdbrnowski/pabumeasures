@@ -1,8 +1,8 @@
-#include "cpp_src/pb_methods_and_measures/Greedy.h"
-#include "cpp_src/pb_methods_and_measures/GreedyOverCost.h"
-#include "cpp_src/pb_methods_and_measures/MesApr.h"
-#include "cpp_src/pb_methods_and_measures/MesCost.h"
-#include "cpp_src/pb_methods_and_measures/Phragmen.h"
+#include "cpp_src/pb_rules_and_measures/Greedy.h"
+#include "cpp_src/pb_rules_and_measures/GreedyOverCost.h"
+#include "cpp_src/pb_rules_and_measures/MesApr.h"
+#include "cpp_src/pb_rules_and_measures/MesCost.h"
+#include "cpp_src/pb_rules_and_measures/Phragmen.h"
 #include "cpp_src/utils/Election.h"
 #include "cpp_src/utils/ProjectComparator.h"
 #include "cpp_src/utils/ProjectEmbedding.h"
@@ -53,9 +53,9 @@ PYBIND11_MODULE(_core, m) {
                                       [](py::object) { return ProjectComparator::ByCostDescThenVotesDesc; });
 
     py::class_<Election>(m, "Election")
-        .def(py::init<long long, int, std::vector<ProjectEmbedding>>(), "budget"_a, "num_voters"_a, "projects"_a)
+        .def(py::init<long long, int, std::vector<ProjectEmbedding>>(), "budget"_a, "num_of_voters"_a, "projects"_a)
         .def_property_readonly("budget", &Election::budget)
-        .def_property_readonly("num_voters", &Election::numVoters)
+        .def_property_readonly("num_of_voters", &Election::num_of_voters)
         .def_property_readonly("projects", &Election::projects);
 
     m.def("greedy", &greedy, "GreedyAV", "election"_a, "tie_breaking"_a);
