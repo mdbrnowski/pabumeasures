@@ -55,7 +55,7 @@ PYBIND11_MODULE(_core, m) {
     py::class_<Election>(m, "Election")
         .def(py::init<long long, int, std::vector<ProjectEmbedding>>(), "budget"_a, "num_voters"_a, "projects"_a)
         .def_property_readonly("budget", &Election::budget)
-        .def_property_readonly("num_voters", &Election::numVoters)
+        .def_property_readonly("num_voters", &Election::num_voters)
         .def_property_readonly("projects", &Election::projects);
 
     m.def("greedy", &greedy, "GreedyAV", "election"_a, "tie_breaking"_a);

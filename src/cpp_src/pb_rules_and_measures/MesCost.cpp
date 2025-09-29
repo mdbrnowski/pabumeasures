@@ -23,7 +23,7 @@ struct Candidate {
 
 std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
-    auto n_voters = election.numVoters();
+    auto n_voters = election.num_voters();
     const auto &projects = election.projects();
 
     std::vector<ProjectEmbedding> winners;
@@ -115,7 +115,7 @@ std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectCo
 
 long long cost_reduction_for_mes_cost(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
-    auto n_voters = election.numVoters();
+    auto n_voters = election.num_voters();
     const auto &projects = election.projects();
     const auto &pp = projects[p];
     auto pp_approvers = pp.approvers();
@@ -253,7 +253,7 @@ long long cost_reduction_for_mes_cost(const Election &election, int p, const Pro
 std::optional<int> singleton_add_for_mes_cost(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto projects = election.projects();
     auto budget = election.budget();
-    auto num_voters = election.numVoters();
+    auto num_voters = election.num_voters();
     auto original_num_voters = num_voters;
 
     auto &pp = projects[p];
