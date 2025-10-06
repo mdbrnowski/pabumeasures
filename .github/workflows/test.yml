@@ -37,7 +37,10 @@ jobs:
         run: |
           wget -O or-tools.tar.gz https://github.com/google/or-tools/releases/download/v9.12/or-tools_amd64_ubuntu-24.04_cpp_v9.12.4544.tar.gz
           tar -xzf or-tools.tar.gz
-          sudo cp -r or-tools_x86_64_Ubuntu*/* /usr/local/
+          export ORTOOLS_DIR=$(realpath $(find . -maxdepth 1 -name "or-tools_x86_64_Ubuntu*" -type d))
+          echo "ORTOOLS_DIR=$ORTOOLS_DIR" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$ORTOOLS_DIR/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "PATH=$ORTOOLS_DIR/bin:$PATH" >> $GITHUB_ENV
       - name: Install the package
         run: |
           python -m pip install --upgrade pip
