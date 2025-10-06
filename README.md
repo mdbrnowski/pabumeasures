@@ -1,7 +1,7 @@
 # Pabumeasures
 
 ## Release
-While preparing the wheels, c++ libraries should be linked statically. To do it, cmake should be called with flag `-DBUILD_STATIC=ON`.
+While preparing the wheels, C++ libraries should be linked statically. To do it, CMake should be called with flag `-DBUILD_STATIC=ON`.
 
 For example if I wanted to run tests on a statically compiled version I'd clear the cache and then run 
 ```bash
