@@ -33,6 +33,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install OR-Tools
+        run: |
+          wget https://github.com/google/or-tools/releases/download/v9.12/or-tools_amd64_ubuntu-24.04_cpp_v9.12.4544.tar.gz
+          tar -xzf or-tools_amd64_ubuntu-24.04_cpp_v9.12.4544.tar.gz
+          sudo cp -r or-tools_x86_64_Ubuntu-24.04_cpp_v9.12.4544/* /usr/local/
       - name: Install the package
         run: |
           python -m pip install --upgrade pip

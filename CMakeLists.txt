@@ -13,7 +13,6 @@ if(BUILD_STATIC)
     include(FetchContent)
 
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
-    set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
     set(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/lib")
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
     set(BUILD_DEPS ON CACHE BOOL "Build dependencies automatically" FORCE)
