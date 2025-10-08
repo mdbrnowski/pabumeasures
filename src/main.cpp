@@ -92,6 +92,10 @@ PYBIND11_MODULE(_core, m) {
           "Cost reduction measure for Method of Equal Shares with approval utilities", "election"_a, "p"_a,
           "tie_breaking"_a);
 
+    m.def("optimist_add_for_mes_apr", &optimist_add_for_mes_apr,
+          "Optimist-add measure for Method of Equal Shares with approval utilities", "election"_a, "p"_a,
+          "tie_breaking"_a);
+
     m.def("singleton_add_for_mes_apr", &singleton_add_for_mes_apr,
           "Singleton-add measure for Method of Equal Shares with approval utilities", "election"_a, "p"_a,
           "tie_breaking"_a);
