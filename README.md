@@ -3,7 +3,7 @@
 ## Release
 While preparing the wheels, C++ libraries should be linked statically. To do it, CMake should be called with flag `-DBUILD_STATIC=ON`.
 
-For example if I wanted to run tests on a statically compiled version I'd clear the cache and then run 
+For example if I wanted to run tests on a statically linked version I'd clear the cache and then run 
 ```bash
 CMAKE_ARGS="-DBUILD_STATIC=ON" uv run pytest
 ```
