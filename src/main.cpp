@@ -120,6 +120,9 @@ PYBIND11_MODULE(_core, m) {
     m.def("optimist_add_for_phragmen", &optimist_add_for_phragmen, "Optimist-add measure for Sequential Phragmén",
           "election"_a, "p"_a, "tie_breaking"_a);
 
+    m.def("pessimist_add_for_phragmen", &pessimist_add_for_phragmen, "Pessimist-add measure for Sequential Phragmén",
+          "election"_a, "p"_a, "tie_breaking"_a);
+
     m.def("singleton_add_for_phragmen", &singleton_add_for_phragmen, "Singleton-add measure for Sequential Phragmén",
           "election"_a, "p"_a, "tie_breaking"_a);
 }

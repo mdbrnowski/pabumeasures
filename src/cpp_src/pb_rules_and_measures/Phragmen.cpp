@@ -223,6 +223,10 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
     return result;
 }
 
+std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    return {};
+}
+
 std::optional<int> singleton_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
     auto n_voters = election.num_of_voters();
