@@ -434,8 +434,8 @@ std::optional<int> optimist_add_for_mes_apr(const Election &election, int p, con
 std::optional<int> singleton_add_for_mes_apr(const Election &election, int p, const ProjectComparator &tie_breaking) {
     auto projects = election.projects();
     auto budget = election.budget();
-    auto num_of_voters = election.num_of_voters();
-    auto original_num_of_voters = num_of_voters;
+    auto n_voters = election.num_of_voters();
+    auto original_n_voters = n_voters;
 
     auto &pp = projects[p];
     auto pp_approvers = pp.approvers();
@@ -450,21 +450,21 @@ std::optional<int> singleton_add_for_mes_apr(const Election &election, int p, co
     }
 
     int minimal_ans =
-        pbmath::ceil_div(static_cast<long long>(num_of_voters - pp_approvers.size()) * pp.cost(), budget - pp.cost());
+        pbmath::ceil_div(static_cast<long long>(n_voters - pp_approvers.size()) * pp.cost(), budget - pp.cost());
     while (pp_approvers.size() < minimal_ans) {
-        pp_approvers.push_back(num_of_voters);
-        num_of_voters++;
+        pp_approvers.push_back(n_voters);
+        n_voters++;
     }
     pp = ProjectEmbedding(pp.cost(), pp.name(), pp_approvers);
 
     while (true) {
-        auto allocation = mes_apr(Election(budget, num_of_voters, projects), tie_breaking);
+        auto allocation = mes_apr(Election(budget, n_voters, projects), tie_breaking);
         if (std::ranges::find(allocation, pp) != allocation.end()) {
-            return num_of_voters - original_num_of_voters;
+            return n_voters - original_n_voters;
         }
 
-        pp_approvers.push_back(num_of_voters);
-        num_of_voters++;
+        pp_approvers.push_back(n_voters);
+        n_voters++;
         pp = ProjectEmbedding(pp.cost(), pp.name(), pp_approvers);
     }
 }
