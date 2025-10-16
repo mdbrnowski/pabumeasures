@@ -348,11 +348,11 @@ std::optional<int> optimist_add_for_mes_apr(const Election &election, int p, con
             break;
         }
 
-        if (best_candidate.index == p) {
+        auto winner = projects[best_candidate.index];
+
+        if (winner == pp) {
             return 0;
         }
-
-        auto winner = projects[best_candidate.index];
 
         { // measure calculation
 
