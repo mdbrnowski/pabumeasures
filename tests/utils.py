@@ -4,7 +4,7 @@
 import random
 from math import ceil
 
-from pabutools.election import ApprovalProfile, Instance, Project, get_random_approval_ballot
+from pabutools.election import ApprovalProfile, Instance, Project, get_random_approval_profile
 
 
 def get_random_election(
@@ -37,19 +37,3 @@ def get_random_instance(num_projects: int, min_cost: int, max_cost: int) -> Inst
     )
     inst.budget_limit = random.randint(ceil(max(p.cost for p in inst)), ceil(sum(p.cost for p in inst)))
     return inst
-
-
-def get_random_approval_profile(instance: Instance, num_agents: int) -> ApprovalProfile:
-    """
-    Generates a random approval profile in which approval ballots are such that each project is approved with
-    probability 0.5.
-
-    Function adapted from pabutools, we can remove it when pabutools#48 is released.
-    """
-    profile = ApprovalProfile(instance=instance)
-    sorted_instance: list[Project] = sorted(instance)
-    for i in range(num_agents):
-        ballot = get_random_approval_ballot(sorted_instance, name=f"RandomAppBallot {i}")
-        ballot.name = f"RandomAppBallot {i}"  # due to a bug in pabutools
-        profile.append(ballot)
-    return profile
