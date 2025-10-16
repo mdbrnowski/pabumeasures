@@ -12,9 +12,6 @@ class ProjectEmbedding {
     ProjectEmbedding(long long cost, StringT &&name, VectorT &&approvers)
         : cost_(cost), name_(std::forward<StringT>(name)), approvers_(std::forward<VectorT>(approvers)) {}
 
-    template <typename StringT>
-    ProjectEmbedding(long long cost, StringT &&name) : cost_(cost), name_(std::forward<StringT>(name)) {}
-
     bool operator==(const ProjectEmbedding &other) const { return name_ == other.name_; }
     long long cost() const { return cost_; }
     const std::string &name() const { return name_; }
