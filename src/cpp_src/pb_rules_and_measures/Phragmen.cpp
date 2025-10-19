@@ -223,6 +223,29 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
     return result;
 }
 
+// Function to calculate voter types not approving project p. Returns a map from the approved project set to the number
+// of voters of that type.
+std::map<std::vector<int>, int> calculate_voter_types(const Election &election, int p) {
+    auto n_voters = election.num_of_voters();
+    auto projects = election.projects();
+
+    std::vector<std::vector<int>> approved_projects(n_voters);
+    for (int i = 0; i < static_cast<int>(projects.size()); i++) {
+        for (int approver : projects[i].approvers()) {
+            approved_projects[approver].push_back(i);
+        }
+    }
+
+    std::map<std::vector<int>, int> voter_types;
+    for (int i = 0; i < n_voters; i++) {
+        if (std::ranges::find(approved_projects[i], p) == approved_projects[i].end()) {
+            voter_types[approved_projects[i]]++;
+        }
+    }
+
+    return voter_types;
+}
+
 std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
     return {};
 }
