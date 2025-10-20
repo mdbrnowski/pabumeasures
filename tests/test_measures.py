@@ -76,24 +76,20 @@ def test_pessimist_add_measure(seed, rule, rule_measure):
         assert result == 0
     else:
         non_approvers = [ballot for ballot in profile if project not in ballot]
-        if result is None:
-            for na in non_approvers:
-                na.add(project)
-            assert project not in rule(instance, profile)
-        else:
-            assert 1 <= result <= len(non_approvers)
-            good_subsets: list[set[str]] = []  # subsets (of ballot names) that if added, make project selected
-            for new_approvers in _powerset(non_approvers):
+        for expected_result in range(0, len(non_approvers) + 1):
+            ok = True
+            for new_approvers in combinations(non_approvers, expected_result):
                 for na in new_approvers:
                     na.add(project)
-                if project in rule(instance, profile):
-                    current_subset: set[str] = {na.name for na in new_approvers}
-                    # here we use the fact that subsets are generated in increasing order of size
-                    if not any(previous_subset.issubset(current_subset) for previous_subset in good_subsets):
-                        good_subsets.append(current_subset)
+                if project not in rule(instance, profile):
+                    ok = False
                 for na in new_approvers:
                     na.remove(project)
-            assert result == max(len(good_subset) for good_subset in good_subsets)
+            if ok:
+                assert result == expected_result
+                assert 1 <= result <= len(non_approvers)
+                return
+        assert result is None
 
 
 @pytest.mark.parametrize("seed", list(range(NUMBER_OF_TIMES)))
