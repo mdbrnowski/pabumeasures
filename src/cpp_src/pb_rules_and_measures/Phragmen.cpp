@@ -13,6 +13,12 @@
 #include <unordered_set>
 #include <vector>
 
+#include "ortools/base/init_google.h"
+#include "ortools/init/init.h"
+#include "ortools/linear_solver/linear_solver.h"
+
+using namespace operations_research;
+
 std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectComparator &tie_breaking) {
     // todo: try with max_load recalculation skipping
     auto total_budget = election.budget();
@@ -226,6 +232,7 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
 // Function to calculate voter types not approving project p. Returns a map from the approved project set to the number
 // of voters of that type.
 std::map<std::vector<int>, int> calculate_voter_types(const Election &election, int p) {
+    // todo: fix/optimize this function - "type" should be a budget vector (set of approved && funded projects?)
     auto n_voters = election.num_of_voters();
     auto projects = election.projects();
 
@@ -247,6 +254,94 @@ std::map<std::vector<int>, int> calculate_voter_types(const Election &election, 
 }
 
 std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    auto total_budget = election.budget();
+    auto n_voters = election.num_of_voters();
+    auto projects = election.projects();
+    auto pp = projects[p];
+
+    auto allocation = phragmen(election, tie_breaking);
+    if (std::ranges::find(allocation, pp) != allocation.end()) {
+        return 0;
+    }
+
+    auto voter_types = calculate_voter_types(election, p);
+    std::vector<std::pair<std::vector<int>, int>> voter_types_vec(voter_types.begin(),
+                                                                  voter_types.end()); // todo: remove?
+    int t = voter_types.size();
+
+    std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver("GLOP"));
+    std::vector<const MPVariable *> x_T;
+    x_T.reserve(t);
+    for (int j = 0; j < t; j++) {
+        x_T.push_back(solver->MakeIntVar(0, voter_types_vec[j].second, "x_T_" + std::to_string(j)));
+    }
+
+    std::vector<ProjectEmbedding> winners; // todo: remove?
+    std::vector<long double> load(n_voters, 0);
+
+    int i = 0; // round index // todo: remove?
+
+    while (!projects.empty()) {
+        long double min_max_load = std::numeric_limits<long double>::max();
+        std::vector<ProjectEmbedding> round_winners;
+        for (const auto &project : projects) {
+            long double max_load = project.cost();
+            if (project.num_of_approvers() == 0) {
+                max_load = std::numeric_limits<long double>::max();
+            } else {
+                for (const auto &approver : project.approvers())
+                    max_load += load[approver];
+                max_load /= project.num_of_approvers();
+            }
+
+            if (pbmath::is_less_than(max_load, min_max_load)) {
+                round_winners.clear();
+                min_max_load = max_load;
+            }
+            if (pbmath::is_equal(max_load, min_max_load)) {
+                round_winners.push_back(project);
+            }
+        }
+        if (any_of(round_winners.begin(), round_winners.end(),
+                   [total_budget](const ProjectEmbedding &winner) { return winner.cost() > total_budget; })) {
+            break;
+        }
+
+        const auto &winner = *std::ranges::min_element(round_winners, tie_breaking);
+
+        { // ILP reduction constraints
+            long double pp_max_load_numerator = pp.cost();
+            for (const auto &approver : pp.approvers()) {
+                pp_max_load_numerator += load[approver];
+            }
+            long double pp_max_load_denominator = pp.num_of_approvers();
+            long double m_i = min_max_load * pp_max_load_denominator - pp_max_load_numerator;
+            MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i, "m_" + std::to_string(i));
+            for (int j = 0; j < t; j++) {
+                c->SetCoefficient(x_T[j], 1); // todo: change 1 something
+            }
+        }
+
+        for (const auto &approver : winner.approvers()) {
+            load[approver] = min_max_load;
+        }
+
+        winners.push_back(winner);
+        total_budget -= winner.cost();
+        projects.erase(remove(projects.begin(), projects.end(), winner), projects.end());
+        i++;
+    }
+
+    MPObjective *const objective = solver->MutableObjective();
+    for (int j = 0; j < t; j++) {
+        objective->SetCoefficient(x_T[j], 1);
+    }
+    objective->SetMaximization();
+
+    MPSolver::ResultStatus result_status = solver->Solve();
+    if (result_status == MPSolver::OPTIMAL) {
+        return objective->Value() + 1;
+    }
     return {};
 }
 
