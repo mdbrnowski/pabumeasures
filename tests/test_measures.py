@@ -43,7 +43,7 @@ def test_optimist_add_measure(seed, rule, rule_measure):
         if result is None:
             for na in non_approvers:
                 na.add(project)
-            assert project not in rule(instance, profile)
+            assert project not in rule(instance, profile), "result should not be None"
         else:
             assert 1 <= result <= len(non_approvers)
             for new_approvers in _powerset(non_approvers):

@@ -231,7 +231,9 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
 
 // Function to calculate voter types not approving project p. Returns a map from the approved project set to the number
 // of voters of that type.
-std::map<std::vector<int>, int> calculate_voter_types(const Election &election, int p) {
+// todo: fix docs and maybe return type?
+std::pair<std::map<std::vector<int>, int>, std::map<std::vector<int>, int>>
+calculate_voter_types(const Election &election, int p) {
     // todo: fix/optimize this function - "type" should be a budget vector (set of approved && funded projects?)
     auto n_voters = election.num_of_voters();
     auto projects = election.projects();
@@ -244,13 +246,15 @@ std::map<std::vector<int>, int> calculate_voter_types(const Election &election, 
     }
 
     std::map<std::vector<int>, int> voter_types;
+    std::map<std::vector<int>, int> type_to_sample_voter;
     for (int i = 0; i < n_voters; i++) {
         if (std::ranges::find(approved_projects[i], p) == approved_projects[i].end()) {
             voter_types[approved_projects[i]]++;
+            type_to_sample_voter[approved_projects[i]] = i;
         }
     }
 
-    return voter_types;
+    return {voter_types, type_to_sample_voter};
 }
 
 std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
@@ -264,7 +268,7 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
         return 0;
     }
 
-    auto voter_types = calculate_voter_types(election, p);
+    auto [voter_types, type_to_sample_voter] = calculate_voter_types(election, p);
     std::vector<std::pair<std::vector<int>, int>> voter_types_vec(voter_types.begin(),
                                                                   voter_types.end()); // todo: remove?
     int t = voter_types.size();
@@ -311,14 +315,17 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
 
         { // ILP reduction constraints
             long double pp_max_load_numerator = pp.cost();
-            for (const auto &approver : pp.approvers()) {
+            for (const auto &approver : pp.approvers())
                 pp_max_load_numerator += load[approver];
-            }
             long double pp_max_load_denominator = pp.num_of_approvers();
-            long double m_i = min_max_load * pp_max_load_denominator - pp_max_load_numerator;
+            long double m_i = pp_max_load_numerator - min_max_load * pp_max_load_denominator;
+            if (tie_breaking(pp, winner)) {
+                // if pp is preferred, we need strict inequality
+                m_i -= pbmath::EPS;
+            }
             MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i, "m_" + std::to_string(i));
             for (int j = 0; j < t; j++) {
-                c->SetCoefficient(x_T[j], 1); // todo: change 1 something
+                c->SetCoefficient(x_T[j], min_max_load - load[type_to_sample_voter[voter_types_vec[j].first]]);
             }
         }
 
@@ -340,7 +347,10 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
 
     MPSolver::ResultStatus result_status = solver->Solve();
     if (result_status == MPSolver::OPTIMAL) {
-        return objective->Value() + 1;
+        int result = objective->Value() + 1;
+        if (result + pp.num_of_approvers() <= n_voters) {
+            return result;
+        }
     }
     return {};
 }
