@@ -314,6 +314,13 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
         const auto &winner = *std::ranges::min_element(round_winners, tie_breaking);
 
         { // ILP reduction constraints
+            if (min_max_load == std::numeric_limits<long double>::max()) {
+                // since the number of approvers of the winner is 0, the number of approvers of pp is also 0; that means
+                // it's enough to add one more approver
+                if (n_voters >= 1)
+                    return 1;
+                return {};
+            }
             long double pp_max_load_numerator = pp.cost();
             for (const auto &approver : pp.approvers())
                 pp_max_load_numerator += load[approver];
