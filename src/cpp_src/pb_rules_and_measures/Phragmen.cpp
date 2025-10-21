@@ -329,9 +329,10 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
                 pp_max_load_numerator += load[approver];
             long double pp_max_load_denominator = pp.num_of_approvers();
             long double m_i = pp_max_load_numerator - min_max_load * pp_max_load_denominator;
-            if (tie_breaking(pp, winner)) {
-                // if pp is preferred, we need strict inequality
-                m_i -= pbmath::EPS;
+            // todo: what if tie-breaking depends on the number of votes?
+            if (tie_breaking(pp, winner) && !would_break) {
+                // we need a strict inequality
+                m_i -= pbmath::EPS * 100000;
             }
             MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i, "m_" + std::to_string(i));
             for (int j = 0; j < t; j++) {
@@ -360,9 +361,9 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
 
     MPSolver::ResultStatus result_status = solver->Solve();
     if (result_status == MPSolver::OPTIMAL) {
-        int result = objective->Value() + 1;
-        if (result + pp.num_of_approvers() <= n_voters) {
-            return result;
+        int result = objective->Value() + pbmath::EPS * 10000;
+        if (result + 1 + pp.num_of_approvers() <= n_voters) {
+            return result + 1;
         }
     }
     return {};
