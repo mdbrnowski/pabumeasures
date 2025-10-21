@@ -306,10 +306,13 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
                 round_winners.push_back(project);
             }
         }
-        if (any_of(round_winners.begin(), round_winners.end(),
-                   [total_budget](const ProjectEmbedding &winner) { return winner.cost() > total_budget; })) {
+
+        if (pp.cost() > total_budget)
             break;
-        }
+
+        bool would_break =
+            any_of(round_winners.begin(), round_winners.end(),
+                   [total_budget](const ProjectEmbedding &winner) { return winner.cost() > total_budget; });
 
         const auto &winner = *std::ranges::min_element(round_winners, tie_breaking);
 
@@ -335,6 +338,9 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
                 c->SetCoefficient(x_T[j], min_max_load - load[type_to_sample_voter[voter_types_vec[j].first]]);
             }
         }
+
+        if (would_break)
+            break;
 
         for (const auto &approver : winner.approvers()) {
             load[approver] = min_max_load;
