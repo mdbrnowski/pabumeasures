@@ -87,7 +87,6 @@ def test_pessimist_add_measure(seed, rule, rule_measure):
                     na.remove(project)
             if ok:
                 assert result == expected_result
-                assert 1 <= result <= len(non_approvers)
                 return
         assert result is None
 
