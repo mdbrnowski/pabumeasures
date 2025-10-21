@@ -280,10 +280,7 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
         x_T.push_back(solver->MakeIntVar(0, voter_types_vec[j].second, "x_T_" + std::to_string(j)));
     }
 
-    std::vector<ProjectEmbedding> winners; // todo: remove?
     std::vector<long double> load(n_voters, 0);
-
-    int i = 0; // round index // todo: remove?
 
     while (!projects.empty()) {
         long double min_max_load = std::numeric_limits<long double>::max();
@@ -334,7 +331,7 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
                 // we need a strict inequality
                 m_i -= pbmath::EPS * 100000;
             }
-            MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i, "m_" + std::to_string(i));
+            MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
             for (int j = 0; j < t; j++) {
                 c->SetCoefficient(x_T[j], min_max_load - load[type_to_sample_voter[voter_types_vec[j].first]]);
             }
@@ -347,10 +344,8 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
             load[approver] = min_max_load;
         }
 
-        winners.push_back(winner);
         total_budget -= winner.cost();
         projects.erase(remove(projects.begin(), projects.end(), winner), projects.end());
-        i++;
     }
 
     MPObjective *const objective = solver->MutableObjective();
