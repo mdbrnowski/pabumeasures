@@ -76,7 +76,7 @@ def test_pessimist_add_measure(seed, rule, rule_measure):
         assert result == 0
     else:
         non_approvers = [ballot for ballot in profile if project not in ballot]
-        for expected_result in range(0, len(non_approvers) + 1):
+        for expected_result in range(1, len(non_approvers) + 1):
             ok = True
             for new_approvers in combinations(non_approvers, expected_result):
                 for na in new_approvers:
