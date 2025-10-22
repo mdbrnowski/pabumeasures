@@ -229,32 +229,37 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
     return result;
 }
 
-// Function to calculate voter types not approving project p. Returns a map from the approved project set to the number
-// of voters of that type.
-// todo: fix docs and maybe return type?
-std::pair<std::map<std::vector<int>, int>, std::map<std::vector<int>, int>>
-calculate_voter_types(const Election &election, int p) {
-    // todo: fix/optimize this function - "type" should be a budget vector (set of approved && funded projects?)
+// Returns pairs of (number of voters of this type, example voter index). Voter type can be indentified by the
+// intersection of the approval set of a voter and the set of winning projects. We disregard voters that approve p.
+// Note: we don't return the type itself since it's not needed in the implementation.
+std::vector<std::pair<int, int>> calculate_voter_types(const Election &election, int p,
+                                                       const std::vector<ProjectEmbedding> &allocation) {
     auto n_voters = election.num_of_voters();
     auto projects = election.projects();
 
-    std::vector<std::vector<int>> approved_projects(n_voters);
+    std::vector<std::vector<int>> approved_projects(n_voters); // only winning ones or those of interest (i.e. p)
     for (int i = 0; i < static_cast<int>(projects.size()); i++) {
-        for (int approver : projects[i].approvers()) {
-            approved_projects[approver].push_back(i);
+        if (p == i || std::ranges::find(allocation, projects[i]) != allocation.end()) {
+            for (int approver : projects[i].approvers()) {
+                approved_projects[approver].push_back(i);
+            }
         }
     }
 
-    std::map<std::vector<int>, int> voter_types;
-    std::map<std::vector<int>, int> type_to_sample_voter;
-    for (int i = 0; i < n_voters; i++) {
-        if (std::ranges::find(approved_projects[i], p) == approved_projects[i].end()) {
-            voter_types[approved_projects[i]]++;
-            type_to_sample_voter[approved_projects[i]] = i;
+    std::map<std::vector<int>, std::pair<int, int>> voter_types_map;
+    for (int j = 0; j < n_voters; j++) {
+        if (std::ranges::find(approved_projects[j], p) == approved_projects[j].end()) {
+            voter_types_map[approved_projects[j]].first++;
+            voter_types_map[approved_projects[j]].second = j;
         }
     }
 
-    return {voter_types, type_to_sample_voter};
+    std::vector<std::pair<int, int>> voter_types;
+    for (const auto &entry : voter_types_map) {
+        voter_types.push_back(entry.second);
+    }
+
+    return voter_types;
 }
 
 std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
@@ -268,16 +273,15 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
         return 0;
     }
 
-    auto [voter_types, type_to_sample_voter] = calculate_voter_types(election, p);
-    std::vector<std::pair<std::vector<int>, int>> voter_types_vec(voter_types.begin(),
-                                                                  voter_types.end()); // todo: remove?
+    const auto voter_types = calculate_voter_types(election, p, allocation);
     int t = voter_types.size();
 
     std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver("GLOP"));
     std::vector<const MPVariable *> x_T;
     x_T.reserve(t);
     for (int j = 0; j < t; j++) {
-        x_T.push_back(solver->MakeIntVar(0, voter_types_vec[j].second, "x_T_" + std::to_string(j)));
+        auto voter_type_count = voter_types[j].first;
+        x_T.push_back(solver->MakeIntVar(0, voter_type_count, "x_T_" + std::to_string(j)));
     }
 
     std::vector<long double> load(n_voters, 0);
@@ -333,7 +337,8 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
             }
             MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
             for (int j = 0; j < t; j++) {
-                c->SetCoefficient(x_T[j], min_max_load - load[type_to_sample_voter[voter_types_vec[j].first]]);
+                auto voter_type_example = voter_types[j].second;
+                c->SetCoefficient(x_T[j], min_max_load - load[voter_type_example]);
             }
         }
 
