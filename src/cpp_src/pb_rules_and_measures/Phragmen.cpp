@@ -229,7 +229,7 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
     return result;
 }
 
-// Returns pairs of (number of voters of this type, example voter index). Voter type can be indentified by the
+// Returns pairs of (number of voters of this type, example voter index). Voter type can be identified by the
 // intersection of the approval set of a voter and the set of winning projects. We disregard voters that approve p.
 // Note: we don't return the type itself since it's not needed in the implementation.
 std::vector<std::pair<int, int>> calculate_voter_types(const Election &election, int p,
