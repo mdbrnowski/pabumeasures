@@ -276,7 +276,7 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
     const auto voter_types = calculate_voter_types(election, p, allocation);
     int t = voter_types.size();
 
-    std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver("GLOP"));
+    std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver("SCIP"));
     std::vector<const MPVariable *> x_T;
     x_T.reserve(t);
     for (int j = 0; j < t; j++) {
@@ -333,7 +333,12 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
             // todo: what if tie-breaking depends on the number of votes?
             if (tie_breaking(pp, winner) && !would_break) {
                 // we need a strict inequality
-                m_i -= pbmath::EPS * 100000;
+                long double min_coeff = std::numeric_limits<long double>::max();
+                for (int j = 0; j < t; j++) {
+                    auto voter_type_example = voter_types[j].second;
+                    min_coeff = std::min(min_coeff, min_max_load - load[voter_type_example]);
+                }
+                m_i = std::max(m_i - min_coeff / 10, 0.0L);
             }
             MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
             for (int j = 0; j < t; j++) {
@@ -361,7 +366,8 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
 
     MPSolver::ResultStatus result_status = solver->Solve();
     if (result_status == MPSolver::OPTIMAL) {
-        int result = objective->Value() + pbmath::EPS * 10000;
+        // MIP solver might return something like 1.99999999, so we add 0.1 to be safe
+        int result = objective->Value() + 0.1;
         if (result + 1 + pp.num_of_approvers() <= n_voters) {
             return result + 1;
         }
