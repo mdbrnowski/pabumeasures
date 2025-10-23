@@ -332,13 +332,8 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
             long double m_i = pp_max_load_numerator - min_max_load * pp_max_load_denominator;
             // todo: what if tie-breaking depends on the number of votes?
             if (tie_breaking(pp, winner) && !would_break) {
-                // we need a strict inequality
-                long double min_coeff = std::numeric_limits<long double>::max();
-                for (int j = 0; j < t; j++) {
-                    auto voter_type_example = voter_types[j].second;
-                    min_coeff = std::min(min_coeff, min_max_load - load[voter_type_example]);
-                }
-                m_i = std::max(m_i - min_coeff / 10, 0.0L);
+                // we need a strict inequality; the solver's default precision is 1e-6, so need to exceed that
+                m_i = std::max(0.0L, std::min(m_i - 1e-5, m_i * (1 - 1e-5)));
             }
             MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
             for (int j = 0; j < t; j++) {
