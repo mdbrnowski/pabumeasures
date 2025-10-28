@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 dependencies = [
     "pabutools>=1.2.3",
 ]
-keywords = ["participatory budgeting", "social choise"]
+keywords = ["participatory budgeting", "social choice"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
