@@ -333,7 +333,7 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
             // todo: what if tie-breaking depends on the number of votes?
             if (tie_breaking(pp, winner) && !would_break) {
                 // we need a strict inequality; the solver's default precision is 1e-6, so need to exceed that
-                m_i = std::max(0.0L, std::min(m_i - 1e-5, m_i * (1 - 1e-5)));
+                m_i = std::min(m_i - 1e-5, m_i * (1 - 1e-5));
             }
             MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
             for (int j = 0; j < t; j++) {
