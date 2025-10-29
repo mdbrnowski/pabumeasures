@@ -13,6 +13,12 @@
 #include <unordered_set>
 #include <vector>
 
+#include "ortools/base/init_google.h"
+#include "ortools/init/init.h"
+#include "ortools/linear_solver/linear_solver.h"
+
+using namespace operations_research;
+
 std::vector<ProjectEmbedding> phragmen(const Election &election, const ProjectComparator &tie_breaking) {
     // todo: try with max_load recalculation skipping
     auto total_budget = election.budget();
@@ -221,6 +227,147 @@ std::optional<int> optimist_add_for_phragmen(const Election &election, int p, co
         projects.erase(remove(projects.begin(), projects.end(), winner), projects.end());
     }
     return result;
+}
+
+// Returns pairs of (number of voters of this type, example voter index). Voter type can be identified by the
+// intersection of the approval set of a voter and the set of winning projects. We disregard voters that approve p.
+// Note: we don't return the type itself since it's not needed in the implementation.
+std::vector<std::pair<int, int>> calculate_voter_types(const Election &election, int p,
+                                                       const std::vector<ProjectEmbedding> &allocation) {
+    auto n_voters = election.num_of_voters();
+    auto projects = election.projects();
+
+    std::vector<std::vector<int>> approved_projects(n_voters); // only winning ones or those of interest (i.e. p)
+    for (int i = 0; i < static_cast<int>(projects.size()); i++) {
+        if (p == i || std::ranges::find(allocation, projects[i]) != allocation.end()) {
+            for (int approver : projects[i].approvers()) {
+                approved_projects[approver].push_back(i);
+            }
+        }
+    }
+
+    std::map<std::vector<int>, std::pair<int, int>> voter_types_map;
+    for (int j = 0; j < n_voters; j++) {
+        if (std::ranges::find(approved_projects[j], p) == approved_projects[j].end()) {
+            voter_types_map[approved_projects[j]].first++;
+            voter_types_map[approved_projects[j]].second = j;
+        }
+    }
+
+    std::vector<std::pair<int, int>> voter_types;
+    for (const auto &entry : voter_types_map) {
+        voter_types.push_back(entry.second);
+    }
+
+    return voter_types;
+}
+
+std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    auto total_budget = election.budget();
+    auto n_voters = election.num_of_voters();
+    auto projects = election.projects();
+    auto pp = projects[p];
+
+    auto allocation = phragmen(election, tie_breaking);
+    if (std::ranges::find(allocation, pp) != allocation.end()) {
+        return 0;
+    }
+
+    const auto voter_types = calculate_voter_types(election, p, allocation);
+    int t = voter_types.size();
+
+    std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver("SCIP"));
+    std::vector<const MPVariable *> x_T;
+    x_T.reserve(t);
+    for (int j = 0; j < t; j++) {
+        auto voter_type_count = voter_types[j].first;
+        x_T.push_back(solver->MakeIntVar(0, voter_type_count, "x_T_" + std::to_string(j)));
+    }
+
+    std::vector<long double> load(n_voters, 0);
+
+    while (!projects.empty()) {
+        long double min_max_load = std::numeric_limits<long double>::max();
+        std::vector<ProjectEmbedding> round_winners;
+        for (const auto &project : projects) {
+            long double max_load = project.cost();
+            if (project.num_of_approvers() == 0) {
+                max_load = std::numeric_limits<long double>::max();
+            } else {
+                for (const auto &approver : project.approvers())
+                    max_load += load[approver];
+                max_load /= project.num_of_approvers();
+            }
+
+            if (pbmath::is_less_than(max_load, min_max_load)) {
+                round_winners.clear();
+                min_max_load = max_load;
+            }
+            if (pbmath::is_equal(max_load, min_max_load)) {
+                round_winners.push_back(project);
+            }
+        }
+
+        if (pp.cost() > total_budget)
+            break;
+
+        bool would_break =
+            any_of(round_winners.begin(), round_winners.end(),
+                   [total_budget](const ProjectEmbedding &winner) { return winner.cost() > total_budget; });
+
+        const auto &winner = *std::ranges::min_element(round_winners, tie_breaking);
+
+        { // ILP reduction constraints
+            if (min_max_load == std::numeric_limits<long double>::max()) {
+                // since the number of approvers of the winner is 0, the number of approvers of pp is also 0; that means
+                // it's enough to add one more approver
+                if (n_voters >= 1)
+                    return 1;
+                return {};
+            }
+            long double pp_max_load_numerator = pp.cost();
+            for (const auto &approver : pp.approvers())
+                pp_max_load_numerator += load[approver];
+            long double pp_max_load_denominator = pp.num_of_approvers();
+            long double m_i = pp_max_load_numerator - min_max_load * pp_max_load_denominator;
+            // todo: what if tie-breaking depends on the number of votes?
+            if (tie_breaking(pp, winner) && !would_break) {
+                // we need a strict inequality; the solver's default precision is 1e-6, so need to exceed that
+                m_i = std::min(m_i - 1e-5, m_i * (1 - 1e-5));
+            }
+            MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
+            for (int j = 0; j < t; j++) {
+                auto voter_type_example = voter_types[j].second;
+                c->SetCoefficient(x_T[j], min_max_load - load[voter_type_example]);
+            }
+        }
+
+        if (would_break)
+            break;
+
+        for (const auto &approver : winner.approvers()) {
+            load[approver] = min_max_load;
+        }
+
+        total_budget -= winner.cost();
+        projects.erase(remove(projects.begin(), projects.end(), winner), projects.end());
+    }
+
+    MPObjective *const objective = solver->MutableObjective();
+    for (int j = 0; j < t; j++) {
+        objective->SetCoefficient(x_T[j], 1);
+    }
+    objective->SetMaximization();
+
+    MPSolver::ResultStatus result_status = solver->Solve();
+    if (result_status == MPSolver::OPTIMAL) {
+        // MIP solver might return something like 1.99999999, so we add 0.1 to be safe
+        int result = objective->Value() + 0.1;
+        if (result + 1 + pp.num_of_approvers() <= n_voters) {
+            return result + 1;
+        }
+    }
+    return {};
 }
 
 std::optional<int> singleton_add_for_phragmen(const Election &election, int p, const ProjectComparator &tie_breaking) {

@@ -43,7 +43,7 @@ def test_optimist_add_measure(seed, rule, rule_measure):
         if result is None:
             for na in non_approvers:
                 na.add(project)
-            assert project not in rule(instance, profile)
+            assert project not in rule(instance, profile), "result should not be None"
         else:
             assert 1 <= result <= len(non_approvers)
             for new_approvers in _powerset(non_approvers):
@@ -63,8 +63,9 @@ def test_optimist_add_measure(seed, rule, rule_measure):
     [
         (pabumeasures.greedy, pabumeasures.greedy_measure),
         (pabumeasures.greedy_over_cost, pabumeasures.greedy_over_cost_measure),
+        (pabumeasures.phragmen, pabumeasures.phragmen_measure),
     ],
-    ids=["greedy", "greedy_over_cost"],
+    ids=["greedy", "greedy_over_cost", "phragmen"],
 )
 def test_pessimist_add_measure(seed, rule, rule_measure):
     random.seed(seed)
