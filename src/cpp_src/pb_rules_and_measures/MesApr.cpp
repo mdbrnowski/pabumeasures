@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <iostream> // DEBUG
 #include <limits>
 #include <numeric>
 #include <queue>
@@ -460,7 +459,6 @@ std::optional<int> pessimist_add_for_mes_apr(const Election &election, int p, co
     for (int j = 0; j < t; j++) {
         auto voter_type_count = voter_types[j].first;
         x_T.push_back(solver->MakeIntVar(0, voter_type_count, "x_T_" + std::to_string(j)));
-        std::cout << "x_T_" + std::to_string(j) << " : " << voter_type_count << "    " << voter_types[j].second << "\n";
     }
 
     std::priority_queue<Candidate, std::vector<Candidate>, std::greater<Candidate>> remaining_candidates;
@@ -474,7 +472,6 @@ std::optional<int> pessimist_add_for_mes_apr(const Election &election, int p, co
     std::vector<Candidate> candidates_to_reinsert;
     candidates_to_reinsert.reserve(projects.size());
 
-    int round_number = 0;
     while (true) {
         long double min_max_payment = std::numeric_limits<long double>::max();
         Candidate best_candidate;
@@ -529,39 +526,37 @@ std::optional<int> pessimist_add_for_mes_apr(const Election &election, int p, co
             }
         }
 
-        round_number++;
-
         if (pp.cost() > total_budget) {
-            std::cout << "KONEC\n" << pp.cost() << " / " << total_budget;
             break;
         }
 
-        if (min_max_payment == std::numeric_limits<long double>::max()) { // no more affordable projects
-            std::cout << "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG\n";
-            long double money_behind_project = 0;
-            for (const auto &approver : pp_approvers) {
-                money_behind_project += budget[approver];
-            }
-
-            long double m_i = pp.cost() - money_behind_project;
-
-            // we need a strict inequality; the solver's default precision is 1e-6, so need to exceed that
-            m_i = std::min(m_i - 1e-5, m_i * (1 - 1e-5));
-
-            MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
-
-            for (int j = 0; j < t; j++) {
-                auto voter_type_example = voter_types[j].second;
-                c->SetCoefficient(x_T[j], budget[voter_type_example]);
-            }
-
-            break;
-        }
-
-        auto winner = projects[best_candidate.index];
         std::ranges::sort(pp_approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
 
         { // ILP reduction constraints
+
+            if (min_max_payment == std::numeric_limits<long double>::max()) { // no more affordable projects
+                long double money_behind_project = 0;
+                for (const auto &approver : pp_approvers) {
+                    money_behind_project += budget[approver];
+                }
+
+                long double m_i = pp.cost() - money_behind_project;
+
+                // we need a strict inequality; the solver's default precision is 1e-6, so need to exceed that
+                m_i = std::min(m_i - 1e-5, m_i * (1 - 1e-5));
+
+                MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
+
+                for (int j = 0; j < t; j++) {
+                    auto voter_type_example = voter_types[j].second;
+                    c->SetCoefficient(x_T[j], budget[voter_type_example]);
+                }
+
+                break;
+            }
+
+            auto winner = projects[best_candidate.index];
+
             long double paid_so_far = 0, denominator = pp_approvers.size();
 
             for (const auto &approver : pp_approvers) {
@@ -578,32 +573,18 @@ std::optional<int> pessimist_add_for_mes_apr(const Election &election, int p, co
 
             // todo: what if tie-breaking depends on the number of votes?
             if (tie_breaking(pp, winner)) {
-                std::cout << "pp, better!";
                 // we need a strict inequality; the solver's default precision is 1e-6, so need to exceed that
                 m_i = std::min(m_i - 1e-5, m_i * (1 - 1e-5));
             }
             MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
-            MPConstraint *const c_2 = solver->MakeRowConstraint(0, solver->infinity());
-            std::cout << "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n";
-            std::cout << "min max payment " << min_max_payment << "\n";
-
-            long double max_used_value = 0;
 
             for (int j = 0; j < t; j++) {
                 auto voter_type_example = voter_types[j].second;
-                if (pbmath::is_less_than(budget[voter_type_example], min_max_payment)) {
-                    c->SetCoefficient(x_T[j], budget[voter_type_example]);
-                } else {
-                    c->SetCoefficient(x_T[j], min_max_payment);
-                    c_2->SetCoefficient(x_T[j], 1);
-                }
-                std::cout << "budget: " << budget[voter_type_example] << " "
-                          << std::min(budget[voter_type_example], min_max_payment) << '\n';
-                max_used_value = std::max(max_used_value, std::min(budget[voter_type_example], min_max_payment));
+                c->SetCoefficient(x_T[j], std::min(min_max_payment, budget[voter_type_example]));
             }
         }
 
-        for (const auto &approver : winner.approvers()) {
+        for (const auto &approver : projects[best_candidate.index].approvers()) {
             budget[approver] = std::max(0.0L, budget[approver] - min_max_payment);
         }
 
@@ -612,7 +593,7 @@ std::optional<int> pessimist_add_for_mes_apr(const Election &election, int p, co
         }
         candidates_to_reinsert.clear();
 
-        total_budget -= winner.cost();
+        total_budget -= projects[best_candidate.index].cost();
     }
 
     MPObjective *const objective = solver->MutableObjective();
@@ -623,42 +604,10 @@ std::optional<int> pessimist_add_for_mes_apr(const Election &election, int p, co
 
     MPSolver::ResultStatus result_status = solver->Solve();
 
-    std::cout << "========== SOLVER SETUP ==========\n";
-    std::cout << "Solver name: " << solver->Name() << "\n";
-    std::cout << "Solver type: " << solver->ProblemType() << "\n";
-    std::cout << "Number of variables: " << solver->NumVariables() << "\n";
-    std::cout << "Number of constraints: " << solver->NumConstraints() << "\n\n";
-
-    // Log all variables
-    std::cout << "----- Variables -----\n";
-    for (const auto *var : solver->variables()) {
-        std::cout << "Name: " << var->name() << " | Bounds: [" << var->lb() << ", " << var->ub() << "]"
-                  << " | Solution value (if any): " << var->solution_value() << "\n";
-    }
-
-    // Log all constraints
-    std::cout << "\n----- Constraints -----\n";
-    for (const auto *ct : solver->constraints()) {
-        std::cout << "Constraint: " << ct->name() << " | Bounds: [" << ct->lb() << ", " << ct->ub() << "]"
-                  << "\n  Expression: ";
-        for (const auto &term : ct->terms()) {
-            std::cout << term.second << "*" << term.first->name() << " + ";
-        }
-        std::cout << "\b\b \n";
-    }
-
-    std::cout << "\n\n\n";
-
-    for (auto [x, y] : voter_types) {
-        std::cout << x << " " << y << "\n";
-    }
-
     if (result_status == MPSolver::OPTIMAL) {
         // MIP solver might return something like 1.99999999, so we add 0.1 to be safe
         int result = objective->Value() + 0.1;
-        std::cout << objective->Value() << '\n';
         if (result + 1 + pp.num_of_approvers() <= n_voters) {
-            std::cout << "res" << result << "\n";
             return result + 1;
         }
     }
