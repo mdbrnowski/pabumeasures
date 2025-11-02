@@ -276,8 +276,9 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
             }
         }
 
-        if (pp.cost() > total_budget)
+        if (pp.cost() > total_budget) {
             break;
+        }
 
         bool would_break =
             any_of(round_winners.begin(), round_winners.end(),
