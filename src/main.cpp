@@ -108,6 +108,10 @@ PYBIND11_MODULE(_core, m) {
     m.def("optimist_add_for_mes_cost", &optimist_add_for_mes_cost,
           "Optimist-add measure for Method of Equal Shares with cost utilities", "election"_a, "p"_a, "tie_breaking"_a);
 
+    m.def("pessimist_add_for_mes_cost", &pessimist_add_for_mes_cost,
+          "Pessimist-add measure for Method of Equal Shares with cost utilities", "election"_a, "p"_a,
+          "tie_breaking"_a);
+
     m.def("singleton_add_for_mes_cost", &singleton_add_for_mes_cost,
           "Singleton-add measure for Method of Equal Shares with cost utilities", "election"_a, "p"_a,
           "tie_breaking"_a);

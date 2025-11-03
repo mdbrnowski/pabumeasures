@@ -4,6 +4,7 @@
 #include "utils/Math.h"
 #include "utils/ProjectComparator.h"
 #include "utils/ProjectEmbedding.h"
+#include "utils/VoterTypes.h"
 
 #include <algorithm>
 #include <functional>
@@ -14,6 +15,10 @@
 #include <set>
 #include <vector>
 
+#include "ortools/base/init_google.h"
+#include "ortools/init/init.h"
+#include "ortools/linear_solver/linear_solver.h"
+
 namespace {
 struct Candidate {
     int index;
@@ -22,6 +27,8 @@ struct Candidate {
     bool operator>(const Candidate &other) const { return max_payment_by_cost > other.max_payment_by_cost; }
 };
 } // namespace
+
+using namespace operations_research;
 
 std::vector<ProjectEmbedding> mes_cost(const Election &election, const ProjectComparator &tie_breaking) {
     auto total_budget = election.budget();
@@ -440,6 +447,185 @@ std::optional<int> optimist_add_for_mes_cost(const Election &election, int p, co
     }
 
     return min_number_of_added_approvers;
+}
+
+std::optional<int> pessimist_add_for_mes_cost(const Election &election, int p, const ProjectComparator &tie_breaking) {
+    auto total_budget = election.budget();
+    auto n_voters = election.num_of_voters();
+    const auto &projects = election.projects();
+    const auto &pp = projects[p];
+    auto pp_approvers = pp.approvers();
+
+    auto allocation = mes_cost(election, tie_breaking);
+    if (std::ranges::find(allocation, pp) != allocation.end()) {
+        return 0;
+    }
+
+    const auto voter_types = calculate_voter_types(election, p, allocation);
+    int t = voter_types.size();
+
+    std::unique_ptr<MPSolver> solver(MPSolver::CreateSolver("SCIP"));
+    std::vector<const MPVariable *> x_T;
+    x_T.reserve(t);
+    for (int j = 0; j < t; j++) {
+        auto voter_type_count = voter_types[j].first;
+        x_T.push_back(solver->MakeIntVar(0, voter_type_count, "x_T_" + std::to_string(j)));
+    }
+
+    std::priority_queue<Candidate, std::vector<Candidate>, std::greater<Candidate>> remaining_candidates;
+
+    for (int i = 0; i < projects.size(); i++) {
+        remaining_candidates.emplace(i, 0);
+    }
+
+    std::vector<long double> budget(n_voters, static_cast<long double>(total_budget) / n_voters);
+
+    std::vector<Candidate> candidates_to_reinsert;
+    candidates_to_reinsert.reserve(projects.size());
+
+    while (true) {
+        long double min_max_payment_by_cost = std::numeric_limits<long double>::max();
+        Candidate best_candidate;
+
+        while (!remaining_candidates.empty()) {
+            auto current_candidate = remaining_candidates.top();
+            remaining_candidates.pop();
+            const auto &project = projects[current_candidate.index];
+            auto previous_max_payment_by_cost = current_candidate.max_payment_by_cost;
+
+            if (pbmath::is_greater_than(previous_max_payment_by_cost, min_max_payment_by_cost)) {
+                candidates_to_reinsert.push_back(current_candidate);
+                break; // We already selected the best possible - max_payment_by_cost value can only increase
+            }
+
+            long double money_behind_project = 0;
+            auto approvers = project.approvers();
+
+            for (const auto &approver : approvers) {
+                money_behind_project += budget[approver];
+            }
+
+            if (pbmath::is_less_than(money_behind_project, project.cost())) {
+                continue;
+            }
+
+            std::ranges::sort(approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
+
+            long double paid_so_far = 0, denominator = approvers.size();
+
+            for (const auto &approver : approvers) {
+                long double max_payment = (static_cast<long double>(project.cost()) - paid_so_far) / denominator;
+                long double max_payment_by_cost = max_payment / project.cost();
+                if (pbmath::is_greater_than(max_payment, budget[approver])) { // cannot afford to fully participate
+                    paid_so_far += budget[approver];
+                    denominator--;
+                } else { // from this voter, everyone can fully participate
+                    current_candidate.max_payment_by_cost = max_payment_by_cost;
+                    if (pbmath::is_less_than(max_payment_by_cost, min_max_payment_by_cost) ||
+                        (pbmath::is_equal(max_payment_by_cost, min_max_payment_by_cost) &&
+                         tie_breaking(project, projects[best_candidate.index]))) {
+                        if (min_max_payment_by_cost !=
+                            std::numeric_limits<long double>::max()) { // Not the first "best" candidate
+                            candidates_to_reinsert.push_back(best_candidate);
+                        }
+                        min_max_payment_by_cost = max_payment_by_cost;
+                        best_candidate = current_candidate;
+                    } else {
+                        candidates_to_reinsert.push_back(current_candidate);
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (pp.cost() > total_budget) {
+            break;
+        }
+
+        std::ranges::sort(pp_approvers, [&budget](const int a, const int b) { return budget[a] < budget[b]; });
+
+        { // ILP reduction constraints
+
+            if (min_max_payment_by_cost == std::numeric_limits<long double>::max()) { // no more affordable projects
+                long double money_behind_project = 0;
+                for (const auto &approver : pp_approvers) {
+                    money_behind_project += budget[approver];
+                }
+
+                long double m_i = pp.cost() - money_behind_project;
+
+                // we need a strict inequality; the solver's default precision is 1e-6, so need to exceed that
+                m_i = std::min(m_i - 1e-5, m_i * (1 - 1e-5));
+
+                MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
+
+                for (int j = 0; j < t; j++) {
+                    auto voter_type_example = voter_types[j].second;
+                    c->SetCoefficient(x_T[j], budget[voter_type_example]);
+                }
+
+                break;
+            }
+
+            auto winner = projects[best_candidate.index];
+            long double min_max_payment = min_max_payment_by_cost * pp.cost();
+
+            long double paid_so_far = 0, denominator = pp_approvers.size();
+
+            for (const auto &approver : pp_approvers) {
+                if (pbmath::is_greater_than(min_max_payment, budget[approver])) {
+                    paid_so_far += budget[approver];
+                    denominator--;
+                } else {
+                    paid_so_far += denominator * min_max_payment;
+                    break;
+                }
+            }
+
+            long double m_i = pp.cost() - paid_so_far;
+
+            // todo: what if tie-breaking depends on the number of votes?
+            if (tie_breaking(pp, winner)) {
+                // we need a strict inequality; the solver's default precision is 1e-6, so need to exceed that
+                m_i = std::min(m_i - 1e-5, m_i * (1 - 1e-5));
+            }
+            MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
+
+            for (int j = 0; j < t; j++) {
+                auto voter_type_example = voter_types[j].second;
+                c->SetCoefficient(x_T[j], std::min(min_max_payment, budget[voter_type_example]));
+            }
+        }
+
+        for (const auto &approver : projects[best_candidate.index].approvers()) {
+            budget[approver] =
+                std::max(0.0L, budget[approver] - min_max_payment_by_cost * projects[best_candidate.index].cost());
+        }
+
+        for (auto &candidate : candidates_to_reinsert) {
+            remaining_candidates.push(candidate);
+        }
+        candidates_to_reinsert.clear();
+
+        total_budget -= projects[best_candidate.index].cost();
+    }
+
+    MPObjective *const objective = solver->MutableObjective();
+    for (int j = 0; j < t; j++) {
+        objective->SetCoefficient(x_T[j], 1);
+    }
+    objective->SetMaximization();
+
+    MPSolver::ResultStatus result_status = solver->Solve();
+
+    if (result_status == MPSolver::OPTIMAL) {
+        // MIP solver might return something like 1.99999999, so we add 0.1 to be safe
+        int result = objective->Value() + 0.1;
+        if (result + 1 + pp.num_of_approvers() <= n_voters) {
+            return result + 1;
+        }
+    }
+    return {};
 }
 
 std::optional<int> singleton_add_for_mes_cost(const Election &election, int p, const ProjectComparator &tie_breaking) {
