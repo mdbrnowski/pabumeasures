@@ -558,6 +558,7 @@ std::optional<int> pessimist_add_for_mes_apr(const Election &election, int p, co
             auto winner = projects[best_candidate.index];
 
             long double paid_so_far = 0, denominator = pp_approvers.size();
+            bool pp_has_rich_supporters = false;
 
             for (const auto &approver : pp_approvers) {
                 if (pbmath::is_greater_than(min_max_payment, budget[approver])) {
@@ -565,22 +566,51 @@ std::optional<int> pessimist_add_for_mes_apr(const Election &election, int p, co
                     denominator--;
                 } else {
                     paid_so_far += denominator * min_max_payment;
+                    pp_has_rich_supporters = true;
                     break;
                 }
             }
 
             long double m_i = pp.cost() - paid_so_far;
+            long double m_i_strict = std::min(m_i - 1e-5, m_i * (1 - 1e-5));
 
             // todo: what if tie-breaking depends on the number of votes?
             if (tie_breaking(pp, winner)) {
-                // we need a strict inequality; the solver's default precision is 1e-6, so need to exceed that
-                m_i = std::min(m_i - 1e-5, m_i * (1 - 1e-5));
-            }
-            MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
+                // Case 1: pp WINS tie-breaking with current winner, we need a STRICT inequality
+                MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i_strict);
 
-            for (int j = 0; j < t; j++) {
-                auto voter_type_example = voter_types[j].second;
-                c->SetCoefficient(x_T[j], std::min(min_max_payment, budget[voter_type_example]));
+                for (int j = 0; j < t; j++) {
+                    auto voter_type_example = voter_types[j].second;
+                    c->SetCoefficient(x_T[j], std::min(min_max_payment, budget[voter_type_example]));
+                }
+            } else {
+                // Case 2: pp DOESN'T WIN tie-breakingu with current winner, we need either a STRICT inequality or a
+                // WEAK inequality and guarantee max_payment is not less than min_max_payment
+
+                MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
+
+                const long double M = election.budget() + 1.0;
+                MPVariable *const y = solver->MakeBoolVar("case_2_disjunction");
+
+                MPConstraint *const either_this = solver->MakeRowConstraint(-solver->infinity(), m_i_strict);
+                either_this->SetCoefficient(y, -M);
+
+                MPConstraint *const or_that =
+                    solver->MakeRowConstraint(1 - M - pp_has_rich_supporters, solver->infinity());
+                or_that->SetCoefficient(y, -M);
+
+                for (int j = 0; j < t; j++) {
+                    auto voter_type_example = voter_types[j].second;
+                    long double payment_coeff;
+                    if (pbmath::is_greater_than(min_max_payment, budget[voter_type_example])) {
+                        payment_coeff = budget[voter_type_example];
+                    } else {
+                        payment_coeff = min_max_payment;
+                        or_that->SetCoefficient(x_T[j], 1);
+                    }
+                    c->SetCoefficient(x_T[j], payment_coeff);
+                    either_this->SetCoefficient(x_T[j], payment_coeff);
+                }
             }
         }
 
