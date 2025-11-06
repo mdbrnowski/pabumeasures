@@ -595,7 +595,7 @@ std::optional<int> pessimist_add_for_mes_cost(const Election &election, int p, c
                     c->SetCoefficient(x_T[j], std::min(min_max_payment, budget[voter_type_example]));
                 }
             } else {
-                // Case 2: pp DOESN'T WIN tie-breakingu with current winner, we need either a STRICT inequality or a
+                // Case 2: pp DOESN'T WIN tie-breaking with current winner, we need either a STRICT inequality or a
                 // WEAK inequality and guarantee max_payment is not less than min_max_payment
 
                 MPConstraint *const c = solver->MakeRowConstraint(-solver->infinity(), m_i);
