@@ -15,8 +15,6 @@
 #include <set>
 #include <vector>
 
-#include "ortools/base/init_google.h"
-#include "ortools/init/init.h"
 #include "ortools/linear_solver/linear_solver.h"
 
 namespace {
