@@ -11,4 +11,6 @@ long long cost_reduction_for_mes_apr(const Election &election, int p, const Proj
 
 std::optional<int> optimist_add_for_mes_apr(const Election &election, int p, const ProjectComparator &tie_breaking);
 
+std::optional<int> pessimist_add_for_mes_apr(const Election &election, int p, const ProjectComparator &tie_breaking);
+
 std::optional<int> singleton_add_for_mes_apr(const Election &election, int p, const ProjectComparator &tie_breaking);

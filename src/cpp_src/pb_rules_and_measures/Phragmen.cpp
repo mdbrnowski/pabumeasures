@@ -14,8 +14,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "ortools/base/init_google.h"
-#include "ortools/init/init.h"
 #include "ortools/linear_solver/linear_solver.h"
 
 using namespace operations_research;
@@ -276,8 +274,9 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
             }
         }
 
-        if (pp.cost() > total_budget)
+        if (pp.cost() > total_budget) {
             break;
+        }
 
         bool would_break =
             any_of(round_winners.begin(), round_winners.end(),
