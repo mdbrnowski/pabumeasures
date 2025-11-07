@@ -122,7 +122,7 @@ def mes_apr_measure(
         case Measure.ADD_APPROVAL_OPTIMIST:
             return _core.optimist_add_for_mes_apr(election, p, tie_breaking)
         case Measure.ADD_APPROVAL_PESSIMIST:
-            raise NotImplementedError()
+            return _core.pessimist_add_for_mes_apr(election, p, tie_breaking)
         case Measure.ADD_SINGLETON:
             return _core.singleton_add_for_mes_apr(election, p, tie_breaking)
 
