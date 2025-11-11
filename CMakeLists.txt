@@ -4,6 +4,8 @@ project(${SKBUILD_PROJECT_NAME} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 CONFIG REQUIRED)
 
@@ -15,16 +17,18 @@ if(BUILD_STATIC)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
     set(ORTOOLS_BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
     set(ABSL_BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
+
     set(DEPENDENCY_LIB_DIR ${CMAKE_BINARY_DIR}/lib)
-    set(CMAKE_INSTALL_RPATH "${DEPENDENCY_LIB_DIR}")
+    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
     set(BUILD_DEPS ON CACHE BOOL "Build dependencies automatically" FORCE)
     set(ORTOOLS_BUILD_DEPS ON CACHE BOOL "Build dependencies" FORCE)
-    set(ORTOOLS_USE_HIGHS OFF CACHE BOOL "Disable HiGHS" FORCE)
-    set(ORTOOLS_USE_SCIP OFF CACHE BOOL "Disable SCIP" FORCE)
-    set(ORTOOLS_USE_CPLEX OFF CACHE BOOL "Disable CPLEX" FORCE)
-    set(ORTOOLS_USE_XPRESS OFF CACHE BOOL "Disable Xpress" FORCE)
-    set(ORTOOLS_USE_PDLP OFF CACHE BOOL "Disable PDLP" FORCE)
+    set(USE_HIGHS OFF CACHE BOOL "Disable HiGHS" FORCE)
+    set(USE_CPLEX OFF CACHE BOOL "Disable CPLEX" FORCE)
+    set(USE_XPRESS OFF CACHE BOOL "Disable Xpress" FORCE)
+    set(USE_PDLP OFF CACHE BOOL "Disable PDLP" FORCE)
 
     FetchContent_Declare(
         ortools
@@ -69,18 +73,22 @@ target_link_libraries(_core PRIVATE ortools::ortools)
 
 set_target_properties(_core PROPERTIES
     INSTALL_RPATH "$ORIGIN"
+    BUILD_WITH_INSTALL_RPATH TRUE
 )
 
 install(TARGETS _core DESTINATION ${SKBUILD_PROJECT_NAME})
 
 if(BUILD_STATIC)
-    file(GLOB SHARED_LIBS
+    file(GLOB ALL_DEP_LIBS
         "${DEPENDENCY_LIB_DIR}/*.so"     
         "${DEPENDENCY_LIB_DIR}/*.so.*" 
+        "${DEPENDENCY_LIB_DIR}/*.dll"
     )
-    list(REMOVE_DUPLICATES SHARED_LIBS)
-    if(SHARED_LIBS)
-        install(DIRECTORY ${DEPENDENCY_LIB_DIR}/
+    list(REMOVE_DUPLICATES ALL_DEP_LIBS)
+
+    if(ALL_DEP_LIBS)
+        message(STATUS "Packaging dependency libs into wheel: ${ALL_DEP_LIBS}")
+        install(FILES ${ALL_DEP_LIBS}
         DESTINATION ${SKBUILD_PROJECT_NAME}
         USE_SOURCE_PERMISSIONS
         FILES_MATCHING PATTERN "*.so*"
