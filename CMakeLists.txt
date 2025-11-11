@@ -88,7 +88,7 @@ if(BUILD_STATIC)
     else()
         message(WARNING "Libs not found (.so | .so.* in ${DEPENDENCY_LIB_DIR}).")
     endif()
-ifend()
+endif()
 
 
 
