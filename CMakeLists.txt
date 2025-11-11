@@ -73,8 +73,23 @@ set_target_properties(_core PROPERTIES
 
 install(TARGETS _core DESTINATION ${SKBUILD_PROJECT_NAME})
 
-install(DIRECTORY ${DEPENDENCY_LIB_DIR}/
-    DESTINATION ${SKBUILD_PROJECT_NAME}
-    USE_SOURCE_PERMISSIONS
-    FILES_MATCHING PATTERN "*.so*"
-)
+if(BUILD_STATIC)
+    file(GLOB SHARED_LIBS
+        "${DEPENDENCY_LIB_DIR}/*.so"     
+        "${DEPENDENCY_LIB_DIR}/*.so.*" 
+    )
+    list(REMOVE_DUPLICATES SHARED_LIBS)
+    if(SHARED_LIBS)
+        install(DIRECTORY ${DEPENDENCY_LIB_DIR}/
+        DESTINATION ${SKBUILD_PROJECT_NAME}
+        USE_SOURCE_PERMISSIONS
+        FILES_MATCHING PATTERN "*.so*"
+    )
+    else()
+        message(WARNING "Libs not found (.so | .so.* in ${DEPENDENCY_LIB_DIR}).")
+    endif()
+ifend()
+
+
+
+
