@@ -13,7 +13,10 @@ if(BUILD_STATIC)
     include(FetchContent)
 
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
-    set(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/lib")
+    set(ORTOOLS_BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
+    set(ABSL_BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
+    set(DEPENDENCY_LIB_DIR ${CMAKE_BINARY_DIR}/lib)
+    set(CMAKE_INSTALL_RPATH "${DEPENDENCY_LIB_DIR}")
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
     set(BUILD_DEPS ON CACHE BOOL "Build dependencies automatically" FORCE)
     set(ORTOOLS_BUILD_DEPS ON CACHE BOOL "Build dependencies" FORCE)
@@ -31,7 +34,7 @@ if(BUILD_STATIC)
     FetchContent_MakeAvailable(ortools)
 else()
     find_package(ortools REQUIRED)
-    set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
+    set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
     message(STATUS "Using prebuilt OR-Tools")
 endif()
 
@@ -64,4 +67,14 @@ target_include_directories(_core PRIVATE
 
 target_link_libraries(_core PRIVATE ortools::ortools)
 
+set_target_properties(_core PROPERTIES
+    INSTALL_RPATH "$ORIGIN"
+)
+
 install(TARGETS _core DESTINATION ${SKBUILD_PROJECT_NAME})
+
+install(DIRECTORY ${DEPENDENCY_LIB_DIR}/
+    DESTINATION ${SKBUILD_PROJECT_NAME}
+    USE_SOURCE_PERMISSIONS
+    FILES_MATCHING PATTERN "*.so*"
+)
