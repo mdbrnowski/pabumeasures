@@ -1,5 +1,9 @@
 # Pabumeasures
 
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pabumeasures)](https://pypi.org/project/pabumeasures/)
+[![PyPI - Version](https://img.shields.io/pypi/v/pabumeasures)](https://pypi.org/project/pabumeasures/)
+[![Test](https://github.com/mdbrnowski/pabumeasures/actions/workflows/test.yml/badge.svg)](https://github.com/mdbrnowski/pabumeasures/actions/workflows/test.yml)
+
 ## Installation
 
 To speed up compilation, OR-Tools (a dependency of **pabumeasures**) is linked dynamically and must be available on your system, so you should install the C++ version of OR-Tools from the official Google [OR-Tools website](https://developers.google.com/optimization/install/cpp).
