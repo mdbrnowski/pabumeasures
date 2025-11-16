@@ -7,33 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 CONFIG REQUIRED)
 
-option(BUILD_STATIC "Build static OR-Tools for packaging" OFF)
-
-if(BUILD_STATIC)
-    include(FetchContent)
-
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
-    set(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/lib")
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    set(BUILD_DEPS ON CACHE BOOL "Build dependencies automatically" FORCE)
-    set(ORTOOLS_BUILD_DEPS ON CACHE BOOL "Build dependencies" FORCE)
-    set(ORTOOLS_USE_HIGHS OFF CACHE BOOL "Disable HiGHS" FORCE)
-    set(ORTOOLS_USE_SCIP OFF CACHE BOOL "Disable SCIP" FORCE)
-    set(ORTOOLS_USE_CPLEX OFF CACHE BOOL "Disable CPLEX" FORCE)
-    set(ORTOOLS_USE_XPRESS OFF CACHE BOOL "Disable Xpress" FORCE)
-    set(ORTOOLS_USE_PDLP OFF CACHE BOOL "Disable PDLP" FORCE)
-
-    FetchContent_Declare(
-        ortools
-        GIT_REPOSITORY https://github.com/google/or-tools.git
-        GIT_TAG v9.12
-    )
-    FetchContent_MakeAvailable(ortools)
-else()
-    find_package(ortools REQUIRED)
-    set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
-    message(STATUS "Using prebuilt OR-Tools")
-endif()
+find_package(ortools REQUIRED)
+set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
 
 option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
 
