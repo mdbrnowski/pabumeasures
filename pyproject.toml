@@ -1,6 +1,6 @@
 [project]
 name = "pabumeasures"
-version = "0.1.0"
+version = "0.1.1"
 description = "Measures on participatory budgeting elections"
 readme = "README.md"
 authors = [
