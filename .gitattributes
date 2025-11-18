@@ -1,1 +1,2 @@
-*.pb linguist-detectable=false
+*.pb linguist-vendored
+*.pb binary
