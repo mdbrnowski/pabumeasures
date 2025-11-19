@@ -5,15 +5,26 @@
 [![Test](https://github.com/mdbrnowski/pabumeasures/actions/workflows/test.yml/badge.svg)](https://github.com/mdbrnowski/pabumeasures/actions/workflows/test.yml)
 
 ## Installation
+> Prerequisites
+> * [CMake](https://cmake.org/download/)
+> * [Google OR-Tools (C++)](https://developers.google.com/optimization/install/cpp) – Install via a package manager (e.g., `brew`) or download a binary distribution.
 
-To speed up compilation, OR-Tools (a dependency of **pabumeasures**) is linked dynamically and must be available on your system, so you should install the C++ version of OR-Tools from the official Google [OR-Tools website](https://developers.google.com/optimization/install/cpp).
-After that, ensure that the headers and shared libraries can be found during installation and at runtime, e.g. by setting the following environment variables:
+**Pabumeasures** uses dynamic linking to reduce build times. You might need to make the OR-Tools headers and libraries discoverable at both build-time and runtime by exporting the variable below.
 
-```shell
-export ORTOOLS_DIR="PATH/TO/ORTOOLS/DIRECTORY"
-export LD_LIBRARY_PATH=$ORTOOLS_DIR/lib:$LD_LIBRARY_PATH
-export PATH=$ORTOOLS_DIR/bin:$PATH
-```
+> **Environment Configuration**
+>
+> ⚠️ **Note:** The path provided below must be the installation root containing the `lib` and `include` subdirectories.
+>
+> **Linux / macOS**
+> ```shell
+> export CMAKE_PREFIX_PATH="/path/to/ortools"
+> ```
+>
+> **Windows**
+> ```shell
+> set CMAKE_PREFIX_PATH="C:\path\to\ortools"
+> ```
+
 
 Then, you can simply install **pabumeasures** from PyPI:
 
