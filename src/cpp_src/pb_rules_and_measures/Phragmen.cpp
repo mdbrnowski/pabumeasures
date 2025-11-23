@@ -288,9 +288,7 @@ std::optional<int> pessimist_add_for_phragmen(const Election &election, int p, c
             if (min_max_load == std::numeric_limits<long double>::max()) {
                 // since the number of approvers of the winner is 0, the number of approvers of pp is also 0; that means
                 // it's enough to add one more approver
-                if (n_voters >= 1)
-                    return 1;
-                return {};
+                return 1;
             }
             long double pp_max_load_numerator = pp.cost();
             for (const auto &approver : pp.approvers())

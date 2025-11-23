@@ -20,6 +20,10 @@ def _translate_input_format(instance: Instance, profile: Profile) -> tuple[_core
         raise TypeError("Instance must be of type Instance")
     if not isinstance(profile, ApprovalProfile):
         raise TypeError("Profile must be of type ApprovalProfile")
+    if len(instance) == 0:
+        raise ValueError("Instance must contain at least one project")
+    if len(profile) == 0:
+        raise ValueError("Profile must contain at least one ballot")
     if len([project.name for project in instance]) != len({project.name for project in instance}):
         raise ValueError("Project names must be unique in the instance")
     if any(project.cost <= 0 for project in instance):
