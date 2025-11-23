@@ -9,11 +9,11 @@
 > * [CMake](https://cmake.org/download/)
 > * [Google OR-Tools (C++)](https://developers.google.com/optimization/install/cpp) – Install via a package manager (e.g., `brew`) or download a binary distribution.
 
-**Pabumeasures** uses dynamic linking to reduce build times. You might need to make the OR-Tools headers and libraries discoverable at both build-time and runtime by exporting the variables below.
+**Pabumeasures** uses dynamic linking to reduce build times. You might need to make the OR-Tools headers and libraries discoverable at both build-time and runtime by exporting the variables as shown below.
 
 > **Environment Configuration**
 >
-> ⚠️ **Note:** The path provided below must be the installation root containing the `lib` and `include` subdirectories.
+> ⚠️ **Note:** The path to ortools provided below must be the installation root containing the `lib` and `include` subdirectories.
 >
 > **Linux**
 > ```shell
