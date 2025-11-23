@@ -13,7 +13,7 @@
 
 > **Environment Configuration**
 >
-> ⚠️ **Note:** The path to ortools provided below must be the installation root containing the `lib` and `include` subdirectories.
+> ⚠️ **Note:** The path to OR-Tools provided below must be the installation root containing the `lib` and `include` subdirectories.
 >
 > **Linux**
 > ```shell
