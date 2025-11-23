@@ -9,20 +9,26 @@
 > * [CMake](https://cmake.org/download/)
 > * [Google OR-Tools (C++)](https://developers.google.com/optimization/install/cpp) – Install via a package manager (e.g., `brew`) or download a binary distribution.
 
-**Pabumeasures** uses dynamic linking to reduce build times. You might need to make the OR-Tools headers and libraries discoverable at both build-time and runtime by exporting the variable below.
+**Pabumeasures** uses dynamic linking to reduce build times. You might need to make the OR-Tools headers and libraries discoverable at both build-time and runtime by exporting the variables below.
 
 > **Environment Configuration**
 >
 > ⚠️ **Note:** The path provided below must be the installation root containing the `lib` and `include` subdirectories.
 >
-> **Linux / macOS**
+> **Linux**
 > ```shell
 > export CMAKE_PREFIX_PATH="/path/to/ortools"
+> export LD_LIBRARY_PATH="$CMAKE_PREFIX_PATH/lib:$LD_LIBRARY_PATH"
 > ```
->
+> **macOS**
+> ```shell
+> export CMAKE_PREFIX_PATH="/path/to/ortools"
+> export DYLD_LIBRARY_PATH="$CMAKE_PREFIX_PATH/lib:$DYLD_LIBRARY_PATH"
+> ```
 > **Windows**
 > ```shell
-> set CMAKE_PREFIX_PATH="C:\path\to\ortools"
+> set CMAKE_PREFIX_PATH=C:\path\to\ortools
+> set PATH=%CMAKE_PREFIX_PATH%\lib;%PATH%
 > ```
 
 
