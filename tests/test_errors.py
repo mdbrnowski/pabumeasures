@@ -4,6 +4,28 @@ from pabutools.election import ApprovalBallot, ApprovalProfile, Instance, Projec
 import pabumeasures
 
 
+def test_error_on_empty_instance():
+    instance = Instance([], 10)
+    profile = ApprovalProfile(
+        [
+            ApprovalBallot([]),
+        ]
+    )
+
+    with pytest.raises(ValueError, match=r".+ at least one project"):
+        pabumeasures.greedy(instance, profile)
+
+
+def test_error_on_empty_profile():
+    p1 = Project("p1", 2)
+    p2 = Project("p2", 1)
+    instance = Instance([p1, p2], 10)
+    profile = ApprovalProfile([])
+
+    with pytest.raises(ValueError, match=r".+ at least one ballot"):
+        pabumeasures.greedy(instance, profile)
+
+
 def test_error_on_same_names():
     p1 = Project("p", 2)
     p2 = Project("p", 1)
