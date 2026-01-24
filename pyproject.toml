@@ -1,6 +1,6 @@
 [project]
 name = "pabumeasures"
-version = "0.2.0"
+version = "0.2.1"
 description = "Measures on participatory budgeting elections"
 readme = "README.md"
 authors = [
@@ -23,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
 ]
 
