@@ -23,9 +23,9 @@ test_cases = [
     (lambda p: (p.cost, p.name), ProjectComparator(Comparator.COST, Ordering.ASCENDING), "ByCostAsc_explicit"),
     (lambda p: (-p.cost, p.name), ProjectComparator.ByCostDesc, "ByCostDesc"),
     (lambda p: (-p.cost, p.name), ProjectComparator(Comparator.COST, Ordering.DESCENDING), "ByCostDesc_explicit"),
-    (lambda p: (p.name), ProjectComparator.ByNameAsc, "ByNameAsc"),
-    (lambda p: (p.name), ProjectComparator([]), "ByNameAsc_implicit"),
-    (lambda p: (p.name), ProjectComparator(Comparator.LEXICOGRAPHIC, Ordering.ASCENDING), "ByNameAsc_explicit"),
+    (lambda p: p.name, ProjectComparator.ByNameAsc, "ByNameAsc"),
+    (lambda p: p.name, ProjectComparator([]), "ByNameAsc_implicit"),
+    (lambda p: p.name, ProjectComparator(Comparator.LEXICOGRAPHIC, Ordering.ASCENDING), "ByNameAsc_explicit"),
     (lambda p: "".join(chr(255 - ord(c)) for c in p.name), ProjectComparator.ByNameDesc, "ByNameDesc"),
     (
         lambda p: "".join(chr(255 - ord(c)) for c in p.name),
